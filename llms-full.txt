@@ -856,13 +856,13 @@ versioning and Keep a Changelog structure.
 
 ### Fixed
 
+- Queue-only benchmarks now size their ring for duration-based runs.
+- Bound fuzz-smoke concurrency to avoid deadline flakes on high-core hosts.
 - Custom metric collectors are now honored.
 - Backend startup errors no longer continue with nil clients.
 - Redis Streams, NSQ, and RabbitMQ no longer acknowledge before handling.
 - Core NATS no longer rejects valid messages by calling its reply-based `Ack`.
 - Malformed backend deliveries return decoding errors instead of zero-valued jobs.
-- Benchmark smoke gates use bounded iterations so local Redis harnesses are not
-  overloaded by Go's adaptive benchmark scaling.
 - Repeated startup and release-before-start no longer duplicate schedulers or
   deadlock the in-memory ring.
 - Callback and settlement panics are isolated without corrupting worker counts.
