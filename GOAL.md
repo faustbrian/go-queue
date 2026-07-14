@@ -219,10 +219,27 @@ Refine later once the consolidated unit is proven.
 
 - README
 - architecture overview
+- full public API reference
 - backend support matrix
 - delivery semantics matrix
 - migration notes from upstream `golang-queue`
 - compatibility policy
+- adoption guide
+- backend setup guides
+- end-to-end examples
+- scenario cookbook
+- FAQ
+- troubleshooting guide
+- versioning and release guide
+- contribution guide
+
+The documentation must be good enough that a new user can:
+
+- understand backend semantics before adoption
+- set up the Redis-first path quickly
+- understand the tradeoffs of each backend
+- adopt the package without reading the whole implementation
+- find examples for common worker and retry scenarios quickly
 
 ## Testing Standard
 
@@ -242,6 +259,30 @@ Testing must include:
 - explicit release notes for behavior changes
 - documented compatibility constraints per backend
 - no silent semantic changes to ack or retry behavior
+
+## Repository Automation And Quality Gates
+
+The repository must include GitHub Actions workflows for:
+
+- test execution
+- formatting checks
+- linting
+- static analysis
+- integration test execution strategy
+- benchmark execution strategy
+- documentation validation where practical
+- dependency and security scanning
+- tagged release automation
+
+At minimum, pull requests must have automated checks that prove:
+
+- the code builds
+- tests pass
+- formatting is enforced
+- lint and static-analysis gates are green
+- backend-critical examples do not silently rot
+
+Release workflows must be explicit and reproducible.
 
 ## Open Source Standard
 
@@ -279,6 +320,10 @@ This package should be publishable as serious infrastructure:
 
 - document upstream provenance
 - document backend semantics clearly
+- finalize technical API documentation
+- finalize adoption documentation
+- finalize FAQ and troubleshooting content
+- finish GitHub Actions and release automation
 - publish roadmap
 - release first public version
 
@@ -291,6 +336,8 @@ This goal is achieved when:
   dependencies
 - Redis-first production usage is credible and well-tested
 - backend semantics are documented honestly
+- GitHub Actions quality gates and release automation are in place
+- user-facing docs are complete enough for direct adoption
 - the package is suitable for open source release and real service adoption
 
 ## Hard Warnings
