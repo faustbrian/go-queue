@@ -36,4 +36,17 @@ func TestRequestDefersNSQSettlement(t *testing.T) {
 	delivery := task.(*job.Message)
 	require.NoError(t, delivery.Ack())
 	require.Equal(t, 1, delegate.finished)
+
+	requeueDelegate := &messageDelegate{}
+	requeueMessage := nsqgo.NewMessage(nsqgo.MessageID{}, queued.Bytes())
+	requeueMessage.Delegate = requeueDelegate
+	requeueTasks := make(chan *nsqgo.Message, 1)
+	requeueTasks <- requeueMessage
+	requeueWorker := &Worker{opts: newOptions(), tasks: requeueTasks}
+	requeueWorker.startOnce.Do(func() {})
+	requeueTask, err := requeueWorker.Request()
+	require.NoError(t, err)
+
+	require.NoError(t, requeueTask.(*job.Message).Nack())
+	require.Equal(t, 1, requeueDelegate.requeued)
 }

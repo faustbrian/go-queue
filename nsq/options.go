@@ -2,6 +2,7 @@ package nsq
 
 import (
 	"context"
+	"time"
 
 	"github.com/faustbrian/go-queue"
 	"github.com/faustbrian/go-queue/core"
@@ -23,13 +24,16 @@ func (f OptionFunc) Apply(option *Options) {
 }
 
 type Options struct {
-	maxInFlight int
-	addr        string
-	topic       string
-	channel     string
-	runFunc     func(context.Context, core.TaskMessage) error
-	logger      queue.Logger
-	logLevel    nsq.LogLevel
+	maxInFlight    int
+	addr           string
+	topic          string
+	channel        string
+	runFunc        func(context.Context, core.TaskMessage) error
+	logger         queue.Logger
+	logLevel       nsq.LogLevel
+	requestTimeout time.Duration
+	touchInterval  time.Duration
+	connectTimeout time.Duration
 }
 
 // WithAddr setup the addr of NSQ
@@ -81,6 +85,27 @@ func WithLogLevel(lvl nsq.LogLevel) Option {
 	})
 }
 
+// WithRequestTimeout sets how long Request waits for an NSQ message.
+func WithRequestTimeout(timeout time.Duration) Option {
+	return OptionFunc(func(o *Options) {
+		o.requestTimeout = timeout
+	})
+}
+
+// WithTouchInterval sets how often an in-flight NSQ message is touched.
+func WithTouchInterval(interval time.Duration) Option {
+	return OptionFunc(func(o *Options) {
+		o.touchInterval = interval
+	})
+}
+
+// WithConnectTimeout bounds NSQ producer and consumer connection attempts.
+func WithConnectTimeout(timeout time.Duration) Option {
+	return OptionFunc(func(o *Options) {
+		o.connectTimeout = timeout
+	})
+}
+
 func newOptions(opts ...Option) Options {
 	defaultOpts := Options{
 		addr:        "127.0.0.1:4150",
@@ -93,6 +118,9 @@ func newOptions(opts ...Option) Options {
 		runFunc: func(context.Context, core.TaskMessage) error {
 			return nil
 		},
+		requestTimeout: 6 * time.Second,
+		touchInterval:  2 * time.Second,
+		connectTimeout: time.Second,
 	}
 
 	// Loop through each option

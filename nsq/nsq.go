@@ -20,15 +20,18 @@ var _ core.Worker = (*Worker)(nil)
 
 // Worker for NSQ
 type Worker struct {
-	q         *nsq.Consumer
-	p         *nsq.Producer
-	cfg       *nsq.Config
-	stopOnce  sync.Once
-	startOnce sync.Once
-	stop      chan struct{}
-	stopFlag  int32
-	opts      Options
-	tasks     chan *nsq.Message
+	q               *nsq.Consumer
+	p               *nsq.Producer
+	cfg             *nsq.Config
+	stopOnce        sync.Once
+	startOnce       sync.Once
+	stop            chan struct{}
+	stopFlag        int32
+	opts            Options
+	tasks           chan *nsq.Message
+	connectConsumer func(*nsq.Consumer, string) error
+	publish         func(string, []byte) error
+	stopProducer    func()
 }
 
 // NewWorker for struc
@@ -54,12 +57,18 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 
 	w.cfg = nsq.NewConfig()
 	w.cfg.MaxInFlight = w.opts.maxInFlight
+	w.cfg.DialTimeout = w.opts.connectTimeout
+	w.connectConsumer = func(consumer *nsq.Consumer, addr string) error {
+		return consumer.ConnectToNSQD(addr)
+	}
 
 	if err := w.startProducer(); err != nil {
 		return nil, err
 	}
 
 	w.p.SetLoggerLevel(w.opts.logLevel)
+	w.publish = w.p.Publish
+	w.stopProducer = w.p.Stop
 
 	return w, nil
 }
@@ -80,40 +89,36 @@ func (w *Worker) startConsumer() (err error) {
 		}
 
 		w.q.SetLoggerLevel(w.opts.logLevel)
-		w.q.AddHandler(nsq.HandlerFunc(func(msg *nsq.Message) error {
-			if len(msg.Body) == 0 {
-				// Returning nil will automatically send a FIN command to NSQ to mark the message as processed.
-				// In this case, a message with an empty body is simply ignored/discarded.
-				return nil
-			}
-			msg.DisableAutoResponse()
+		w.q.AddHandler(nsq.HandlerFunc(w.handleMessage))
 
-		loop:
-			for {
-				select {
-				case w.tasks <- msg:
-					break loop
-				case <-w.stop:
-					if msg != nil {
-						// re-queue the job if worker has been shutdown.
-						msg.Requeue(-1)
-					}
-					break loop
-				case <-time.After(2 * time.Second):
-					msg.Touch()
-				}
-			}
-
-			return nil
-		}))
-
-		err = w.q.ConnectToNSQD(w.opts.addr)
+		err = w.connectConsumer(w.q, w.opts.addr)
 		if err != nil {
 			return
 		}
 	})
 
 	return err
+}
+
+func (w *Worker) handleMessage(msg *nsq.Message) error {
+	if len(msg.Body) == 0 {
+		// Returning nil will automatically send a FIN command to NSQ to mark the message as processed.
+		// In this case, a message with an empty body is simply ignored/discarded.
+		return nil
+	}
+	msg.DisableAutoResponse()
+
+	for {
+		select {
+		case w.tasks <- msg:
+			return nil
+		case <-w.stop:
+			msg.Requeue(-1)
+			return nil
+		case <-time.After(w.opts.touchInterval):
+			msg.Touch()
+		}
+	}
 }
 
 // Run start the worker
@@ -136,7 +141,7 @@ func (w *Worker) Shutdown() error {
 			w.q.Stop()
 			<-w.q.StopChan
 		}
-		w.p.Stop()
+		w.stopProducer()
 
 		// close task channel
 		close(w.tasks)
@@ -150,7 +155,7 @@ func (w *Worker) Queue(job core.TaskMessage) error {
 		return queue.ErrQueueShutdown
 	}
 
-	return w.p.Publish(w.opts.topic, job.Bytes())
+	return w.publish(w.opts.topic, job.Bytes())
 }
 
 // Request fetch new task from queue
@@ -159,30 +164,25 @@ func (w *Worker) Request() (core.TaskMessage, error) {
 		return nil, err
 	}
 
-	clock := 0
-loop:
-	for {
-		select {
-		case task, ok := <-w.tasks:
-			if !ok {
-				return nil, queue.ErrQueueHasBeenClosed
-			}
-			var data job.Message
-			_ = json.Unmarshal(task.Body, &data)
-			data.SetAcknowledgement(
-				func() error { task.Finish(); return nil },
-				func() error { task.Requeue(-1); return nil },
-			)
-			return &data, nil
-		case <-time.After(1 * time.Second):
-			if clock == 5 {
-				break loop
-			}
-			clock += 1
+	timer := time.NewTimer(w.opts.requestTimeout)
+	defer timer.Stop()
+	select {
+	case task, ok := <-w.tasks:
+		if !ok {
+			return nil, queue.ErrQueueHasBeenClosed
 		}
+		var data job.Message
+		if err := json.Unmarshal(task.Body, &data); err != nil {
+			return nil, err
+		}
+		data.SetAcknowledgement(
+			func() error { task.Finish(); return nil },
+			func() error { task.Requeue(-1); return nil },
+		)
+		return &data, nil
+	case <-timer.C:
+		return nil, queue.ErrNoTaskInQueue
 	}
-
-	return nil, queue.ErrNoTaskInQueue
 }
 
 // Stats retrieves the current connection and message statistics for a Consumer
