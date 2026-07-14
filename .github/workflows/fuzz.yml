@@ -1,0 +1,23 @@
+name: Fuzz smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "11 1 * * 3"
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Fuzz untrusted inputs
+        run: scripts/check-fuzz.sh
