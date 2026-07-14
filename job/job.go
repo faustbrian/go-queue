@@ -11,6 +11,8 @@ import (
 // TaskFunc is the task function
 type TaskFunc func(context.Context) error
 
+var marshalJSON = json.Marshal
+
 // Message describes a task and its metadata.
 type Message struct {
 	Task TaskFunc `json:"-" msgpack:"-"`
@@ -95,7 +97,7 @@ func (m *Message) Payload() []byte {
 // Returns:
 //   - A byte slice containing the msgpack-encoded data.
 func (m *Message) Bytes() []byte {
-	b, err := json.Marshal(m)
+	b, err := marshalJSON(m)
 	if err != nil {
 		panic(err)
 	}
@@ -113,6 +115,7 @@ func NewMessage(m core.QueuedMessage, opts ...AllowOption) Message {
 		RetryFactor: o.retryFactor,
 		RetryMin:    o.retryMin,
 		RetryMax:    o.retryMax,
+		Jitter:      o.jitter,
 		Timeout:     o.timeout,
 		Body:        m.Bytes(),
 	}
@@ -128,6 +131,7 @@ func NewTask(task TaskFunc, opts ...AllowOption) Message {
 		RetryFactor: o.retryFactor,
 		RetryMin:    o.retryMin,
 		RetryMax:    o.retryMax,
+		Jitter:      o.jitter,
 		Task:        task,
 	}
 }
@@ -142,7 +146,7 @@ func NewTask(task TaskFunc, opts ...AllowOption) Message {
 // Returns:
 //   - A byte slice containing the msgpack-encoded data.
 func Encode(m *Message) []byte {
-	b, err := json.Marshal(m)
+	b, err := marshalJSON(m)
 	if err != nil {
 		panic(err)
 	}
