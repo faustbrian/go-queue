@@ -19,6 +19,10 @@ import (
 
 var _ core.Worker = (*Worker)(nil)
 
+var pingRedisSubscription = func(ctx context.Context, subscription *redis.PubSub) error {
+	return subscription.Ping(ctx)
+}
+
 // Worker for Redis
 type Worker struct {
 	// redis config
@@ -57,11 +61,15 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 	}
 
 	options := &redis.Options{
-		Addr:      w.opts.addr,
-		Username:  w.opts.username,
-		Password:  w.opts.password,
-		DB:        w.opts.db,
-		TLSConfig: w.opts.tls,
+		Addr:                  w.opts.addr,
+		Username:              w.opts.username,
+		Password:              w.opts.password,
+		DB:                    w.opts.db,
+		TLSConfig:             w.opts.tls,
+		DialTimeout:           w.opts.connectTimeout,
+		DialerRetries:         -1,
+		MaxRetries:            -1,
+		ContextTimeoutEnabled: true,
 	}
 	w.rdb = redis.NewClient(options)
 
@@ -70,42 +78,52 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 		if err != nil {
 			return nil, fmt.Errorf("parse Redis connection string: %w", err)
 		}
+		options.DialTimeout = w.opts.connectTimeout
+		options.DialerRetries = -1
+		options.MaxRetries = -1
+		options.ContextTimeoutEnabled = true
 		w.rdb = redis.NewClient(options)
 	}
 
 	if w.opts.cluster {
 		w.rdb = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:     strings.Split(w.opts.addr, ","),
-			Username:  w.opts.username,
-			Password:  w.opts.password,
-			TLSConfig: w.opts.tls,
+			Addrs:                 strings.Split(w.opts.addr, ","),
+			Username:              w.opts.username,
+			Password:              w.opts.password,
+			TLSConfig:             w.opts.tls,
+			DialTimeout:           w.opts.connectTimeout,
+			DialerRetries:         -1,
+			MaxRedirects:          -1,
+			ContextTimeoutEnabled: true,
 		})
 	}
 
 	if w.opts.sentinel {
 		w.rdb = redis.NewFailoverClient(&redis.FailoverOptions{
-			MasterName:    w.opts.masterName,
-			SentinelAddrs: strings.Split(w.opts.addr, ","),
-			Username:      w.opts.username,
-			Password:      w.opts.password,
-			DB:            w.opts.db,
-			TLSConfig:     w.opts.tls,
+			MasterName:            w.opts.masterName,
+			SentinelAddrs:         strings.Split(w.opts.addr, ","),
+			Username:              w.opts.username,
+			Password:              w.opts.password,
+			DB:                    w.opts.db,
+			TLSConfig:             w.opts.tls,
+			DialTimeout:           w.opts.connectTimeout,
+			DialerRetries:         -1,
+			MaxRetries:            -1,
+			ContextTimeoutEnabled: true,
 		})
 	}
 
-	_, err = w.rdb.Ping(context.Background()).Result()
+	ctx, cancel := context.WithTimeout(context.Background(), w.opts.connectTimeout)
+	defer cancel()
+	_, err = w.rdb.Ping(ctx).Result()
 	if err != nil {
+		closeRedisClient(w.rdb)
 		return nil, fmt.Errorf("connect to Redis: %w", err)
 	}
 
-	ctx := context.Background()
+	ctx = context.Background()
 
-	switch v := w.rdb.(type) {
-	case *redis.Client:
-		w.pubsub = v.Subscribe(ctx, w.opts.channelName)
-	case *redis.ClusterClient:
-		w.pubsub = v.Subscribe(ctx, w.opts.channelName)
-	}
+	w.pubsub = subscribeRedis(ctx, w.rdb, w.opts.channelName)
 
 	var ropts []redis.ChannelOption
 
@@ -115,12 +133,33 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 
 	w.channel = w.pubsub.Channel(ropts...)
 	// make sure the connection is successful
-	if err := w.pubsub.Ping(ctx); err != nil {
+	if err := pingRedisSubscription(ctx, w.pubsub); err != nil {
 		_ = w.pubsub.Close()
+		closeRedisClient(w.rdb)
 		return nil, fmt.Errorf("subscribe to Redis channel: %w", err)
 	}
 
 	return w, nil
+}
+
+func subscribeRedis(ctx context.Context, client redis.Cmdable, channel string) *redis.PubSub {
+	switch value := client.(type) {
+	case *redis.Client:
+		return value.Subscribe(ctx, channel)
+	case *redis.ClusterClient:
+		return value.Subscribe(ctx, channel)
+	default:
+		return nil
+	}
+}
+
+func closeRedisClient(client redis.Cmdable) {
+	switch value := client.(type) {
+	case *redis.Client:
+		_ = value.Close()
+	case *redis.ClusterClient:
+		_ = value.Close()
+	}
 }
 
 // Run to execute new task
@@ -136,12 +175,7 @@ func (w *Worker) Shutdown() error {
 
 	w.stopOnce.Do(func() {
 		_ = w.pubsub.Close()
-		switch v := w.rdb.(type) {
-		case *redis.Client:
-			_ = v.Close()
-		case *redis.ClusterClient:
-			_ = v.Close()
-		}
+		closeRedisClient(w.rdb)
 		close(w.stop)
 	})
 	return nil
@@ -166,27 +200,20 @@ func (w *Worker) Queue(job core.TaskMessage) error {
 
 // Request a new task
 func (w *Worker) Request() (core.TaskMessage, error) {
-	clock := 0
-loop:
-	for {
-		select {
-		case task, ok := <-w.channel:
-			if !ok {
-				return nil, queue.ErrQueueHasBeenClosed
-			}
-			var data job.Message
-			err := json.Unmarshal([]byte(task.Payload), &data)
-			if err != nil {
-				return nil, err
-			}
-			return &data, nil
-		case <-time.After(1 * time.Second):
-			if clock == 5 {
-				break loop
-			}
-			clock += 1
+	timer := time.NewTimer(w.opts.requestTimeout)
+	defer timer.Stop()
+	select {
+	case task, ok := <-w.channel:
+		if !ok {
+			return nil, queue.ErrQueueHasBeenClosed
 		}
+		var data job.Message
+		err := json.Unmarshal([]byte(task.Payload), &data)
+		if err != nil {
+			return nil, err
+		}
+		return &data, nil
+	case <-timer.C:
+		return nil, queue.ErrNoTaskInQueue
 	}
-
-	return nil, queue.ErrNoTaskInQueue
 }

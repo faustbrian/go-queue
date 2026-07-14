@@ -3,6 +3,7 @@ package redisdb
 import (
 	"context"
 	"crypto/tls"
+	"time"
 
 	"github.com/faustbrian/go-queue"
 	"github.com/faustbrian/go-queue/core"
@@ -26,6 +27,8 @@ type options struct {
 	masterName       string
 	tls              *tls.Config
 	debug            bool
+	requestTimeout   time.Duration
+	connectTimeout   time.Duration
 }
 
 // WithAddr setup the addr of redis
@@ -147,6 +150,20 @@ func WithDebug() Option {
 	}
 }
 
+// WithRequestTimeout sets how long Request waits for a published message.
+func WithRequestTimeout(timeout time.Duration) Option {
+	return func(w *options) {
+		w.requestTimeout = timeout
+	}
+}
+
+// WithConnectTimeout bounds initial Redis connection validation.
+func WithConnectTimeout(timeout time.Duration) Option {
+	return func(w *options) {
+		w.connectTimeout = timeout
+	}
+}
+
 func newOptions(opts ...Option) options {
 	defaultOpts := options{
 		channelName: "queue",
@@ -156,6 +173,8 @@ func newOptions(opts ...Option) options {
 		runFunc: func(context.Context, core.TaskMessage) error {
 			return nil
 		},
+		requestTimeout: 6 * time.Second,
+		connectTimeout: 5 * time.Second,
 	}
 
 	// Loop through each option
