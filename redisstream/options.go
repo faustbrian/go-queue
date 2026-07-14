@@ -27,6 +27,8 @@ type options struct {
 	maxLength        int64
 	blockTime        time.Duration
 	tls              *tls.Config
+	requestTimeout   time.Duration
+	connectTimeout   time.Duration
 }
 
 // WithAddr setup the addr of redis
@@ -151,6 +153,20 @@ func WithSkipTLSVerify() Option {
 	}
 }
 
+// WithRequestTimeout sets how long Request waits for a stream message.
+func WithRequestTimeout(timeout time.Duration) Option {
+	return func(w *options) {
+		w.requestTimeout = timeout
+	}
+}
+
+// WithConnectTimeout bounds initial Redis connection validation.
+func WithConnectTimeout(timeout time.Duration) Option {
+	return func(w *options) {
+		w.connectTimeout = timeout
+	}
+}
+
 func newOptions(opts ...Option) options {
 	defaultOpts := options{
 		streamName: "golang-queue",
@@ -160,7 +176,9 @@ func newOptions(opts ...Option) options {
 		runFunc: func(context.Context, core.TaskMessage) error {
 			return nil
 		},
-		blockTime: 60 * time.Second,
+		blockTime:      60 * time.Second,
+		requestTimeout: 6 * time.Second,
+		connectTimeout: 5 * time.Second,
 	}
 
 	// Loop through each option

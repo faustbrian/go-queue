@@ -24,6 +24,7 @@ var _ core.Worker = (*Worker)(nil)
 type Worker struct {
 	// redis config
 	rdb       redis.Cmdable
+	readGroup func(context.Context, *redis.XReadGroupArgs) ([]redis.XStream, error)
 	tasks     chan redis.XMessage
 	ack       func(string) error
 	stopFlag  int32
@@ -59,14 +60,19 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 		if err != nil {
 			return nil, fmt.Errorf("parse Redis connection string: %w", err)
 		}
+		configureRedisOptions(options, w.opts.connectTimeout)
 		w.rdb = redis.NewClient(options)
 	} else if w.opts.addr != "" {
 		if w.opts.cluster {
 			w.rdb = redis.NewClusterClient(&redis.ClusterOptions{
-				Addrs:     strings.Split(w.opts.addr, ","),
-				Username:  w.opts.username,
-				Password:  w.opts.password,
-				TLSConfig: w.opts.tls,
+				Addrs:                 strings.Split(w.opts.addr, ","),
+				Username:              w.opts.username,
+				Password:              w.opts.password,
+				TLSConfig:             w.opts.tls,
+				DialTimeout:           w.opts.connectTimeout,
+				DialerRetries:         -1,
+				MaxRedirects:          -1,
+				ContextTimeoutEnabled: true,
 			})
 		} else {
 			options := &redis.Options{
@@ -76,6 +82,7 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 				DB:        w.opts.db,
 				TLSConfig: w.opts.tls,
 			}
+			configureRedisOptions(options, w.opts.connectTimeout)
 			w.rdb = redis.NewClient(options)
 		}
 	}
@@ -83,15 +90,37 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 		return nil, errors.New("redis address or connection string is required")
 	}
 
-	_, err = w.rdb.Ping(context.Background()).Result()
+	ctx, cancel := context.WithTimeout(context.Background(), w.opts.connectTimeout)
+	defer cancel()
+	_, err = w.rdb.Ping(ctx).Result()
 	if err != nil {
+		closeRedisClient(w.rdb)
 		return nil, fmt.Errorf("connect to Redis: %w", err)
 	}
 	w.ack = func(id string) error {
 		return w.rdb.XAck(context.Background(), w.opts.streamName, w.opts.group, id).Err()
 	}
+	w.readGroup = func(ctx context.Context, args *redis.XReadGroupArgs) ([]redis.XStream, error) {
+		return w.rdb.XReadGroup(ctx, args).Result()
+	}
 
 	return w, nil
+}
+
+func configureRedisOptions(options *redis.Options, timeout time.Duration) {
+	options.DialTimeout = timeout
+	options.DialerRetries = -1
+	options.MaxRetries = -1
+	options.ContextTimeoutEnabled = true
+}
+
+func closeRedisClient(client redis.Cmdable) {
+	switch value := client.(type) {
+	case *redis.Client:
+		_ = value.Close()
+	case *redis.ClusterClient:
+		_ = value.Close()
+	}
 }
 
 func (w *Worker) startConsumer() {
@@ -118,7 +147,7 @@ func (w *Worker) fetchTask() {
 		}
 
 		ctx := context.Background()
-		data, err := w.rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
+		data, err := w.readGroup(ctx, &redis.XReadGroupArgs{
 			Group:    w.opts.group,
 			Consumer: w.opts.consumer,
 			Streams:  []string{w.opts.streamName, ">"},
@@ -127,7 +156,7 @@ func (w *Worker) fetchTask() {
 			// we use the block command to make sure if no entry is found we wait
 			// until an entry is found
 			Block: w.opts.blockTime,
-		}).Result()
+		})
 		if err != nil {
 			if errors.Is(err, redis.Nil) {
 				w.opts.logger.Infof("no messages available in Redis stream [%s]", w.opts.streamName)
@@ -171,12 +200,7 @@ func (w *Worker) Shutdown() error {
 		case <-time.After(200 * time.Millisecond):
 		}
 
-		switch v := w.rdb.(type) {
-		case *redis.Client:
-			_ = v.Close()
-		case *redis.ClusterClient:
-			_ = v.Close()
-		}
+		closeRedisClient(w.rdb)
 		close(w.tasks)
 	})
 	return nil
@@ -211,29 +235,28 @@ func (w *Worker) Run(ctx context.Context, task core.TaskMessage) error {
 
 // Request a new task
 func (w *Worker) Request() (core.TaskMessage, error) {
-	clock := 0
 	w.startConsumer()
-loop:
-	for {
-		select {
-		case task, ok := <-w.tasks:
-			if !ok {
-				return nil, queue.ErrQueueHasBeenClosed
-			}
-			var data job.Message
-			_ = json.Unmarshal(bytesconv.StrToBytes(task.Values["body"].(string)), &data)
-			data.SetAcknowledgement(
-				func() error { return w.ack(task.ID) },
-				func() error { return nil },
-			)
-			return &data, nil
-		case <-time.After(1 * time.Second):
-			if clock == 5 {
-				break loop
-			}
-			clock += 1
+	timer := time.NewTimer(w.opts.requestTimeout)
+	defer timer.Stop()
+	select {
+	case task, ok := <-w.tasks:
+		if !ok {
+			return nil, queue.ErrQueueHasBeenClosed
 		}
+		body, ok := task.Values["body"].(string)
+		if !ok {
+			return nil, errors.New("Redis stream message body must be a string")
+		}
+		var data job.Message
+		if err := json.Unmarshal(bytesconv.StrToBytes(body), &data); err != nil {
+			return nil, fmt.Errorf("decode Redis stream message: %w", err)
+		}
+		data.SetAcknowledgement(
+			func() error { return w.ack(task.ID) },
+			func() error { return nil },
+		)
+		return &data, nil
+	case <-timer.C:
+		return nil, queue.ErrNoTaskInQueue
 	}
-
-	return nil, queue.ErrNoTaskInQueue
 }
