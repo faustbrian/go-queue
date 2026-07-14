@@ -28,7 +28,7 @@ type (
 	// retry logic, and graceful shutdown capabilities.
 	Queue struct {
 		sync.Mutex                  // Mutex to protect concurrent access to queue state
-		metric        *metric       // Metrics collector for tracking queue and worker stats
+		metric        Metric        // Metrics collector for tracking queue and worker stats
 		logger        Logger        // Logger for queue events and errors
 		workerCount   int64         // Number of worker goroutines to process jobs
 		routineGroup  *routineGroup // Group to manage and wait for goroutines
@@ -61,7 +61,7 @@ func NewQueue(opts ...Option) (*Queue, error) {
 		workerCount:   o.workerCount,          // Number of worker goroutines
 		logger:        o.logger,               // Logger for queue events
 		worker:        o.worker,               // Worker implementation
-		metric:        &metric{},              // Metrics collector
+		metric:        o.metric,               // Metrics collector
 		afterFn:       o.afterFn,              // Optional post-job callback
 		retryInterval: o.retryInterval,        // Interval for retrying job requests
 		observer:      o.observer,             // Lifecycle event observer

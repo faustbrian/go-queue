@@ -13,7 +13,6 @@ var (
 	defaultWorkerCount = int64(runtime.NumCPU())
 	defaultNewLogger   = NewLogger()
 	defaultFn          = func(context.Context, core.TaskMessage) error { return nil }
-	defaultMetric      = NewMetric()
 )
 
 // Option is a functional option for configuring a Queue.
@@ -188,7 +187,7 @@ func NewOptions(opts ...Option) *Options {
 		logger:        defaultNewLogger,
 		worker:        nil,
 		fn:            defaultFn,
-		metric:        defaultMetric,
+		metric:        NewMetric(),
 		observer:      emptyObserver{},
 		retryInterval: time.Second,
 	}
