@@ -3,6 +3,7 @@ package nats
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/faustbrian/go-queue"
 	"github.com/faustbrian/go-queue/core"
@@ -14,11 +15,13 @@ import (
 type Option func(*options)
 
 type options struct {
-	runFunc func(context.Context, core.TaskMessage) error
-	logger  queue.Logger
-	addr    string
-	subj    string
-	queue   string
+	runFunc        func(context.Context, core.TaskMessage) error
+	logger         queue.Logger
+	addr           string
+	subj           string
+	queue          string
+	requestTimeout time.Duration
+	connectTimeout time.Duration
 }
 
 // WithAddr setup the addr of NATS
@@ -58,6 +61,20 @@ func WithLogger(l queue.Logger) Option {
 	}
 }
 
+// WithRequestTimeout sets how long Request waits for a NATS message.
+func WithRequestTimeout(timeout time.Duration) Option {
+	return func(w *options) {
+		w.requestTimeout = timeout
+	}
+}
+
+// WithConnectTimeout bounds the initial NATS connection attempt.
+func WithConnectTimeout(timeout time.Duration) Option {
+	return func(w *options) {
+		w.connectTimeout = timeout
+	}
+}
+
 func newOptions(opts ...Option) options {
 	defaultOpts := options{
 		addr:   nats.DefaultURL,
@@ -67,6 +84,8 @@ func newOptions(opts ...Option) options {
 		runFunc: func(context.Context, core.TaskMessage) error {
 			return nil
 		},
+		requestTimeout: 6 * time.Second,
+		connectTimeout: 2 * time.Second,
 	}
 
 	// Loop through each option

@@ -50,7 +50,7 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 		tasks: make(chan *nats.Msg),
 	}
 
-	w.client, err = nats.Connect(w.opts.addr)
+	w.client, err = nats.Connect(w.opts.addr, nats.Timeout(w.opts.connectTimeout))
 	if err != nil {
 		return nil, fmt.Errorf("connect to NATS: %w", err)
 	}
@@ -65,20 +65,7 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 
 func (w *Worker) startConsumer() (err error) {
 	w.startOnce.Do(func() {
-		w.subscription, err = w.client.QueueSubscribe(w.opts.subj, w.opts.queue, func(msg *nats.Msg) {
-			select {
-			case w.tasks <- msg:
-			case <-w.stop:
-				if msg != nil {
-					// re-queue the task if worker has been shutdown.
-					w.opts.logger.Info("re-queue the current task")
-					if err := w.client.Publish(w.opts.subj, msg.Data); err != nil {
-						w.opts.logger.Errorf("error to re-queue the current task: %s", err.Error())
-					}
-				}
-				close(w.exit)
-			}
-		})
+		w.subscription, err = w.client.QueueSubscribe(w.opts.subj, w.opts.queue, w.handleMessage)
 		if err != nil {
 			w.opts.logger.Errorf("error subscribing to queue: %s", err.Error())
 			close(w.exit)
@@ -86,6 +73,21 @@ func (w *Worker) startConsumer() (err error) {
 	})
 
 	return err
+}
+
+func (w *Worker) handleMessage(msg *nats.Msg) {
+	select {
+	case w.tasks <- msg:
+	case <-w.stop:
+		if msg != nil {
+			// re-queue the task if worker has been shutdown.
+			w.opts.logger.Info("re-queue the current task")
+			if err := w.client.Publish(w.opts.subj, msg.Data); err != nil {
+				w.opts.logger.Errorf("error to re-queue the current task: %s", err.Error())
+			}
+		}
+		close(w.exit)
+	}
 }
 
 // Run start the worker
@@ -133,27 +135,19 @@ func (w *Worker) Queue(job core.TaskMessage) error {
 // Request a new task
 func (w *Worker) Request() (core.TaskMessage, error) {
 	_ = w.startConsumer()
-	clock := 0
-loop:
-	for {
-		select {
-		case task, ok := <-w.tasks:
-			if !ok {
-				return nil, queue.ErrQueueHasBeenClosed
-			}
-			var data job.Message
-			_ = json.Unmarshal(task.Data, &data)
-			if err := task.Ack(); err != nil {
-				return nil, err
-			}
-			return &data, nil
-		case <-time.After(1 * time.Second):
-			if clock == 5 {
-				break loop
-			}
-			clock += 1
+	timer := time.NewTimer(w.opts.requestTimeout)
+	defer timer.Stop()
+	select {
+	case task, ok := <-w.tasks:
+		if !ok {
+			return nil, queue.ErrQueueHasBeenClosed
 		}
+		var data job.Message
+		if err := json.Unmarshal(task.Data, &data); err != nil {
+			return nil, fmt.Errorf("decode NATS message: %w", err)
+		}
+		return &data, nil
+	case <-timer.C:
+		return nil, queue.ErrNoTaskInQueue
 	}
-
-	return nil, queue.ErrNoTaskInQueue
 }
