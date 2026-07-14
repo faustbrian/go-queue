@@ -89,6 +89,13 @@ func WithMetric(m Metric) Option {
 	})
 }
 
+// WithObserver installs a lifecycle observer for queue events.
+func WithObserver(observer Observer) Option {
+	return OptionFunc(func(q *Options) {
+		q.observer = observer
+	})
+}
+
 // WithWorker sets a custom worker implementation for the queue backend.
 // By default, NewPool uses an in-memory Ring buffer worker.
 // Use this to integrate external queue systems like NSQ, NATS, Redis, or RabbitMQ.
@@ -161,6 +168,7 @@ type Options struct {
 	fn            func(context.Context, core.TaskMessage) error // Task handler function
 	afterFn       func()                                        // Callback executed after each job
 	metric        Metric                                        // Metrics collector
+	observer      Observer                                      // Lifecycle event observer
 	retryInterval time.Duration                                 // Polling interval when queue is empty
 }
 
@@ -181,6 +189,7 @@ func NewOptions(opts ...Option) *Options {
 		worker:        nil,
 		fn:            defaultFn,
 		metric:        defaultMetric,
+		observer:      emptyObserver{},
 		retryInterval: time.Second,
 	}
 

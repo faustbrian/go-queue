@@ -38,6 +38,7 @@ type (
 		stopOnce      sync.Once     // Ensures shutdown is only performed once
 		stopFlag      int32         // Atomic flag indicating if shutdown has started
 		afterFn       func()        // Optional callback after each job execution
+		observer      Observer      // Queue lifecycle observer
 		retryInterval time.Duration // Interval for retrying job requests
 	}
 )
@@ -62,6 +63,7 @@ func NewQueue(opts ...Option) (*Queue, error) {
 		metric:        &metric{},              // Metrics collector
 		afterFn:       o.afterFn,              // Optional post-job callback
 		retryInterval: o.retryInterval,        // Interval for retrying job requests
+		observer:      o.observer,             // Lifecycle event observer
 	}
 
 	if q.worker == nil {
@@ -94,6 +96,7 @@ func (q *Queue) Shutdown() {
 	}
 
 	q.stopOnce.Do(func() {
+		q.observe(Event{Kind: EventShutdownStarted})
 		if q.metric.BusyWorkers() > 0 {
 			q.logger.Infof("shutdown all tasks: %d workers", q.metric.BusyWorkers())
 		}
@@ -102,6 +105,7 @@ func (q *Queue) Shutdown() {
 			q.logger.Error(err)
 		}
 		close(q.quit)
+		q.observe(Event{Kind: EventShutdownCompleted})
 	})
 }
 
@@ -168,6 +172,7 @@ func (q *Queue) queue(m *job.Message) error {
 	}
 
 	q.metric.IncSubmittedTask()
+	q.observe(Event{Kind: EventEnqueued})
 	// Notify a worker that a new job is available.
 	// If the notify channel is full, the worker is busy and we avoid blocking.
 	select {
@@ -182,6 +187,8 @@ func (q *Queue) queue(m *job.Message) error {
 // After execution, it schedules the next worker if needed.
 func (q *Queue) work(task core.TaskMessage) {
 	var err error
+	startedAt := time.Now()
+	q.observe(Event{Kind: EventHandlerStarted})
 	// Defer block to handle panics, update metrics, and run afterFn callback.
 	defer func() {
 		q.metric.DecBusyWorker()
@@ -194,8 +201,10 @@ func (q *Queue) work(task core.TaskMessage) {
 		// Update success or failure metrics based on execution result.
 		if err == nil && e == nil {
 			q.metric.IncSuccessTask()
+			q.observe(Event{Kind: EventHandlerSucceeded, Duration: time.Since(startedAt)})
 		} else {
 			q.metric.IncFailureTask()
+			q.observe(Event{Kind: EventHandlerFailed, Duration: time.Since(startedAt), Err: err})
 		}
 		if q.afterFn != nil {
 			q.afterFn()
@@ -269,6 +278,12 @@ func (q *Queue) handle(m *job.Message) error {
 			if m.RetryDelay == 0 {
 				delay = b.Duration()
 			}
+			q.observe(Event{
+				Kind:           EventRetryScheduled,
+				RetryRemaining: m.RetryCount,
+				RetryDelay:     delay,
+				Err:            err,
+			})
 
 			select {
 			case <-time.After(delay): // Wait before retrying
@@ -302,6 +317,13 @@ func (q *Queue) handle(m *job.Message) error {
 	case err := <-done: // Job finished
 		return err
 	}
+}
+
+func (q *Queue) observe(event Event) {
+	if event.OccurredAt.IsZero() {
+		event.OccurredAt = time.Now()
+	}
+	q.observer.Observe(event)
 }
 
 // UpdateWorkerCount dynamically updates the number of worker goroutines.
