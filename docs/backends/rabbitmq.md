@@ -7,3 +7,4 @@ handler success and nack/requeue after final failure.
 `WithReconnectConfig` controls initial startup attempts. Runtime reconnection is
 not hidden by v1; supervise worker/service restart and observe failures. Native
 DLX, TTL, priorities, and publisher confirms remain explicit RabbitMQ concerns.
+`WithRequestTimeout` bounds an idle delivery request.

@@ -14,6 +14,8 @@ differences.
 - `Ring` is the in-memory worker.
 - Backend packages own connection, publish, receive, and transport-specific
   settlement behavior.
+- `core.WorkerMetadata` enriches every lifecycle event with backend and logical
+  queue identity without importing backend packages into the coordinator.
 
 The processing path is:
 
@@ -33,8 +35,8 @@ also waits for owned goroutines.
 
 The root and backend option names remain close to upstream. Intentional v1
 divergences are limited to error-returning constructors, correct post-handler
-settlement, usable metric injection, and optional structured observation. See
-[migration.md](migration.md).
+settlement, bounded backend waits, malformed-delivery rejection, usable metric
+injection, and optional structured observation. See [migration.md](migration.md).
 
 ## Dependency boundary
 

@@ -1,13 +1,15 @@
 # Roadmap
 
-## v1 gates
+## v1 readiness completed
 
-- Make backend integration fixtures hermetic and repeatable.
-- Reach and enforce meaningful 100% production-code coverage.
-- Add Redis enqueue/consume/ack/retry/shutdown benchmarks.
-- Complete backend depth and age observation where protocols expose it.
-- Validate all examples and documentation links in CI.
-- Complete dependency, vulnerability, and tagged release automation.
+- Backend integration fixtures are hermetic in-process tests or repeatable
+  tagged containers.
+- Meaningful 100% production-code coverage is enforced in CI.
+- Redis enqueue, consume, ack, retry, and shutdown benchmarks run in CI.
+- Lifecycle events carry backend/queue identity; Redis Streams exposes group
+  depth and oldest-job age, while other backend-specific sources are documented.
+- Examples and documentation links are validated in CI.
+- Dependency updates, vulnerability scanning, and tagged releases are automated.
 
 ## After v1
 

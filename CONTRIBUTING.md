@@ -6,10 +6,12 @@ production code, and preserve backend-specific semantics.
 Before submitting:
 
 ```sh
-gofmt -w .
+./scripts/check-format.sh
 go test ./...
 go test -race ./...
 go vet ./...
+./scripts/check-coverage.sh
+./scripts/check-docs.sh
 ```
 
 Integration tests require Docker and run with `go test -tags=integration`.

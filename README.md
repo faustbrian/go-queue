@@ -8,11 +8,11 @@ operability gaps in one release unit.
 
 ## Status
 
-The repository is pre-v1. The core and five upstream backends are consolidated.
-Constructor errors, delivery settlement, lifecycle events, and custom metrics
-are hardened. The remaining v1 gates are tracked in [ROADMAP.md](ROADMAP.md),
-including full meaningful coverage and completely hermetic backend integration
-fixtures.
+The repository is a pre-v1 release candidate. The core and five upstream
+backends are consolidated, meaningful production-code coverage is enforced at
+100%, Redis-critical benchmarks run in CI, and backend integrations are either
+hermetic in-process tests or repeatable tagged containers. Remaining post-v1
+ideas are tracked in [ROADMAP.md](ROADMAP.md).
 
 ## Install
 
@@ -105,9 +105,11 @@ err := q.QueueTask(handler, job.AllowOption{
 ## Observability
 
 Use `WithMetric` for counters and `WithObserver` for structured lifecycle
-events. Events include enqueue, handler timing, retry count and delay,
-settlement failures, and shutdown transitions. Exporters remain application
-choices; the core does not require an observability framework.
+events. Events include backend and queue identity, enqueue, handler timing,
+retry count and delay, settlement failures, and shutdown transitions. Redis
+Streams also exposes consumer-group `Stats`, including outstanding depth,
+pending count, lag, and oldest-job age. Exporters remain application choices;
+the core does not require an observability framework.
 
 ```go
 observer := queue.ObserverFunc(func(event queue.Event) {
@@ -134,6 +136,8 @@ observer := queue.ObserverFunc(func(event queue.Event) {
 go test ./...
 go test -race ./...
 go vet ./...
+./scripts/check-coverage.sh
+go test -run='^$' -bench=. -benchmem ./...
 ```
 
 Integration tests use the `integration` build tag and require their documented

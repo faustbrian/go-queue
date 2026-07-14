@@ -17,6 +17,13 @@ import (
 )
 
 var _ core.Worker = (*Worker)(nil)
+var _ core.WorkerMetadata = (*Worker)(nil)
+
+// BackendName identifies NSQ in lifecycle events.
+func (*Worker) BackendName() string { return "nsq" }
+
+// QueueName returns the configured NSQ topic.
+func (w *Worker) QueueName() string { return w.opts.topic }
 
 // Worker for NSQ
 type Worker struct {

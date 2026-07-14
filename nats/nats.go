@@ -16,6 +16,13 @@ import (
 )
 
 var _ core.Worker = (*Worker)(nil)
+var _ core.WorkerMetadata = (*Worker)(nil)
+
+// BackendName identifies Core NATS in lifecycle events.
+func (*Worker) BackendName() string { return "nats" }
+
+// QueueName returns the configured NATS subject.
+func (w *Worker) QueueName() string { return w.opts.subj }
 
 // Worker for NSQ
 type Worker struct {

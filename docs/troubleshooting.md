@@ -14,11 +14,13 @@ delivery fails or the process exits. Verify idempotency and inspect `ack_failed`
 
 Final handler failures are intentionally not acknowledged. Inspect the consumer
 group pending entries and operate an explicit claim/dead-letter policy.
+`Worker.Stats(ctx)` reports pending count, lag, depth, and oldest-job age.
 
 ## Shutdown takes too long
 
 Confirm handlers honor context cancellation and that task timeouts fit the
 service shutdown window. Inspect shutdown events and busy-worker metrics.
+Tune backend request/connect timeouts so broker outages fit that window.
 
 ## No NATS redelivery
 

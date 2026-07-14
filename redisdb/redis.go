@@ -18,10 +18,17 @@ import (
 )
 
 var _ core.Worker = (*Worker)(nil)
+var _ core.WorkerMetadata = (*Worker)(nil)
 
 var pingRedisSubscription = func(ctx context.Context, subscription *redis.PubSub) error {
 	return subscription.Ping(ctx)
 }
+
+// BackendName identifies Redis Pub/Sub in lifecycle events.
+func (*Worker) BackendName() string { return "redis-pubsub" }
+
+// QueueName returns the configured Redis channel.
+func (w *Worker) QueueName() string { return w.opts.channelName }
 
 // Worker for Redis
 type Worker struct {

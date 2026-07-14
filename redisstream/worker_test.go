@@ -56,6 +56,9 @@ func TestOptionsConfigureRedisStreams(t *testing.T) {
 	assert.Equal(t, uint16(tls.VersionTLS12), opts.tls.MinVersion)
 	assert.True(t, opts.tls.InsecureSkipVerify)
 	assert.ErrorIs(t, opts.runFunc(context.Background(), nil), runErr)
+	worker := &Worker{opts: opts}
+	assert.Equal(t, "redis-streams", worker.BackendName())
+	assert.Equal(t, "jobs", worker.QueueName())
 }
 
 func TestSkipTLSVerifyCreatesConfig(t *testing.T) {
@@ -285,6 +288,126 @@ func TestFetchTaskRequeuesDeliveryDuringShutdown(t *testing.T) {
 				require.NoError(t, client.Close())
 			}
 		})
+	}
+}
+
+func TestStatsReportsOutstandingDepthAndOldestJobAge(t *testing.T) {
+	server := miniredis.RunT(t)
+	worker, err := NewWorkerE(
+		WithAddr(server.Addr()),
+		WithStreamName("jobs"),
+		WithGroup("workers"),
+		WithConsumer("worker-1"),
+		WithBlockTime(time.Millisecond),
+		WithRequestTimeout(time.Second),
+	)
+	require.NoError(t, err)
+	worker.startConsumer()
+	message := job.NewMessage(rawMessage("payload"))
+	require.NoError(t, worker.Queue(&message))
+
+	if !assert.Eventually(t, func() bool {
+		stats, statsErr := worker.Stats(context.Background())
+		return statsErr == nil && stats.Depth >= 1 && stats.OldestJobAge >= 0
+	}, time.Second, time.Millisecond) {
+		stats, statsErr := worker.Stats(context.Background())
+		t.Fatalf("unexpected stats: %+v, error: %v", stats, statsErr)
+	}
+
+	received, err := worker.Request()
+	require.NoError(t, err)
+	stats, err := worker.Stats(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), stats.Pending)
+	assert.Equal(t, stats.Pending+stats.Lag, stats.Depth)
+	assert.GreaterOrEqual(t, stats.OldestJobAge, time.Duration(0))
+	require.NoError(t, received.(*job.Message).Ack())
+
+	stats, err = worker.Stats(context.Background())
+	require.NoError(t, err)
+	assert.Zero(t, stats.Pending)
+	assert.Equal(t, stats.Lag, stats.Depth)
+	require.NoError(t, worker.Shutdown())
+}
+
+func TestStatsReturnsBackendAndGroupErrors(t *testing.T) {
+	server := miniredis.RunT(t)
+	worker, err := NewWorkerE(WithAddr(server.Addr()))
+	require.NoError(t, err)
+
+	stats, err := worker.Stats(context.Background())
+	assert.Zero(t, stats)
+	assert.Error(t, err)
+
+	require.NoError(t, worker.rdb.(*redis.Client).Close())
+	stats, err = worker.Stats(context.Background())
+	assert.Zero(t, stats)
+	assert.Error(t, err)
+}
+
+func TestStatsCoversGroupAndCommandBranches(t *testing.T) {
+	expected := errors.New("backend")
+	for _, test := range []struct {
+		name         string
+		groups       []redis.XInfoGroup
+		pending      []redis.XPendingExt
+		messages     []redis.XMessage
+		pendingErr   error
+		rangeErr     error
+		wantErr      bool
+		wantDepth    int64
+		wantLagKnown bool
+	}{
+		{name: "group missing", groups: []redis.XInfoGroup{{Name: "other"}}, wantErr: true},
+		{name: "lag unknown", groups: []redis.XInfoGroup{{Name: "workers", Lag: -1}}, wantDepth: -1},
+		{name: "empty", groups: []redis.XInfoGroup{{Name: "workers"}}, wantLagKnown: true},
+		{name: "pending error", groups: []redis.XInfoGroup{{Name: "workers", Pending: 1}}, pendingErr: expected, wantErr: true},
+		{name: "pending empty", groups: []redis.XInfoGroup{{Name: "workers", Pending: 1}}, wantDepth: 1, wantLagKnown: true},
+		{name: "range error", groups: []redis.XInfoGroup{{Name: "workers", Lag: 1}}, rangeErr: expected, wantErr: true},
+		{name: "range empty", groups: []redis.XInfoGroup{{Name: "workers", Lag: 1}}, wantDepth: 1, wantLagKnown: true},
+		{name: "invalid pending ID", groups: []redis.XInfoGroup{{Name: "workers", Pending: 1}}, pending: []redis.XPendingExt{{ID: "invalid"}}, wantErr: true},
+		{name: "invalid queued ID", groups: []redis.XInfoGroup{{Name: "workers", Lag: 1}}, messages: []redis.XMessage{{ID: "invalid"}}, wantErr: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			worker := &Worker{
+				opts: newOptions(WithGroup("workers")),
+				readGroups: func(context.Context, string) ([]redis.XInfoGroup, error) {
+					return test.groups, nil
+				},
+				readPending: func(context.Context, *redis.XPendingExtArgs) ([]redis.XPendingExt, error) {
+					return test.pending, test.pendingErr
+				},
+				readRange: func(context.Context, string, string, string, int64) ([]redis.XMessage, error) {
+					return test.messages, test.rangeErr
+				},
+			}
+
+			stats, err := worker.Stats(context.Background())
+			if test.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.wantDepth, stats.Depth)
+			assert.Equal(t, test.wantLagKnown, stats.LagKnown)
+		})
+	}
+}
+
+func TestStreamMessageAgeValidatesRedisIDs(t *testing.T) {
+	now := time.UnixMilli(1_000)
+	age, err := streamMessageAge("500-0", now)
+	require.NoError(t, err)
+	assert.Equal(t, 500*time.Millisecond, age)
+
+	age, err = streamMessageAge("2000-0", now)
+	require.NoError(t, err)
+	assert.Zero(t, age)
+
+	for _, id := range []string{"invalid", "nope-0"} {
+		age, err = streamMessageAge(id, now)
+		assert.Zero(t, age)
+		assert.Error(t, err)
 	}
 }
 

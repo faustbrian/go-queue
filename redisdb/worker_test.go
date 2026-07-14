@@ -54,6 +54,9 @@ func TestOptionsConfigureRedisPubSub(t *testing.T) {
 	assert.Equal(t, uint16(tls.VersionTLS12), opts.tls.MinVersion)
 	assert.True(t, opts.tls.InsecureSkipVerify)
 	assert.ErrorIs(t, opts.runFunc(context.Background(), nil), runErr)
+	worker := &Worker{opts: opts}
+	assert.Equal(t, "redis-pubsub", worker.BackendName())
+	assert.Equal(t, "jobs", worker.QueueName())
 }
 
 func TestDefaultRunFunctionSucceeds(t *testing.T) {

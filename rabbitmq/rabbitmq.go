@@ -17,6 +17,13 @@ import (
 )
 
 var _ core.Worker = (*Worker)(nil)
+var _ core.WorkerMetadata = (*Worker)(nil)
+
+// BackendName identifies RabbitMQ in lifecycle events.
+func (*Worker) BackendName() string { return "rabbitmq" }
+
+// QueueName returns the configured RabbitMQ queue.
+func (w *Worker) QueueName() string { return w.opts.queue }
 
 // ReconnectConfig defines the retry policy for RabbitMQ connection.
 type ReconnectConfig struct {

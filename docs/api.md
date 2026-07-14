@@ -15,6 +15,8 @@ maps the stable concepts new adopters need.
   `WithMetric`, `WithObserver`, and `WithAfterFn` configure coordination.
 - `Metric` exposes busy, submitted, success, failure, and completed counters.
 - `Observer` receives `Event` values for lifecycle transitions.
+- `core.WorkerMetadata` lets workers add backend and queue identity to every
+  lifecycle event.
 
 ## Job package
 
@@ -31,3 +33,12 @@ should use the error-returning form.
 
 Backend-specific options are documented in [backend setup guides](backends/redis.md)
 and in Go doc comments beside each option.
+
+All network backends provide `WithRequestTimeout`. Redis Pub/Sub and Redis
+Streams provide `WithConnectTimeout`; NATS and NSQ provide the same startup
+bound, while RabbitMQ uses `WithReconnectConfig`. NSQ also provides
+`WithTouchInterval`.
+
+Redis Streams exposes `Worker.Stats(context.Context)`. Its result reports
+consumer-group `Depth`, `Pending`, `Lag`, whether lag is known, and
+`OldestJobAge`. `Depth` is `-1` when Redis reports indeterminate lag.

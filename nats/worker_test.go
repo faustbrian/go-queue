@@ -37,6 +37,9 @@ func TestOptionsConfigureNATS(t *testing.T) {
 	assert.ErrorIs(t, opts.runFunc(context.Background(), nil), runErr)
 	assert.Equal(t, natsgo.DefaultURL, newOptions(WithAddr()).addr)
 	assert.NoError(t, newOptions().runFunc(context.Background(), nil))
+	worker := &Worker{opts: opts}
+	assert.Equal(t, "nats", worker.BackendName())
+	assert.Equal(t, "jobs", worker.QueueName())
 }
 
 func TestWorkerQueuesRequestsRunsAndShutsDown(t *testing.T) {

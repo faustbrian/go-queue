@@ -41,6 +41,9 @@ func TestOptionsConfigureNSQ(t *testing.T) {
 	assert.Equal(t, 35*time.Millisecond, opts.connectTimeout)
 	assert.ErrorIs(t, opts.runFunc(context.Background(), nil), runErr)
 	assert.NoError(t, newOptions().runFunc(context.Background(), nil))
+	worker := &Worker{opts: opts}
+	assert.Equal(t, "nsq", worker.BackendName())
+	assert.Equal(t, "jobs", worker.QueueName())
 }
 
 func TestWorkerConstructorAndShutdown(t *testing.T) {

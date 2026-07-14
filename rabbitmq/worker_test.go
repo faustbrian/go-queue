@@ -49,6 +49,9 @@ func TestOptionsConfigureRabbitMQ(t *testing.T) {
 	for _, exchange := range []string{ExchangeDirect, ExchangeFanout, ExchangeTopic, ExchangeHeaders} {
 		assert.True(t, isVaildExchange(exchange))
 	}
+	worker := &Worker{opts: opts}
+	assert.Equal(t, "rabbitmq", worker.BackendName())
+	assert.Equal(t, "jobs", worker.QueueName())
 }
 
 func TestDialWithRetryValidatesRetriesAndBacksOff(t *testing.T) {

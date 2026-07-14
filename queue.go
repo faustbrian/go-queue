@@ -344,6 +344,14 @@ func (q *Queue) handle(m *job.Message) error {
 }
 
 func (q *Queue) observe(event Event) {
+	if metadata, ok := q.worker.(core.WorkerMetadata); ok {
+		if event.Backend == "" {
+			event.Backend = metadata.BackendName()
+		}
+		if event.Queue == "" {
+			event.Queue = metadata.QueueName()
+		}
+	}
 	if event.OccurredAt.IsZero() {
 		event.OccurredAt = time.Now()
 	}

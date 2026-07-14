@@ -24,6 +24,13 @@ type Worker interface {
 	Request() (TaskMessage, error)
 }
 
+// WorkerMetadata identifies the backend and logical queue represented by a worker.
+// Queue uses it to enrich lifecycle events without coupling to backend packages.
+type WorkerMetadata interface {
+	BackendName() string
+	QueueName() string
+}
+
 // QueuedMessage represents an interface for a message that can be queued.
 // It requires the implementation of a Bytes method, which returns the message
 // content as a slice of bytes.

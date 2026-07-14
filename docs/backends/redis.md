@@ -2,7 +2,8 @@
 
 Use package `redisdb`. Configure `WithAddr`, `WithUsername`, `WithPassword`,
 `WithDB`, `WithChannel`, and optional TLS. Cluster and Sentinel modes are
-explicit options.
+explicit options. `WithConnectTimeout` bounds startup validation and
+`WithRequestTimeout` bounds an idle request.
 
 Pub/Sub is non-durable: messages published while a consumer is disconnected are
 lost, there is no ack, and depth/job age are unavailable. Use it only when those

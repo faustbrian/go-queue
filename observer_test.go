@@ -32,6 +32,12 @@ func (o *recordingObserver) kinds() []EventKind {
 	return kinds
 }
 
+func (o *recordingObserver) snapshot() []Event {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	return append([]Event(nil), o.events...)
+}
+
 func TestObserverReceivesSuccessfulTaskLifecycle(t *testing.T) {
 	observer := &recordingObserver{}
 	done := make(chan struct{})
@@ -61,6 +67,9 @@ func TestObserverReceivesSuccessfulTaskLifecycle(t *testing.T) {
 		EventShutdownStarted,
 		EventShutdownCompleted,
 	})
+	for _, event := range observer.snapshot() {
+		require.Equal(t, "memory", event.Backend)
+	}
 }
 
 func TestObserverReceivesRetryAndFailure(t *testing.T) {

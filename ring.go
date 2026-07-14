@@ -9,6 +9,13 @@ import (
 )
 
 var _ core.Worker = (*Ring)(nil)
+var _ core.WorkerMetadata = (*Ring)(nil)
+
+// BackendName identifies the in-memory worker in lifecycle events.
+func (*Ring) BackendName() string { return "memory" }
+
+// QueueName is empty because an in-memory ring has no broker queue name.
+func (*Ring) QueueName() string { return "" }
 
 // Ring is an in-memory worker implementation using a dynamic circular buffer.
 // It implements the core.Worker interface and provides automatic resizing:

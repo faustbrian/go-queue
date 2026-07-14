@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -19,20 +20,40 @@ import (
 )
 
 var _ core.Worker = (*Worker)(nil)
+var _ core.WorkerMetadata = (*Worker)(nil)
+
+// BackendName identifies Redis Streams in lifecycle events.
+func (*Worker) BackendName() string { return "redis-streams" }
+
+// QueueName returns the configured Redis stream.
+func (w *Worker) QueueName() string { return w.opts.streamName }
+
+// Stats describes outstanding work for this worker's Redis consumer group.
+// Depth is Pending plus Lag and is -1 when Redis cannot determine group lag.
+type Stats struct {
+	Depth        int64
+	Pending      int64
+	Lag          int64
+	LagKnown     bool
+	OldestJobAge time.Duration
+}
 
 // Worker for Redis
 type Worker struct {
 	// redis config
-	rdb       redis.Cmdable
-	readGroup func(context.Context, *redis.XReadGroupArgs) ([]redis.XStream, error)
-	tasks     chan redis.XMessage
-	ack       func(string) error
-	stopFlag  int32
-	stopOnce  sync.Once
-	startOnce sync.Once
-	stop      chan struct{}
-	exit      chan struct{}
-	opts      options
+	rdb         redis.Cmdable
+	readGroup   func(context.Context, *redis.XReadGroupArgs) ([]redis.XStream, error)
+	readGroups  func(context.Context, string) ([]redis.XInfoGroup, error)
+	readPending func(context.Context, *redis.XPendingExtArgs) ([]redis.XPendingExt, error)
+	readRange   func(context.Context, string, string, string, int64) ([]redis.XMessage, error)
+	tasks       chan redis.XMessage
+	ack         func(string) error
+	stopFlag    int32
+	stopOnce    sync.Once
+	startOnce   sync.Once
+	stop        chan struct{}
+	exit        chan struct{}
+	opts        options
 }
 
 // NewWorker for struc
@@ -102,6 +123,17 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 	}
 	w.readGroup = func(ctx context.Context, args *redis.XReadGroupArgs) ([]redis.XStream, error) {
 		return w.rdb.XReadGroup(ctx, args).Result()
+	}
+	w.readGroups = func(ctx context.Context, stream string) ([]redis.XInfoGroup, error) {
+		return w.rdb.XInfoGroups(ctx, stream).Result()
+	}
+	w.readPending = func(ctx context.Context, args *redis.XPendingExtArgs) ([]redis.XPendingExt, error) {
+		return w.rdb.XPendingExt(ctx, args).Result()
+	}
+	w.readRange = func(
+		ctx context.Context, stream string, start string, stop string, count int64,
+	) ([]redis.XMessage, error) {
+		return w.rdb.XRangeN(ctx, stream, start, stop, count).Result()
 	}
 
 	return w, nil
@@ -259,4 +291,87 @@ func (w *Worker) Request() (core.TaskMessage, error) {
 	case <-timer.C:
 		return nil, queue.ErrNoTaskInQueue
 	}
+}
+
+// Stats returns consumer-group depth and the age of its oldest outstanding job.
+func (w *Worker) Stats(ctx context.Context) (Stats, error) {
+	groups, err := w.readGroups(ctx, w.opts.streamName)
+	if err != nil {
+		return Stats{}, fmt.Errorf("read Redis stream groups: %w", err)
+	}
+	var group *redis.XInfoGroup
+	for index := range groups {
+		if groups[index].Name == w.opts.group {
+			group = &groups[index]
+			break
+		}
+	}
+	if group == nil {
+		return Stats{}, fmt.Errorf("Redis stream group %q does not exist", w.opts.group)
+	}
+
+	stats := Stats{Pending: group.Pending, Lag: group.Lag, LagKnown: group.Lag >= 0}
+	if stats.LagKnown {
+		stats.Depth = group.Pending + group.Lag
+	} else {
+		stats.Depth = -1
+	}
+	if group.Pending == 0 && group.Lag == 0 {
+		return stats, nil
+	}
+
+	var oldestIDs []string
+	if group.Pending > 0 {
+		pending, pendingErr := w.readPending(ctx, &redis.XPendingExtArgs{
+			Stream: w.opts.streamName,
+			Group:  w.opts.group,
+			Start:  "-",
+			End:    "+",
+			Count:  1,
+		})
+		if pendingErr != nil {
+			return Stats{}, fmt.Errorf("read Redis pending jobs: %w", pendingErr)
+		}
+		if len(pending) > 0 {
+			oldestIDs = append(oldestIDs, pending[0].ID)
+		}
+	}
+	if group.Lag > 0 {
+		start := "(" + group.LastDeliveredID
+		messages, rangeErr := w.readRange(ctx, w.opts.streamName, start, "+", 1)
+		if rangeErr != nil {
+			return Stats{}, fmt.Errorf("read Redis queued jobs: %w", rangeErr)
+		}
+		if len(messages) > 0 {
+			oldestIDs = append(oldestIDs, messages[0].ID)
+		}
+	}
+
+	now := time.Now()
+	for _, id := range oldestIDs {
+		age, ageErr := streamMessageAge(id, now)
+		if ageErr != nil {
+			return Stats{}, ageErr
+		}
+		if age > stats.OldestJobAge {
+			stats.OldestJobAge = age
+		}
+	}
+	return stats, nil
+}
+
+func streamMessageAge(id string, now time.Time) (time.Duration, error) {
+	milliseconds, _, ok := strings.Cut(id, "-")
+	if !ok {
+		return 0, fmt.Errorf("invalid Redis stream message ID %q", id)
+	}
+	timestamp, err := strconv.ParseInt(milliseconds, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid Redis stream message ID %q: %w", id, err)
+	}
+	age := now.Sub(time.UnixMilli(timestamp))
+	if age < 0 {
+		return 0, nil
+	}
+	return age, nil
 }
