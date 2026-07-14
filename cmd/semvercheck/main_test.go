@@ -22,7 +22,7 @@ func TestNextStableVersion(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			command := exec.Command("go", "run", ".", "next", test.part, test.current)
+			command := exec.CommandContext(t.Context(), "go", "run", ".", "next", test.part, test.current)
 			output, err := command.CombinedOutput()
 			if err != nil {
 				t.Fatalf("semvercheck next error = %v: %s", err, output)

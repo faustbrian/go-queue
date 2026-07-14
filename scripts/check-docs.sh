@@ -1,43 +1,82 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-go test ./...
-scripts/generate-llms.py --check
-
 required=(
-	README.md
-	CONTRIBUTING.md
-	SECURITY.md
-	docs/architecture.md
-	docs/lifecycle.md
-	docs/failure-model.md
-	docs/hardening-report.md
-	docs/integration-evidence.md
-	docs/performance.md
-	docs/api.md
-	docs/backend-support.md
-	docs/delivery-semantics.md
-	docs/migration.md
-	docs/compatibility.md
-	docs/adoption.md
-	docs/cookbook.md
-	docs/faq.md
-	docs/troubleshooting.md
-	docs/releases.md
+  .gitattributes
+  .gitignore
+  .golangci.yml
+  AGENTS.md
+  CHANGELOG.md
+  CLAUDE.md
+  CODE_OF_CONDUCT.md
+  CONTRIBUTING.md
+  GOAL.md
+  GOAL_HARDEN.md
+  LICENSE
+  Makefile
+  NOTICE
+  README.md
+  ROADMAP.md
+  SECURITY.md
+  THIRD_PARTY_NOTICES.md
+  llms.txt
+  llms-full.txt
+  docs/README.md
+  docs/quickstart.md
+  docs/adoption.md
+  docs/api.md
+  docs/architecture.md
+  docs/examples.md
+  docs/cookbook.md
+  docs/faq.md
+  docs/troubleshooting.md
+  docs/migration.md
+  docs/compatibility.md
+  docs/performance.md
+  docs/hardening.md
+  docs/security.md
+  docs/releasing.md
+  docs/repository-standards.md
+  docs/backend-support.md
+  docs/delivery-semantics.md
+  docs/failure-model.md
+  docs/integration-evidence.md
+  docs/lifecycle.md
 )
 
 for file in "${required[@]}"; do
-	[[ -s "$file" ]] || { printf 'missing required document: %s\n' "$file" >&2; exit 1; }
+  if [[ ! -s "$file" ]]; then
+    echo "required repository file is missing or empty: $file" >&2
+    exit 1
+  fi
 done
 
-while IFS= read -r file; do
-	while IFS= read -r target; do
-		target=${target%%#*}
-		[[ -z "$target" || "$target" == http://* || "$target" == https://* || "$target" == mailto:* ]] && continue
-		path=$(dirname "$file")/$target
-		[[ -e "$path" ]] || { printf 'broken link in %s: %s\n' "$file" "$target" >&2; exit 1; }
-	done < <(sed -nE 's/.*\]\(([^)]+)\).*/\1/p' "$file")
-done < <(find . -name '*.md' -not -path './.git/*' -print)
+python3 - <<'PY'
+from pathlib import Path
+import re
 
-go test ./examples/...
-printf 'Markdown links and runnable examples are valid\n'
+for document in Path(".").rglob("*.md"):
+    content = document.read_text(encoding="utf-8")
+    prose = []
+    in_fence = False
+    for line in content.splitlines():
+        if line.lstrip().startswith(("```", "~~~")):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            prose.append(line)
+    for target in re.findall(r"\[[^\]]*\]\(([^)]+)\)", "\n".join(prose)):
+        if target.startswith(("http://", "https://", "mailto:", "#")):
+            continue
+        relative = target.split("#", 1)[0]
+        if relative.startswith("<") and relative.endswith(">"):
+            relative = relative[1:-1]
+        resolved = (document.parent / relative).resolve()
+        if not resolved.exists():
+            raise SystemExit(f"broken relative link in {document}: {target}")
+
+print("all required files exist and relative Markdown links resolve")
+PY
+
+python3 scripts/generate-llms.py --check
+go test ./... -run '^Example'

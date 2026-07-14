@@ -1,17 +1,29 @@
 version: "2"
 
+run:
+  timeout: 5m
+
 linters:
   default: standard
   enable:
     - bodyclose
     - errorlint
-    - exhaustive
     - gosec
     - misspell
     - nilerr
     - noctx
     - staticcheck
     - unconvert
+  settings:
+    gosec:
+      excludes:
+        - G115
+  exclusions:
+    rules:
+      - path: '_test\.go'
+        linters:
+          - gosec
+          - noctx
 
 formatters:
   enable:

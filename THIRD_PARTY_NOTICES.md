@@ -1,4 +1,10 @@
-# Third-party notices
+# Third-Party Notices
+
+## Policy
+
+This file is mandatory because this repository consolidates forked source. It
+records attribution for copied, forked, generated, or vendored code. Ordinary
+Go module dependencies retain their upstream licenses and notices.
 
 This repository consolidates code originally published by the
 `golang-queue` project under the MIT License. The initial source baselines

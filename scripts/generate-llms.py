@@ -1,108 +1,72 @@
 #!/usr/bin/env python3
-"""Generate portable LLM documentation from the canonical Markdown docs."""
+from __future__ import annotations
 
 import argparse
-import pathlib
-import re
-import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+CORE_DOCUMENTS = [
+    Path("README.md"),
+    Path("docs/README.md"),
+    Path("docs/quickstart.md"),
+    Path("docs/adoption.md"),
+    Path("docs/api.md"),
+    Path("docs/architecture.md"),
+    Path("docs/examples.md"),
+    Path("docs/cookbook.md"),
+    Path("docs/faq.md"),
+    Path("docs/troubleshooting.md"),
+    Path("docs/migration.md"),
+    Path("docs/compatibility.md"),
+    Path("docs/performance.md"),
+    Path("docs/hardening.md"),
+    Path("docs/security.md"),
+    Path("docs/releasing.md"),
+    Path("CONTRIBUTING.md"),
+    Path("SECURITY.md"),
+    Path("ROADMAP.md"),
+    Path("CHANGELOG.md"),
+]
 
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-README = ROOT / "README.md"
-RAW_BASE = "https://raw.githubusercontent.com/faustbrian/go-queue/main"
-
-
-def documentation_paths(readme: str) -> list[pathlib.Path]:
-    match = re.search(
-        r"^## Documentation\s*$\n(?P<body>.*?)(?=^## |\Z)",
-        readme,
-        flags=re.MULTILINE | re.DOTALL,
+def documents() -> list[Path]:
+    selected = list(CORE_DOCUMENTS)
+    selected_set = set(selected)
+    selected.extend(
+        path.relative_to(ROOT)
+        for path in sorted((ROOT / "docs").glob("*.md"))
+        if path.relative_to(ROOT) not in selected_set
     )
-    if match is None:
-        raise ValueError("README.md does not contain a Documentation section")
-
-    paths = []
-    for target in re.findall(
-        r"^- \[[^]]+\]\(([^)]+\.md)\)\s*$", match["body"], re.MULTILINE
-    ):
-        path = ROOT / target
-        if not path.is_file():
-            raise ValueError(f"README.md references missing documentation: {target}")
-        paths.append(path)
-    if not paths:
-        raise ValueError("README.md Documentation section has no Markdown documents")
-    return paths
+    return selected
 
 
-def title(document: str, path: pathlib.Path) -> str:
-    match = re.search(r"^# (.+)$", document, flags=re.MULTILINE)
-    if match is None:
-        raise ValueError(f"{path.relative_to(ROOT)} has no level-one heading")
-    return match.group(1)
+def title(path: Path) -> str:
+    for line in (ROOT / path).read_text(encoding="utf-8").splitlines():
+        if line.startswith("# "):
+            return line[2:]
+    return path.stem.replace("-", " ").title()
 
 
-def summary(document: str) -> str:
-    lines = document.splitlines()
-    paragraph = []
-    after_title = False
-    in_code = False
-    for line in lines:
-        if not after_title:
-            after_title = line.startswith("# ")
-            continue
-        if line.startswith("```"):
-            in_code = not in_code
-            continue
-        if in_code:
-            continue
-        if not line.strip():
-            if paragraph:
-                break
-            continue
-        if line.startswith(("#", "- ")):
-            if paragraph:
-                break
-            continue
-        paragraph.append(line.strip())
-    return " ".join(paragraph)
-
-
-def render_index(readme: str, paths: list[pathlib.Path]) -> str:
+def render_index(paths: list[Path]) -> str:
+    package = (ROOT / "go.mod").read_text(encoding="utf-8").splitlines()[0].split("/")[-1]
     lines = [
-        f"# {title(readme, README)}",
+        f"# {package}",
         "",
-        f"> {summary(readme)}",
+        "> Documentation map for package users, adopters, operators, and contributors.",
         "",
-        "This index is generated from the repository's canonical Markdown documentation.",
-        "",
-        "## Documentation",
-        "",
+        "- [Complete documentation bundle](llms-full.txt)",
     ]
-    for path in paths:
-        document = path.read_text()
-        relative = path.relative_to(ROOT).as_posix()
-        lines.append(
-            f"- [{title(document, path)}]({RAW_BASE}/{relative}): {summary(document)}"
-        )
-    lines.extend(
-        [
-            "",
-            "## Complete documentation",
-            "",
-            f"- [llms-full.txt]({RAW_BASE}/llms-full.txt): All linked documentation in one file.",
-            "",
-        ]
-    )
-    return "\n".join(lines)
+    lines.extend(f"- [{title(path)}]({path.as_posix()})" for path in paths)
+    return "\n".join(lines) + "\n"
 
 
-def render_full(readme: str, paths: list[pathlib.Path]) -> str:
-    sections = [readme.rstrip()]
+def render_full(paths: list[Path]) -> str:
+    package = (ROOT / "go.mod").read_text(encoding="utf-8").splitlines()[0].split("/")[-1]
+    sections = [f"# {package} Complete Documentation", ""]
     for path in paths:
-        relative = path.relative_to(ROOT).as_posix()
-        sections.extend([f"<!-- Source: {relative} -->", path.read_text().rstrip()])
-    notice = "<!-- Code generated by scripts/generate-llms.py; DO NOT EDIT. -->"
-    return notice + "\n\n" + "\n\n---\n\n".join(sections) + "\n"
+        content = (ROOT / path).read_text(encoding="utf-8").rstrip()
+        sections.extend([f"## Source: {path.as_posix()}", "", content, ""])
+    return "\n".join(sections).rstrip() + "\n"
 
 
 def main() -> int:
@@ -110,25 +74,25 @@ def main() -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
-    readme = README.read_text()
-    paths = documentation_paths(readme)
-    generated = {
-        ROOT / "llms.txt": render_index(readme, paths),
-        ROOT / "llms-full.txt": render_full(readme, paths),
+    paths = documents()
+    outputs = {
+        ROOT / "llms.txt": render_index(paths),
+        ROOT / "llms-full.txt": render_full(paths),
     }
 
-    stale = []
-    for path, contents in generated.items():
-        if args.check:
-            if not path.is_file() or path.read_text() != contents:
-                stale.append(path.name)
-        else:
-            path.write_text(contents)
+    if args.check:
+        stale = [
+            path.name
+            for path, content in outputs.items()
+            if not path.exists() or path.read_text(encoding="utf-8") != content
+        ]
+        if stale:
+            raise SystemExit("generated documentation is stale: " + ", ".join(stale))
+        print("generated documentation is current")
+        return 0
 
-    if stale:
-        print("generated LLM documentation is stale: " + ", ".join(stale), file=sys.stderr)
-        print("run scripts/generate-llms.py", file=sys.stderr)
-        return 1
+    for path, content in outputs.items():
+        path.write_text(content, encoding="utf-8")
     return 0
 
 

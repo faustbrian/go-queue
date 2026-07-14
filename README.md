@@ -1,164 +1,93 @@
 # go-queue
 
-`go-queue` is a consolidated Go worker queue with owned implementations for
-in-memory, Redis Pub/Sub, Redis Streams, NATS, NSQ, and RabbitMQ. It began as a
-compatibility-focused merge of the `golang-queue` ecosystem and intentionally
-keeps that programming model recognizable while fixing correctness and
-operability gaps in one release unit.
+`go-queue` is a consolidated worker queue with owned implementations for
+in-memory, Redis Pub/Sub, Redis Streams, NATS, NSQ, and RabbitMQ. It preserves
+the recognizable `golang-queue` programming model while owning correctness,
+operations, and releases in one module.
 
 ## Status
 
-The repository is undergoing a pre-v1 hardening audit. The core and five upstream
-backends are consolidated, meaningful production-code coverage is enforced at
-100%, Redis-critical benchmarks run in CI, and backend integrations are either
-hermetic in-process tests or repeatable tagged containers. Remaining post-v1
-ideas are tracked in [ROADMAP.md](ROADMAP.md).
+The package is pre-v1 and undergoing hardening. Production code is held to
+meaningful 100% coverage; durable delivery claims require backend-specific
+integration evidence.
 
-## Install
+## Requirements
 
-go-queue requires Go 1.25.12 or newer.
+- Go 1.25 or later
+- a supported broker for non-memory backends
+
+## Installation
 
 ```sh
 go get github.com/faustbrian/go-queue
 ```
 
-Backend packages are part of the same module:
+Backend packages ship in the same module and are imported explicitly.
+
+## Quickstart
 
 ```go
-import (
-	queue "github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/redisdb"
+worker, err := redisdb.NewWorkerE(
+    redisdb.WithAddr("127.0.0.1:6379"),
+    redisdb.WithChannel("jobs"),
+    redisdb.WithRunFunc(func(ctx context.Context, task core.TaskMessage) error {
+        return handle(ctx, task.Payload())
+    }),
 )
-```
-
-## Redis-first quick start
-
-```go
-package main
-
-import (
-	"context"
-	"log"
-
-	queue "github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/redisdb"
-)
-
-func main() {
-	worker, err := redisdb.NewWorkerE(
-		redisdb.WithAddr("127.0.0.1:6379"),
-		redisdb.WithChannel("jobs"),
-		redisdb.WithRunFunc(func(ctx context.Context, task core.TaskMessage) error {
-			log.Printf("received %q", task.Payload())
-			return nil
-		}),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	q, err := queue.NewQueue(queue.WithWorker(worker), queue.WithWorkerCount(8))
-	if err != nil {
-		log.Fatal(err)
-	}
-	q.Start()
-	defer q.Release()
+if err != nil {
+    return err
 }
+
+q, err := queue.NewQueue(queue.WithWorker(worker), queue.WithWorkerCount(8))
+if err != nil {
+    return err
+}
+q.Start()
+defer q.Release()
 ```
 
-Use `NewWorkerE` in new applications. The legacy `NewWorker` constructors are
-kept for upstream source compatibility and panic on startup failure.
+Redis Pub/Sub is low-latency and non-durable. Use Redis Streams when work must
+remain pending until settlement. Read [delivery semantics](docs/delivery-semantics.md)
+before selecting a backend.
 
-Redis Pub/Sub is low-latency but non-durable. Use Redis Streams when work must
-remain pending until the handler succeeds. Read the
-[delivery semantics matrix](docs/delivery-semantics.md) before choosing.
+## Package Guarantees
 
-## Backends
-
-| Package | Transport | Durable | Explicit settlement | Primary use |
-| --- | --- | --- | --- | --- |
-| root `Ring` | memory | No | No | tests and in-process work |
-| `redisdb` | Redis Pub/Sub | No | No | transient notifications |
-| `redisstream` | Redis Streams | Yes | Yes | primary durable Redis path |
-| `nats` | Core NATS | No | No | low-latency fan-out/work groups |
-| `nsq` | NSQ | Yes | Yes | distributed work queues |
-| `rabbitmq` | AMQP 0-9-1 | Yes | Yes | routed durable work queues |
-
-See [backend support](docs/backend-support.md) and each
-[backend setup guide](docs/backends/redis.md).
-
-## Retries and shutdown
-
-Retries are configured per job with `job.AllowOption`. A delivery is settled
-only after all handler retries succeed or final failure is known. `Release`
-initiates shutdown and waits for queue goroutines; handlers receive cancellation
-through their context.
-
-```go
-err := q.QueueTask(handler, job.AllowOption{
-	RetryCount: job.Int64(5),
-	RetryMin:   job.Time(100 * time.Millisecond),
-	RetryMax:   job.Time(10 * time.Second),
-	Timeout:    job.Time(2 * time.Minute),
-})
-```
-
-## Observability
-
-Use `WithMetric` for counters and `WithObserver` for structured lifecycle
-events. Events include backend and queue identity, enqueue, handler timing,
-retry count and delay, settlement failures, and shutdown transitions. Redis
-Streams also exposes consumer-group `Stats`, including outstanding depth,
-pending count, lag, and oldest-job age. Exporters remain application choices;
-the core does not require an observability framework.
-
-```go
-observer := queue.ObserverFunc(func(event queue.Event) {
-	log.Printf("kind=%s backend=%s duration=%s err=%v",
-		event.Kind, event.Backend, event.Duration, event.Err)
-})
-```
+- explicit retry, acknowledgement, redelivery, cancellation, and shutdown
+  behavior
+- durable Redis Streams, NSQ, and RabbitMQ paths with explicit settlement
+- observable lifecycle events, metrics, and backend identity
+- one module and release unit for all maintained backends
+- backend-specific guarantees documented without abstraction leakage
 
 ## Documentation
 
-- [Architecture](docs/architecture.md)
-- [Lifecycle and state ownership](docs/lifecycle.md)
-- [Delivery semantics](docs/delivery-semantics.md)
-- [Threat and failure model](docs/failure-model.md)
-- [Security and abuse resistance](docs/security.md)
-- [Hardening report and release verdict](docs/hardening-report.md)
-- [Integration evidence](docs/integration-evidence.md)
-- [Performance and capacity](docs/performance.md)
-- [Public API](docs/api.md)
-- [Adoption guide](docs/adoption.md)
-- [Migration from golang-queue](docs/migration.md)
-- [Compatibility policy](docs/compatibility.md)
-- [Scenario cookbook](docs/cookbook.md)
-- [FAQ](docs/faq.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Versioning and releases](docs/releases.md)
-- [Roadmap](ROADMAP.md)
-- [Changelog](CHANGELOG.md)
-- [Portable AI documentation index](llms.txt)
-- [Complete AI documentation bundle](llms-full.txt)
+Start with the [documentation index](docs/README.md), [quickstart](docs/quickstart.md),
+[adoption guide](docs/adoption.md), and [API reference](docs/api.md). Review the
+[backend matrix](docs/backend-support.md), [failure model](docs/failure-model.md),
+and [integration evidence](docs/integration-evidence.md) before production use.
+
+AI tools can use [llms.txt](llms.txt) and [llms-full.txt](llms-full.txt).
+Release history is maintained in [CHANGELOG.md](CHANGELOG.md).
 
 ## Development
 
-```sh
-go test ./...
-go test -race ./...
-go vet ./...
-./scripts/check-coverage.sh
-./scripts/check-fuzz.sh
-go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
-go test -run='^$' -bench=. -benchmem ./...
-```
+Run `make check` before submitting a change. Backend changes must also pass
+`make integration` with the services documented in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
-Integration tests use the `integration` build tag and require their documented
-backend services. See [CONTRIBUTING.md](CONTRIBUTING.md).
+## Contributing
 
-## Provenance and license
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and follow the
+[code of conduct](CODE_OF_CONDUCT.md). Every backend change must document its
+delivery and settlement impact.
 
-The initial consolidation baseline and exact source commits are recorded in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The project is MIT licensed.
+## Security
+
+Report vulnerabilities privately according to [SECURITY.md](SECURITY.md).
+Review [docs/security.md](docs/security.md) before processing untrusted jobs.
+
+## License
+
+`go-queue` is available under the [MIT License](LICENSE). Fork provenance and
+third-party attribution are recorded in [NOTICE](NOTICE) and
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

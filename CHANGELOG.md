@@ -7,6 +7,8 @@ versioning and Keep a Changelog structure.
 
 ### Added
 
+- A standardized OSS repository skeleton covering policy, documentation,
+  legal notices, Go tooling, pinned CI, security, and release automation.
 - Evidence-driven audit and hardening goal covering lifecycle safety,
   backend-specific delivery semantics, failure injection, and operations.
 - Consolidated core, Redis, Redis Streams, NATS, NSQ, and RabbitMQ packages.
@@ -18,7 +20,7 @@ versioning and Keep a Changelog structure.
 - Redis Streams group depth, lag, pending, and oldest-job-age statistics.
 - Hermetic Redis and NATS scenarios plus Redis enqueue, consume, ack, retry,
   and shutdown benchmarks.
-- Consistent repository automation for Go 1.25.12, CI, dependency review,
+- Consistent repository automation for Go 1.25, CI, dependency review,
   guarded semantic releases, and generated portable AI documentation.
 - Bounded non-panicking delivery decoding and fuzz targets for every backend.
 - Lifecycle, failure-model, performance, integration-evidence, and hardening

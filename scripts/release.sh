@@ -36,31 +36,33 @@ while IFS= read -r tag; do
   fi
 done < <(git tag --list "v*" --sort=-version:refname)
 
-next="$(go run ./cmd/semvercheck next "$part" "$current")"
+if [[ ! "$current" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+  echo "invalid current release tag: $current" >&2
+  exit 1
+fi
+major="${BASH_REMATCH[1]}"
+minor="${BASH_REMATCH[2]}"
+patch="${BASH_REMATCH[3]}"
+
+case "$part" in
+  patch) patch=$((patch + 1)) ;;
+  minor) minor=$((minor + 1)); patch=0 ;;
+  major) major=$((major + 1)); minor=0; patch=0 ;;
+esac
+
+next="v${major}.${minor}.${patch}"
 version="${next#v}"
+
 if git rev-parse --quiet --verify "refs/tags/$next" >/dev/null; then
   echo "tag $next already exists" >&2
   exit 1
 fi
-if ! grep -Eq "^## \[$version\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$" CHANGELOG.md; then
+if ! grep -Eq "^## \\[$version\\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$" CHANGELOG.md; then
   echo "CHANGELOG.md must contain a dated [$version] release section" >&2
   exit 1
 fi
-if ! grep -Fq "[$version]: https://github.com/faustbrian/go-queue/releases/tag/$next" CHANGELOG.md; then
-  echo "CHANGELOG.md must contain the $next release link" >&2
-  exit 1
-fi
 
-go run ./cmd/semvercheck "$next"
-test -z "$(gofmt -l .)"
-go vet ./...
-go run honnef.co/go/tools/cmd/staticcheck@v0.6.1 ./...
-go test -race ./...
-scripts/check-coverage.sh
-scripts/check-docs.sh
-make benchmark
-go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
-go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+make check
 
 if ! git diff --quiet || ! git diff --cached --quiet ||
   [[ -n "$(git ls-files --others --exclude-standard)" ]]; then

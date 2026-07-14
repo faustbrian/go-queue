@@ -1,11 +1,12 @@
 module github.com/faustbrian/go-queue
 
-go 1.25.12
+go 1.25.0
 
 require (
 	github.com/alicebob/miniredis/v2 v2.38.0
 	github.com/appleboy/com v1.2.0
 	github.com/jpillora/backoff v1.0.0
+	github.com/moby/moby/api v1.54.1
 	github.com/nats-io/nats-server/v2 v2.11.15
 	github.com/nats-io/nats.go v1.52.0
 	github.com/nsqio/go-nsq v1.1.0
@@ -47,7 +48,6 @@ require (
 	github.com/minio/highwayhash v1.0.4-0.20251030100505-070ab1a87a76 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.2.0 // indirect
-	github.com/moby/moby/api v1.54.1 // indirect
 	github.com/moby/moby/client v0.4.0 // indirect
 	github.com/moby/patternmatcher v0.6.1 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect

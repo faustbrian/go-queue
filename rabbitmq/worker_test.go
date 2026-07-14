@@ -242,7 +242,7 @@ func TestWorkerRunQueueRequestAndShutdown(t *testing.T) {
 	assert.ErrorIs(t, worker.Run(context.Background(), &message), expectedRun)
 	require.NoError(t, worker.Queue(&message))
 	assert.Equal(t, message.Bytes(), channel.published.Body)
-	assert.Equal(t, uint8(amqp.Persistent), channel.published.DeliveryMode)
+	assert.Equal(t, amqp.Persistent, channel.published.DeliveryMode)
 	deadline, ok := channel.publishContext.Deadline()
 	assert.True(t, ok)
 	assert.WithinDuration(t, time.Now().Add(5*time.Second), deadline, time.Second)

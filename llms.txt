@@ -1,30 +1,31 @@
 # go-queue
 
-> `go-queue` is a consolidated Go worker queue with owned implementations for in-memory, Redis Pub/Sub, Redis Streams, NATS, NSQ, and RabbitMQ. It began as a compatibility-focused merge of the `golang-queue` ecosystem and intentionally keeps that programming model recognizable while fixing correctness and operability gaps in one release unit.
+> Documentation map for package users, adopters, operators, and contributors.
 
-This index is generated from the repository's canonical Markdown documentation.
-
-## Documentation
-
-- [Architecture](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/architecture.md): The module has a small coordinator at its root and explicit backend packages. It deliberately avoids a universal transport API that would erase correctness differences.
-- [Lifecycle and state ownership](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/lifecycle.md): `Queue` owns scheduling and handler execution; each backend worker owns its transport connection, delivery channel, and settlement callbacks. A queue moves through `constructed -> started -> shutting down -> stopped` and never returns to an earlier state.
-- [Delivery semantics](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/delivery-semantics.md): No backend in this module promises exactly-once processing. Handlers must be idempotent whenever a transport can redeliver.
-- [Threat and failure model](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/failure-model.md): The trust boundary begins at every enqueue caller and broker delivery. Broker availability, network continuity, handler correctness, and observer code are not assumed.
-- [Security and abuse resistance](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/security.md): Every enqueue caller and broker delivery is untrusted. The library validates message envelopes before handler execution, but deployment authentication, authorization, network isolation, and broker retention limits remain operator responsibilities.
-- [Hardening report](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/hardening-report.md): This report records the audit findings, their evidence, impact, and current disposition. Severity reflects production worker impact, not patch size.
-- [Integration evidence](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/integration-evidence.md): Integration tests use the `integration` build tag and Testcontainers 0.42.0. Images are pinned by version and digest so a tag cannot silently change the evidence environment.
-- [Performance and capacity](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/performance.md): Benchmarks are diagnostic measurements, not correctness gates. `make benchmark` uses a bounded iteration count (`BENCH_TIME=100x`) so broker-backed harnesses do not amplify load unpredictably.
-- [Public API reference](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/api.md): Go package documentation remains authoritative for exact signatures. This page maps the stable concepts new adopters need.
-- [Adoption guide](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/adoption.md): 1. Choose semantics before choosing a client. Use Redis Streams for durable Redis-first work and Pub/Sub only for disposable notifications. 2. Make the handler idempotent. At-least-once transports can repeat completed side effects after a crash/ack race. 3. Construct with `NewWorkerE` and fail service startup on error. 4. Set explicit worker count, task timeout, and retry limits. 5. Export `Metric` counters and `Observer` failure/retry/shutdown events. 6. Exercise broker loss and shutdown with production-like timeouts. 7. Roll out with a small consumer group and compare throughput, age, retries, and duplicates before full migration.
-- [Migration from golang-queue](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/migration.md): | Upstream | Consolidated import | | --- | --- | | `github.com/golang-queue/queue` | `github.com/faustbrian/go-queue` | | `github.com/golang-queue/redisdb` | `github.com/faustbrian/go-queue/redisdb` | | `github.com/golang-queue/redisdb-stream` | `github.com/faustbrian/go-queue/redisstream` | | `github.com/golang-queue/nats` | `github.com/faustbrian/go-queue/nats` | | `github.com/golang-queue/nsq` | `github.com/faustbrian/go-queue/nsq` | | `github.com/golang-queue/rabbitmq` | `github.com/faustbrian/go-queue/rabbitmq` |
-- [Compatibility policy](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/compatibility.md): The project uses semantic versioning.
-- [Scenario cookbook](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/cookbook.md): Set `RetryCount` and `RetryDelay` on `job.AllowOption`. The total timeout covers handler execution and retry waits.
-- [FAQ](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/faq.md): No. Durable backends target at-least-once processing. Applications must handle duplicates.
-- [Troubleshooting](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/troubleshooting.md): Check the backend address format, credentials, TLS mode, and broker listener. Use `NewWorkerE`; do not recover a compatibility-constructor panic and continue.
-- [Versioning and release guide](https://raw.githubusercontent.com/faustbrian/go-queue/main/docs/releases.md): Releases follow semantic versioning and are created from annotated `vX.Y.Z` tags on a clean `main` commit synchronized with `origin/main`.
-- [Roadmap](https://raw.githubusercontent.com/faustbrian/go-queue/main/ROADMAP.md): tagged containers.
-- [Changelog](https://raw.githubusercontent.com/faustbrian/go-queue/main/CHANGELOG.md): All notable changes are documented here. The project follows semantic versioning and Keep a Changelog structure.
-
-## Complete documentation
-
-- [llms-full.txt](https://raw.githubusercontent.com/faustbrian/go-queue/main/llms-full.txt): All linked documentation in one file.
+- [Complete documentation bundle](llms-full.txt)
+- [go-queue](README.md)
+- [go-queue Documentation](docs/README.md)
+- [Quickstart](docs/quickstart.md)
+- [Adoption guide](docs/adoption.md)
+- [Public API reference](docs/api.md)
+- [Architecture](docs/architecture.md)
+- [Examples](docs/examples.md)
+- [Scenario cookbook](docs/cookbook.md)
+- [FAQ](docs/faq.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Migration from golang-queue](docs/migration.md)
+- [Compatibility policy](docs/compatibility.md)
+- [Performance and capacity](docs/performance.md)
+- [Hardening report](docs/hardening.md)
+- [Security and abuse resistance](docs/security.md)
+- [Versioning and release guide](docs/releasing.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Roadmap](ROADMAP.md)
+- [Changelog](CHANGELOG.md)
+- [Backend support](docs/backend-support.md)
+- [Delivery semantics](docs/delivery-semantics.md)
+- [Threat and failure model](docs/failure-model.md)
+- [Integration evidence](docs/integration-evidence.md)
+- [Lifecycle and state ownership](docs/lifecycle.md)
+- [Repository Standards](docs/repository-standards.md)

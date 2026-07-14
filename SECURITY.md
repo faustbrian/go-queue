@@ -1,24 +1,34 @@
-# Security policy
+# Security Policy
 
-Report vulnerabilities privately through GitHub Security Advisories. Do not
-open a public issue before a fix is available. Include affected versions,
-backend, reproduction, and operational impact.
+## Supported Versions
 
-Pre-v1 receives fixes on the latest minor line. After v1, the latest major and
-previous major receive critical fixes for a documented support window.
+Before `v1.0.0`, security fixes are applied to the latest revision of
+`main`. After the first stable release, supported release lines and
+end-of-support dates will be documented here.
 
-## Production security baseline
+## Reporting A Vulnerability
 
-- Use verified TLS and broker authentication. Redis TLS is opt-in and
-  `WithSkipTLSVerify` is unsafe outside isolated tests.
-- Keep the one-mebibyte encoded-message limit, 100-retry ceiling, finite worker
-  count, and default 10,000-job ring capacity unless a measured deployment has
-  stricter upstream admission controls.
-- Treat payloads and broker metadata as untrusted. Decoder and state-machine
-  fuzz targets run through `scripts/check-fuzz.sh`.
-- Do not log connection URIs, credentials, payloads, or raw option dumps.
-- Use idempotent handlers for every durable backend and operate poison/dead
-  letter policy explicitly.
+Use GitHub private vulnerability reporting for this repository. Include a
+minimal reproducer, expected and observed behavior, affected versions, impact,
+and any suggested mitigation. Do not include secrets or production data.
 
-See the [threat and failure model](docs/failure-model.md) and
-[hardening report](docs/hardening-report.md).
+## Response Process
+
+Maintainers will acknowledge the report, reproduce and assess it privately,
+coordinate a fix and advisory, and credit the reporter when requested. Public
+disclosure should wait until a fix or agreed mitigation is available.
+
+## Package Security Boundary
+
+Job payloads, broker frames, retry metadata, and backend state are untrusted operational inputs. Settlement correctness, bounded retries, and deterministic shutdown are part of the maintained security boundary.
+
+## Application Responsibilities
+
+Applications remain responsible for transport limits, authentication,
+authorization, rate limiting, deadlines, secret handling, deployment policy,
+and business-level validation. Package safeguards do not replace those
+controls.
+
+See [docs/security.md](docs/security.md) and
+[docs/hardening.md](docs/hardening.md) for adoption guidance and maintained
+evidence.
