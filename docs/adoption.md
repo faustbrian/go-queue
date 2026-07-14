@@ -1,0 +1,15 @@
+# Adoption guide
+
+1. Choose semantics before choosing a client. Use Redis Streams for durable
+   Redis-first work and Pub/Sub only for disposable notifications.
+2. Make the handler idempotent. At-least-once transports can repeat completed
+   side effects after a crash/ack race.
+3. Construct with `NewWorkerE` and fail service startup on error.
+4. Set explicit worker count, task timeout, and retry limits.
+5. Export `Metric` counters and `Observer` failure/retry/shutdown events.
+6. Exercise broker loss and shutdown with production-like timeouts.
+7. Roll out with a small consumer group and compare throughput, age, retries,
+   and duplicates before full migration.
+
+For Redis, begin with [the Redis guide](backends/redis.md). For common patterns,
+see [the cookbook](cookbook.md).
