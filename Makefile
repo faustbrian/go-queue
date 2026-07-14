@@ -1,7 +1,7 @@
 GO ?= go
 GOLANGCI_LINT ?= golangci-lint
 FUZZ_TIME ?= 2s
-BENCH_TIME ?= 100x
+BENCH_TIME ?= 100ms
 
 .PHONY: benchmark check coverage docs format format-check fuzz lint \
 	release-major release-minor release-patch test test-race vet vuln integration

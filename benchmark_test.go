@@ -48,7 +48,7 @@ func BenchmarkNewRing(b *testing.B) {
 }
 
 func BenchmarkQueueTask(b *testing.B) {
-	w := NewRing()
+	w := NewRing(WithQueueSize(b.N))
 	q, _ := NewQueue(
 		WithWorker(w),
 		WithLogger(emptyLogger{}),
@@ -68,7 +68,7 @@ func BenchmarkQueueTask(b *testing.B) {
 }
 
 func BenchmarkQueue(b *testing.B) {
-	w := NewRing()
+	w := NewRing(WithQueueSize(b.N))
 	q, _ := NewQueue(
 		WithWorker(w),
 		WithLogger(emptyLogger{}),

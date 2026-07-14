@@ -142,7 +142,7 @@ func TestSharedToolingContract(t *testing.T) {
 		"README.md":       {"Go 1.25 or later", "llms.txt", "llms-full.txt", "CHANGELOG.md"},
 		"CONTRIBUTING.md": {"Go 1.25 or later", "make check", "CHANGELOG.md"},
 		"Makefile": {
-			"BENCH_TIME ?= 100x",
+			"BENCH_TIME ?= 100ms",
 			"format:",
 			"format-check:",
 			"test:",
@@ -171,7 +171,7 @@ func TestSharedToolingContract(t *testing.T) {
 			"make coverage",
 			"make docs",
 		},
-		".github/workflows/benchmark.yml": {"make benchmark BENCH_TIME=100x", "upload-artifact"},
+		".github/workflows/benchmark.yml": {"make benchmark BENCH_TIME=100ms", "upload-artifact"},
 		".github/workflows/fuzz.yml":      {"make fuzz FUZZ_TIME=30s"},
 		".github/workflows/security.yml":  {"govulncheck-action", "dependency-review-action"},
 		".github/workflows/release.yml": {
