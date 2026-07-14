@@ -29,6 +29,7 @@ versioning and Keep a Changelog structure.
 
 ### Fixed
 
+- Bound fuzz-smoke concurrency to avoid deadline flakes on high-core hosts.
 - Custom metric collectors are now honored.
 - Backend startup errors no longer continue with nil clients.
 - Redis Streams, NSQ, and RabbitMQ no longer acknowledge before handling.
