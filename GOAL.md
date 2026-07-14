@@ -243,6 +243,22 @@ The documentation must be good enough that a new user can:
 
 ## Testing Standard
 
+Meaningful `100%` coverage for production package code is required.
+
+That requirement does not mean “touch every line somehow.” It means tests must
+exercise and prove the behavior of:
+
+- happy paths
+- edge cases
+- backend-specific branches
+- retry and redelivery flows
+- error paths
+- shutdown behavior
+- acknowledgement and lease semantics
+
+Coverage games are not acceptable. Hitting lines without proving behavior does
+not satisfy this goal.
+
 Testing must include:
 
 - unit tests for the core queue abstractions
@@ -278,6 +294,7 @@ At minimum, pull requests must have automated checks that prove:
 
 - the code builds
 - tests pass
+- meaningful `100%` production-code coverage is maintained
 - formatting is enforced
 - lint and static-analysis gates are green
 - backend-critical examples do not silently rot
@@ -336,6 +353,7 @@ This goal is achieved when:
   dependencies
 - Redis-first production usage is credible and well-tested
 - backend semantics are documented honestly
+- meaningful `100%` production-code coverage is documented and enforced
 - GitHub Actions quality gates and release automation are in place
 - user-facing docs are complete enough for direct adoption
 - the package is suitable for open source release and real service adoption
