@@ -68,16 +68,17 @@ Fields:
 - routingKey: AMQP routing key for message delivery.
 */
 type options struct {
-	runFunc      func(context.Context, core.TaskMessage) error
-	logger       queue.Logger
-	addr         string
-	queue        string
-	tag          string
-	exchangeName string // Durable AMQP exchange name
-	exchangeType string // Exchange Types: Direct, Fanout, Topic and Headers
-	autoAck      bool
-	routingKey   string // AMQP routing key
-	reconnect    ReconnectConfig
+	runFunc        func(context.Context, core.TaskMessage) error
+	logger         queue.Logger
+	addr           string
+	queue          string
+	tag            string
+	exchangeName   string // Durable AMQP exchange name
+	exchangeType   string // Exchange Types: Direct, Fanout, Topic and Headers
+	autoAck        bool
+	routingKey     string // AMQP routing key
+	reconnect      ReconnectConfig
+	requestTimeout time.Duration
 }
 
 /*
@@ -232,6 +233,13 @@ func WithLogger(l queue.Logger) Option {
 	}
 }
 
+// WithRequestTimeout sets how long Request waits for a RabbitMQ delivery.
+func WithRequestTimeout(timeout time.Duration) Option {
+	return func(w *options) {
+		w.requestTimeout = timeout
+	}
+}
+
 /*
 newOptions creates a new options struct with default values,
 then applies any provided functional options to override defaults.
@@ -260,6 +268,7 @@ func newOptions(opts ...Option) options {
 			InitialDelay: 500 * time.Millisecond,
 			MaxDelay:     5 * time.Second,
 		},
+		requestTimeout: 6 * time.Second,
 	}
 
 	// Apply each provided option to override defaults

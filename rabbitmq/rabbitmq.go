@@ -25,16 +25,37 @@ type ReconnectConfig struct {
 	MaxDelay     time.Duration
 }
 
+type amqpConnection interface {
+	Close() error
+	Channel() (*amqp.Channel, error)
+}
+
+type amqpChannel interface {
+	ExchangeDeclare(string, string, bool, bool, bool, bool, amqp.Table) error
+	QueueDeclare(string, bool, bool, bool, bool, amqp.Table) (amqp.Queue, error)
+	QueueBind(string, string, string, bool, amqp.Table) error
+	Consume(string, string, bool, bool, bool, bool, amqp.Table) (<-chan amqp.Delivery, error)
+	Cancel(string, bool) error
+	Close() error
+	PublishWithContext(context.Context, string, string, bool, bool, amqp.Publishing) error
+}
+
+var dialAMQP = func(addr string) (amqpConnection, error) {
+	return amqp.Dial(addr)
+}
+
+var connectRabbitMQ = openRabbitMQ
+
 // dialWithRetry tries to connect to RabbitMQ with retry and backoff.
-func dialWithRetry(addr string, cfg ReconnectConfig) (*amqp.Connection, error) {
+func dialWithRetry(addr string, cfg ReconnectConfig) (amqpConnection, error) {
 	if cfg.MaxRetries < 1 {
 		return nil, errors.New("RabbitMQ max retries must be at least one")
 	}
-	var conn *amqp.Connection
+	var conn amqpConnection
 	var err error
 	delay := cfg.InitialDelay
 	for i := 0; i < cfg.MaxRetries; i++ {
-		conn, err = amqp.Dial(addr)
+		conn, err = dialAMQP(addr)
 		if err == nil {
 			return conn, nil
 		}
@@ -45,6 +66,22 @@ func dialWithRetry(addr string, cfg ReconnectConfig) (*amqp.Connection, error) {
 		delay = time.Duration(math.Min(float64(cfg.MaxDelay), float64(delay)*2))
 	}
 	return nil, errors.New("failed to connect to RabbitMQ after retries: " + err.Error())
+}
+
+func openRabbitMQ(
+	addr string,
+	cfg ReconnectConfig,
+) (amqpConnection, amqpChannel, error) {
+	connection, err := dialWithRetry(addr, cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+	channel, err := connection.Channel()
+	if err != nil {
+		_ = connection.Close()
+		return nil, nil, errors.New("set up RabbitMQ channel: " + err.Error())
+	}
+	return connection, channel, nil
 }
 
 /*
@@ -61,8 +98,8 @@ Fields:
 - tasks: Channel for receiving AMQP deliveries (tasks).
 */
 type Worker struct {
-	conn      *amqp.Connection
-	channel   *amqp.Channel
+	conn      amqpConnection
+	channel   amqpChannel
 	stop      chan struct{}
 	stopFlag  int32
 	stopOnce  sync.Once
@@ -103,15 +140,9 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 	if !isVaildExchange(w.opts.exchangeType) {
 		return nil, errors.New("invalid RabbitMQ exchange type: " + w.opts.exchangeType)
 	}
-	w.conn, err = dialWithRetry(w.opts.addr, w.opts.reconnect)
+	w.conn, w.channel, err = connectRabbitMQ(w.opts.addr, w.opts.reconnect)
 	if err != nil {
 		return nil, err
-	}
-
-	w.channel, err = w.conn.Channel()
-	if err != nil {
-		_ = w.conn.Close()
-		return nil, errors.New("set up RabbitMQ channel: " + err.Error())
 	}
 
 	if err := w.channel.ExchangeDeclare(
@@ -287,30 +318,25 @@ func (w *Worker) Request() (core.TaskMessage, error) {
 	if err := w.startConsumer(); err != nil {
 		return nil, err
 	}
-	clock := 0
-loop:
-	for {
-		select {
-		case task, ok := <-w.tasks:
-			if !ok {
-				return nil, queue.ErrQueueHasBeenClosed
-			}
-			var data job.Message
-			_ = json.Unmarshal(task.Body, &data)
-			if !w.opts.autoAck {
-				data.SetAcknowledgement(
-					func() error { return task.Ack(false) },
-					func() error { return task.Nack(false, true) },
-				)
-			}
-			return &data, nil
-		case <-time.After(1 * time.Second):
-			if clock == 5 {
-				break loop
-			}
-			clock += 1
+	timer := time.NewTimer(w.opts.requestTimeout)
+	defer timer.Stop()
+	select {
+	case task, ok := <-w.tasks:
+		if !ok {
+			return nil, queue.ErrQueueHasBeenClosed
 		}
+		var data job.Message
+		if err := json.Unmarshal(task.Body, &data); err != nil {
+			return nil, err
+		}
+		if !w.opts.autoAck {
+			data.SetAcknowledgement(
+				func() error { return task.Ack(false) },
+				func() error { return task.Nack(false, true) },
+			)
+		}
+		return &data, nil
+	case <-timer.C:
+		return nil, queue.ErrNoTaskInQueue
 	}
-
-	return nil, queue.ErrNoTaskInQueue
 }
