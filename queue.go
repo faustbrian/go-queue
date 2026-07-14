@@ -6,6 +6,7 @@ package queue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -194,6 +195,7 @@ func (q *Queue) work(task core.TaskMessage) {
 		q.metric.DecBusyWorker()
 		e := recover()
 		if e != nil {
+			err = q.settle(task, fmt.Errorf("handler panic: %v", e))
 			q.logger.Fatalf("panic error: %v", e)
 		}
 		q.schedule()
@@ -214,6 +216,28 @@ func (q *Queue) work(task core.TaskMessage) {
 	if err = q.run(task); err != nil {
 		q.logger.Errorf("runtime error: %s", err.Error())
 	}
+	err = q.settle(task, err)
+}
+
+func (q *Queue) settle(task core.TaskMessage, handlerErr error) error {
+	delivery, ok := task.(core.Acknowledger)
+	if !ok || !delivery.AcknowledgementRequired() {
+		return handlerErr
+	}
+	if handlerErr == nil {
+		if err := delivery.Ack(); err != nil {
+			q.observe(Event{Kind: EventAckFailed, Err: err})
+			return fmt.Errorf("acknowledge delivery: %w", err)
+		}
+		q.observe(Event{Kind: EventAcknowledged})
+		return nil
+	}
+	if err := delivery.Nack(); err != nil {
+		q.observe(Event{Kind: EventRejectFailed, Err: err})
+		return errors.Join(handlerErr, fmt.Errorf("reject delivery: %w", err))
+	}
+	q.observe(Event{Kind: EventRejected, Err: handlerErr})
+	return handlerErr
 }
 
 // run dispatches the task to the appropriate handler based on its type.

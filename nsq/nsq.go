@@ -86,6 +86,7 @@ func (w *Worker) startConsumer() (err error) {
 				// In this case, a message with an empty body is simply ignored/discarded.
 				return nil
 			}
+			msg.DisableAutoResponse()
 
 		loop:
 			for {
@@ -168,6 +169,10 @@ loop:
 			}
 			var data job.Message
 			_ = json.Unmarshal(task.Body, &data)
+			data.SetAcknowledgement(
+				func() error { task.Finish(); return nil },
+				func() error { task.Requeue(-1); return nil },
+			)
 			return &data, nil
 		case <-time.After(1 * time.Second):
 			if clock == 5 {

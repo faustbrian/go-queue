@@ -15,6 +15,8 @@ const (
 	EventHandlerFailed     EventKind = "handler_failed"
 	EventAcknowledged      EventKind = "acknowledged"
 	EventAckFailed         EventKind = "ack_failed"
+	EventRejected          EventKind = "rejected"
+	EventRejectFailed      EventKind = "reject_failed"
 	EventShutdownStarted   EventKind = "shutdown_started"
 	EventShutdownCompleted EventKind = "shutdown_completed"
 )

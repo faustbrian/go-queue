@@ -14,6 +14,8 @@ type TaskFunc func(context.Context) error
 // Message describes a task and its metadata.
 type Message struct {
 	Task TaskFunc `json:"-" msgpack:"-"`
+	ack  func() error
+	nack func() error
 
 	// Timeout is the duration the task can be processed by Handler.
 	// zero if not specified
@@ -48,6 +50,33 @@ type Message struct {
 
 	// Jitter eases contention by randomizing backoff steps
 	Jitter bool `json:"jitter" msgpack:"jitter"`
+}
+
+// SetAcknowledgement attaches backend delivery settlement callbacks.
+func (m *Message) SetAcknowledgement(ack func() error, nack func() error) {
+	m.ack = ack
+	m.nack = nack
+}
+
+// AcknowledgementRequired reports whether backend settlement is attached.
+func (m *Message) AcknowledgementRequired() bool {
+	return m.ack != nil || m.nack != nil
+}
+
+// Ack acknowledges successful processing when the backend requires it.
+func (m *Message) Ack() error {
+	if m.ack == nil {
+		return nil
+	}
+	return m.ack()
+}
+
+// Nack rejects unsuccessful processing when the backend requires it.
+func (m *Message) Nack() error {
+	if m.nack == nil {
+		return nil
+	}
+	return m.nack()
 }
 
 // Payload returns the payload data of the Message.

@@ -25,6 +25,7 @@ type Worker struct {
 	// redis config
 	rdb       redis.Cmdable
 	tasks     chan redis.XMessage
+	ack       func(string) error
 	stopFlag  int32
 	stopOnce  sync.Once
 	startOnce sync.Once
@@ -86,6 +87,9 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connect to Redis: %w", err)
 	}
+	w.ack = func(id string) error {
+		return w.rdb.XAck(context.Background(), w.opts.streamName, w.opts.group, id).Err()
+	}
 
 	return w, nil
 }
@@ -138,9 +142,6 @@ func (w *Worker) fetchTask() {
 			for _, message := range result.Messages {
 				select {
 				case w.tasks <- message:
-					if err := w.rdb.XAck(ctx, w.opts.streamName, w.opts.group, message.ID).Err(); err != nil {
-						w.opts.logger.Errorf("can't ack message: %s", message.ID)
-					}
 				case <-w.stop:
 					// Todo: re-queue the task
 					w.opts.logger.Info("re-queue the task: ", message.ID)
@@ -221,6 +222,10 @@ loop:
 			}
 			var data job.Message
 			_ = json.Unmarshal(bytesconv.StrToBytes(task.Values["body"].(string)), &data)
+			data.SetAcknowledgement(
+				func() error { return w.ack(task.ID) },
+				func() error { return nil },
+			)
 			return &data, nil
 		case <-time.After(1 * time.Second):
 			if clock == 5 {

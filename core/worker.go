@@ -37,3 +37,10 @@ type TaskMessage interface {
 	QueuedMessage
 	Payload() []byte
 }
+
+// Acknowledger is implemented by deliveries that require explicit settlement.
+type Acknowledger interface {
+	AcknowledgementRequired() bool
+	Ack() error
+	Nack() error
+}

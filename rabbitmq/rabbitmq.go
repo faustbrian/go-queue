@@ -298,10 +298,10 @@ loop:
 			var data job.Message
 			_ = json.Unmarshal(task.Body, &data)
 			if !w.opts.autoAck {
-				if err := task.Ack(false); err != nil {
-					w.opts.logger.Error("Ack failed: ", err)
-					_ = task.Nack(false, true) // requeue
-				}
+				data.SetAcknowledgement(
+					func() error { return task.Ack(false) },
+					func() error { return task.Nack(false, true) },
+				)
 			}
 			return &data, nil
 		case <-time.After(1 * time.Second):
