@@ -1,10 +1,10 @@
 module github.com/faustbrian/go-queue
 
-go 1.25.0
+go 1.25.10
 
 require (
 	github.com/alicebob/miniredis/v2 v2.38.0
-	github.com/appleboy/com v1.2.0
+	github.com/appleboy/com v1.2.1
 	github.com/jpillora/backoff v1.0.0
 	github.com/nats-io/nats-server/v2 v2.11.15
 	github.com/nats-io/nats.go v1.52.0

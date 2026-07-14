@@ -10,8 +10,8 @@ github.com/alicebob/miniredis/v2 v2.38.0 h1:nZAzCR+Lj+Vxk4ZXzm2NuKq2O33RXj1XxJ2e
 github.com/alicebob/miniredis/v2 v2.38.0/go.mod h1:TcL7YfarKPGDAthEtl5NBeHZfeUQj6OXMm/+iu5cLMM=
 github.com/antithesishq/antithesis-sdk-go v0.6.0-default-no-op h1:kpBdlEPbRvff0mDD1gk7o9BhI16b9p5yYAXRlidpqJE=
 github.com/antithesishq/antithesis-sdk-go v0.6.0-default-no-op/go.mod h1:IUpT2DPAKh6i/YhSbt6Gl3v2yvUZjmKncl7U91fup7E=
-github.com/appleboy/com v1.2.0 h1:3jyA+yVofe/uzPHHa7Xrsj7rnDy1sZn/8pYHdzHB3GQ=
-github.com/appleboy/com v1.2.0/go.mod h1:XK2kV+JWz/gkzsDPotNJL+aS6XCy5GNlbiTWGvIhqIU=
+github.com/appleboy/com v1.2.1 h1:4bqaVFSxy1Q3mRotTIcF8TLryTet0652iNDNVV16skM=
+github.com/appleboy/com v1.2.1/go.mod h1:KKYavyU5ejOp8c4vW+daKMf6Dw2DxE9IjqmWAhy0huo=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=
