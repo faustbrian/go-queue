@@ -16,6 +16,8 @@ const (
 	slash     = "/"
 )
 
+var readSourceFile = os.ReadFile
+
 // bufferPool is a pool of byte buffers that can be reused to reduce the number
 // of allocations and improve performance. It uses sync.Pool to manage a pool
 // of reusable *bytes.Buffer objects. When a buffer is requested from the pool,
@@ -51,7 +53,7 @@ func stack(skip int) []byte {
 		}
 		fmt.Fprintf(buf, "%s:%d (0x%x)\n", file, line, pc)
 		if file != lastFile {
-			data, err := os.ReadFile(file) //nolint:gosec // runtime.Caller supplies the source path
+			data, err := readSourceFile(file) //nolint:gosec // runtime.Caller supplies the source path
 			if err != nil {
 				continue
 			}

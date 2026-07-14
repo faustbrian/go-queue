@@ -1,5 +1,7 @@
 package queue
 
+var constructQueue = NewQueue
+
 // NewPool creates a ready-to-use in-memory queue with the Ring buffer worker.
 // This is the recommended way to create a queue for most use cases.
 //
@@ -38,7 +40,7 @@ func NewPool(size int64, opts ...Option) *Queue {
 		opts...,
 	)
 
-	q, err := NewQueue(o...)
+	q, err := constructQueue(o...)
 	if err != nil {
 		panic(err)
 	}
