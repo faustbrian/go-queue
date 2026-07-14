@@ -27,6 +27,9 @@ type ReconnectConfig struct {
 
 // dialWithRetry tries to connect to RabbitMQ with retry and backoff.
 func dialWithRetry(addr string, cfg ReconnectConfig) (*amqp.Connection, error) {
+	if cfg.MaxRetries < 1 {
+		return nil, errors.New("RabbitMQ max retries must be at least one")
+	}
 	var conn *amqp.Connection
 	var err error
 	delay := cfg.InitialDelay
@@ -35,7 +38,9 @@ func dialWithRetry(addr string, cfg ReconnectConfig) (*amqp.Connection, error) {
 		if err == nil {
 			return conn, nil
 		}
-		time.Sleep(delay)
+		if i+1 < cfg.MaxRetries {
+			time.Sleep(delay)
+		}
 		// Exponential backoff with cap
 		delay = time.Duration(math.Min(float64(cfg.MaxDelay), float64(delay)*2))
 	}
@@ -78,6 +83,16 @@ Returns:
 - Pointer to the initialized Worker.
 */
 func NewWorker(opts ...Option) *Worker {
+	w, err := NewWorkerE(opts...)
+	if err != nil {
+		panic(err)
+	}
+
+	return w
+}
+
+// NewWorkerE creates a worker and returns connection and setup errors.
+func NewWorkerE(opts ...Option) (*Worker, error) {
 	var err error
 	w := &Worker{
 		opts:  newOptions(opts...),
@@ -85,20 +100,18 @@ func NewWorker(opts ...Option) *Worker {
 		tasks: make(chan amqp.Delivery),
 	}
 
-	// Use retry config, fallback to default if not set
-	retryCfg := ReconnectConfig{
-		MaxRetries:   5,
-		InitialDelay: 500 * time.Millisecond,
-		MaxDelay:     5 * time.Second,
+	if !isVaildExchange(w.opts.exchangeType) {
+		return nil, errors.New("invalid RabbitMQ exchange type: " + w.opts.exchangeType)
 	}
-	w.conn, err = dialWithRetry(w.opts.addr, retryCfg)
+	w.conn, err = dialWithRetry(w.opts.addr, w.opts.reconnect)
 	if err != nil {
-		w.opts.logger.Fatal("can't connect rabbitmq: ", err)
+		return nil, err
 	}
 
 	w.channel, err = w.conn.Channel()
 	if err != nil {
-		w.opts.logger.Fatal("can't setup channel: ", err)
+		_ = w.conn.Close()
+		return nil, errors.New("set up RabbitMQ channel: " + err.Error())
 	}
 
 	if err := w.channel.ExchangeDeclare(
@@ -110,10 +123,12 @@ func NewWorker(opts ...Option) *Worker {
 		false,               // noWait
 		nil,                 // arguments
 	); err != nil {
-		w.opts.logger.Fatal("can't declares an exchange: ", err)
+		_ = w.channel.Close()
+		_ = w.conn.Close()
+		return nil, errors.New("declare RabbitMQ exchange: " + err.Error())
 	}
 
-	return w
+	return w, nil
 }
 
 /*

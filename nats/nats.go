@@ -3,6 +3,7 @@ package nats
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 	"sync/atomic" //nolint:typecheck,nolintlint
 	"time"
@@ -31,6 +32,16 @@ type Worker struct {
 
 // NewWorker for struc
 func NewWorker(opts ...Option) *Worker {
+	w, err := NewWorkerE(opts...)
+	if err != nil {
+		panic(err)
+	}
+
+	return w
+}
+
+// NewWorkerE creates a worker and returns connection and subscription errors.
+func NewWorkerE(opts ...Option) (*Worker, error) {
 	var err error
 	w := &Worker{
 		opts:  newOptions(opts...),
@@ -41,14 +52,15 @@ func NewWorker(opts ...Option) *Worker {
 
 	w.client, err = nats.Connect(w.opts.addr)
 	if err != nil {
-		w.opts.logger.Fatal("can't connect to nats:", err)
+		return nil, fmt.Errorf("connect to NATS: %w", err)
 	}
 
 	if err := w.startConsumer(); err != nil {
-		w.opts.logger.Fatal("can't start consumer:", err)
+		w.client.Close()
+		return nil, fmt.Errorf("subscribe to NATS queue: %w", err)
 	}
 
-	return w
+	return w, nil
 }
 
 func (w *Worker) startConsumer() (err error) {

@@ -3,6 +3,7 @@ package redisdb
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -35,6 +36,16 @@ type Worker struct {
 // The Worker is responsible for subscribing to a Redis channel and receiving messages from it.
 // It returns the created Worker instance.
 func NewWorker(opts ...Option) *Worker {
+	w, err := NewWorkerE(opts...)
+	if err != nil {
+		panic(err)
+	}
+
+	return w
+}
+
+// NewWorkerE creates a worker and returns connection and configuration errors.
+func NewWorkerE(opts ...Option) (*Worker, error) {
 	var err error
 	w := &Worker{
 		opts: newOptions(opts...),
@@ -57,7 +68,7 @@ func NewWorker(opts ...Option) *Worker {
 	if w.opts.connectionString != "" {
 		options, err := redis.ParseURL(w.opts.connectionString)
 		if err != nil {
-			w.opts.logger.Fatal(err)
+			return nil, fmt.Errorf("parse Redis connection string: %w", err)
 		}
 		w.rdb = redis.NewClient(options)
 	}
@@ -84,7 +95,7 @@ func NewWorker(opts ...Option) *Worker {
 
 	_, err = w.rdb.Ping(context.Background()).Result()
 	if err != nil {
-		w.opts.logger.Fatal(err)
+		return nil, fmt.Errorf("connect to Redis: %w", err)
 	}
 
 	ctx := context.Background()
@@ -105,10 +116,11 @@ func NewWorker(opts ...Option) *Worker {
 	w.channel = w.pubsub.Channel(ropts...)
 	// make sure the connection is successful
 	if err := w.pubsub.Ping(ctx); err != nil {
-		w.opts.logger.Fatal(err)
+		_ = w.pubsub.Close()
+		return nil, fmt.Errorf("subscribe to Redis channel: %w", err)
 	}
 
-	return w
+	return w, nil
 }
 
 // Run to execute new task

@@ -2,6 +2,7 @@ package rabbitmq
 
 import (
 	"context"
+	"time"
 
 	"github.com/faustbrian/go-queue"
 	"github.com/faustbrian/go-queue/core"
@@ -76,6 +77,7 @@ type options struct {
 	exchangeType string // Exchange Types: Direct, Fanout, Topic and Headers
 	autoAck      bool
 	routingKey   string // AMQP routing key
+	reconnect    ReconnectConfig
 }
 
 /*
@@ -90,6 +92,13 @@ Returns:
 func WithAddr(addr string) Option {
 	return func(w *options) {
 		w.addr = addr
+	}
+}
+
+// WithReconnectConfig configures connection retry timing.
+func WithReconnectConfig(config ReconnectConfig) Option {
+	return func(w *options) {
+		w.reconnect = config
 	}
 }
 
@@ -245,6 +254,11 @@ func newOptions(opts ...Option) options {
 		autoAck:      false,
 		runFunc: func(context.Context, core.TaskMessage) error {
 			return nil
+		},
+		reconnect: ReconnectConfig{
+			MaxRetries:   5,
+			InitialDelay: 500 * time.Millisecond,
+			MaxDelay:     5 * time.Second,
 		},
 	}
 

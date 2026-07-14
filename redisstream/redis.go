@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -34,6 +35,16 @@ type Worker struct {
 
 // NewWorker for struc
 func NewWorker(opts ...Option) *Worker {
+	w, err := NewWorkerE(opts...)
+	if err != nil {
+		panic(err)
+	}
+
+	return w
+}
+
+// NewWorkerE creates a worker and returns connection and configuration errors.
+func NewWorkerE(opts ...Option) (*Worker, error) {
 	var err error
 	w := &Worker{
 		opts:  newOptions(opts...),
@@ -45,7 +56,7 @@ func NewWorker(opts ...Option) *Worker {
 	if w.opts.connectionString != "" {
 		options, err := redis.ParseURL(w.opts.connectionString)
 		if err != nil {
-			w.opts.logger.Fatal(err)
+			return nil, fmt.Errorf("parse Redis connection string: %w", err)
 		}
 		w.rdb = redis.NewClient(options)
 	} else if w.opts.addr != "" {
@@ -67,13 +78,16 @@ func NewWorker(opts ...Option) *Worker {
 			w.rdb = redis.NewClient(options)
 		}
 	}
+	if w.rdb == nil {
+		return nil, errors.New("Redis address or connection string is required")
+	}
 
 	_, err = w.rdb.Ping(context.Background()).Result()
 	if err != nil {
-		w.opts.logger.Fatal(err)
+		return nil, fmt.Errorf("connect to Redis: %w", err)
 	}
 
-	return w
+	return w, nil
 }
 
 func (w *Worker) startConsumer() {

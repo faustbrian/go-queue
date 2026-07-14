@@ -3,6 +3,8 @@ package nsq
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"strings"
 	"sync"
 	"sync/atomic" //nolint:typecheck,nolintlint
 	"time"
@@ -31,22 +33,35 @@ type Worker struct {
 
 // NewWorker for struc
 func NewWorker(opts ...Option) *Worker {
+	w, err := NewWorkerE(opts...)
+	if err != nil {
+		panic(err)
+	}
+
+	return w
+}
+
+// NewWorkerE creates a worker and returns configuration errors.
+func NewWorkerE(opts ...Option) (*Worker, error) {
 	w := &Worker{
 		opts:  newOptions(opts...),
 		stop:  make(chan struct{}),
 		tasks: make(chan *nsq.Message),
+	}
+	if strings.TrimSpace(w.opts.addr) == "" {
+		return nil, errors.New("NSQ address is required")
 	}
 
 	w.cfg = nsq.NewConfig()
 	w.cfg.MaxInFlight = w.opts.maxInFlight
 
 	if err := w.startProducer(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	w.p.SetLoggerLevel(w.opts.logLevel)
 
-	return w
+	return w, nil
 }
 
 func (w *Worker) startProducer() error {
