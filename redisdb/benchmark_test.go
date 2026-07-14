@@ -94,7 +94,8 @@ func BenchmarkRedisRetry(b *testing.B) {
 			b.Fatal(err)
 		}
 	}
-	for q.CompletedTasks() < uint64(b.N) {
+	target := uint64(b.N) //nolint:gosec // testing.B never supplies a negative N.
+	for q.CompletedTasks() < target {
 		time.Sleep(time.Microsecond)
 	}
 }

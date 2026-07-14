@@ -277,7 +277,7 @@ func (w *Worker) Request() (core.TaskMessage, error) {
 		}
 		body, ok := task.Values["body"].(string)
 		if !ok {
-			return nil, errors.New("Redis stream message body must be a string")
+			return nil, errors.New("redis stream message body must be a string")
 		}
 		var data job.Message
 		if err := json.Unmarshal(bytesconv.StrToBytes(body), &data); err != nil {
@@ -307,7 +307,7 @@ func (w *Worker) Stats(ctx context.Context) (Stats, error) {
 		}
 	}
 	if group == nil {
-		return Stats{}, fmt.Errorf("Redis stream group %q does not exist", w.opts.group)
+		return Stats{}, fmt.Errorf("redis stream group %q does not exist", w.opts.group)
 	}
 
 	stats := Stats{Pending: group.Pending, Lag: group.Lag, LagKnown: group.Lag >= 0}
