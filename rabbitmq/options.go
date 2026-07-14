@@ -243,7 +243,7 @@ Returns:
 - options: The fully configured options struct.
 */
 func newOptions(opts ...Option) options {
-	defaultOpts := options{
+	defaultOpts := options{ //nolint:gosec // upstream local-development default, not a secret
 		addr:         "amqp://guest:guest@localhost:5672/",
 		queue:        "golang-queue",
 		tag:          "golang-queue",

@@ -80,7 +80,7 @@ func NewWorkerE(opts ...Option) (*Worker, error) {
 		}
 	}
 	if w.rdb == nil {
-		return nil, errors.New("Redis address or connection string is required")
+		return nil, errors.New("redis address or connection string is required")
 	}
 
 	_, err = w.rdb.Ping(context.Background()).Result()
@@ -173,9 +173,9 @@ func (w *Worker) Shutdown() error {
 
 		switch v := w.rdb.(type) {
 		case *redis.Client:
-			v.Close()
+			_ = v.Close()
 		case *redis.ClusterClient:
-			v.Close()
+			_ = v.Close()
 		}
 		close(w.tasks)
 	})

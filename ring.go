@@ -69,7 +69,7 @@ func (s *Ring) Shutdown() error {
 // Returns ErrQueueShutdown if the queue is closing, or ErrMaxCapacity if at the size limit.
 //
 // Thread-safety: This method is safe for concurrent calls.
-func (s *Ring) Queue(task core.TaskMessage) error { //nolint:stylecheck
+func (s *Ring) Queue(task core.TaskMessage) error {
 	// Reject new tasks if shutdown has been initiated
 	if atomic.LoadInt32(&s.stopFlag) == 1 {
 		return ErrQueueShutdown

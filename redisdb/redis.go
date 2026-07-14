@@ -135,12 +135,12 @@ func (w *Worker) Shutdown() error {
 	}
 
 	w.stopOnce.Do(func() {
-		w.pubsub.Close()
+		_ = w.pubsub.Close()
 		switch v := w.rdb.(type) {
 		case *redis.Client:
-			v.Close()
+			_ = v.Close()
 		case *redis.ClusterClient:
-			v.Close()
+			_ = v.Close()
 		}
 		close(w.stop)
 	})
