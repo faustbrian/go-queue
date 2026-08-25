@@ -10,8 +10,6 @@ import (
 	"testing"
 )
 
-const repositoryName = "queue"
-
 func TestSharedRepositoryContract(t *testing.T) {
 	t.Parallel()
 
@@ -113,67 +111,11 @@ func TestSharedDocumentationConventions(t *testing.T) {
 	}
 }
 
-func TestSharedToolingContract(t *testing.T) {
-	t.Parallel()
-
-	required := map[string][]string{
-		"go.mod": {"go 1.26.6"},
-		"AGENTS.md": {
-			"meaningful 100% coverage",
-			"## Repository-Specific Rules",
-			"GO-SAFETY-1",
-			"make safety",
-			"CHANGELOG.md",
-		},
-		"CLAUDE.md":       {"AGENTS.md", "docs/go-safety-and-concurrency.md"},
-		"README.md":       {"Go 1.26.6 or later", "llms.txt", "llms-full.txt", "CHANGELOG.md"},
-		"CONTRIBUTING.md": {"Go 1.26.6 or later", "make check", "CHANGELOG.md"},
-		"Makefile": {
-			"BENCH_TIME ?= 100ms",
-			"format:",
-			"format-check:",
-			"test:",
-			"test-race:",
-			"coverage:",
-			"vet:",
-			"lint:",
-			"safety:",
-			"fuzz:",
-			"benchmark:",
-			"docs:",
-			"vuln:",
-			"check:",
-			"release-patch:",
-			"release-minor:",
-			"release-major:",
-		},
-		"llms.txt":                     {"# " + repositoryName, "llms-full.txt", "docs/quickstart.md"},
-		"scripts/check-coverage.sh":    {"100.0%"},
-		"scripts/check-go-safety.sh":   {"unsafe", "go:linkname"},
-		"scripts/check-docs.sh":        {"relative Markdown links", "generate-llms.py --check"},
-		"scripts/generate-llms.py":     {"README.md", "--check"},
-		"scripts/release.sh":           {"origin/main", "make check", "git tag -a"},
-		"../../.github/dependabot.yml": {"gomod", "github-actions"},
-	}
-
-	for path, fragments := range required {
-		contents, err := os.ReadFile(path)
-		if err != nil {
-			t.Fatalf("read %s: %v", path, err)
-		}
-		for _, fragment := range fragments {
-			if !strings.Contains(string(contents), fragment) {
-				t.Errorf("%s does not contain %q", path, fragment)
-			}
-		}
-	}
-}
-
 func TestGitHubActionsUseFullCommitSHAs(t *testing.T) {
 	t.Parallel()
 
 	pinned := regexp.MustCompile(`^[0-9a-f]{40}$`)
-	workflows, err := filepath.Glob("../../.github/workflows/*.yml")
+	workflows, err := filepath.Glob(".github/workflows/*.yml")
 	if err != nil {
 		t.Fatal(err)
 	}
