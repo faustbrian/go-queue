@@ -1192,6 +1192,9 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Build CodeQL against a deterministic proxy of the current root module so
+  nested modules never resolve stale public or bootstrap archives.
+
 - Validate action pinning from the standalone repository root and leave
   repository-foundation policy to the authoritative repository contract.
 
