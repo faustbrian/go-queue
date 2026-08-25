@@ -8,12 +8,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	queue "github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/internal/safeerr"
-	"github.com/faustbrian/golib/pkg/queue/internal/streamqueue"
-	"github.com/faustbrian/golib/pkg/queue/job"
-	"github.com/faustbrian/golib/pkg/queue/management"
+	queue "github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/internal/safeerr"
+	"github.com/faustbrian/go-queue/internal/streamqueue"
+	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/management"
 	valkey "github.com/valkey-io/valkey-go"
 )
 

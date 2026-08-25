@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/job"
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/management"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

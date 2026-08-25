@@ -5,6 +5,8 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-25
+
 ### Documentation
 
 - Replace obsolete standalone-repository links and workflow claims with
@@ -22,6 +24,7 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Publish the module from its standalone `github.com/faustbrian/go-queue` identity while preserving its documented API and behavior.
 - Valkey Streams terminal delivery limits now accept one attempt, allowing a
   failed first handler execution to move directly to the dead-letter stream.
 - Strengthen exact queue semantic, settlement-callback, retry, replay-lineage,
@@ -354,4 +357,5 @@ versioning and Keep a Changelog structure.
   results do not depend on scheduler selection between simultaneously ready
   channels.
 
-[Unreleased]: https://github.com/faustbrian/golib/commits/main/pkg/queue
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.0

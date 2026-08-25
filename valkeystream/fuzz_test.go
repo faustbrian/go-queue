@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/internal/streamqueue"
-	"github.com/faustbrian/golib/pkg/queue/job"
+	"github.com/faustbrian/go-queue/internal/streamqueue"
+	"github.com/faustbrian/go-queue/job"
 )
 
 func FuzzDeliveryEnvelope(f *testing.F) {

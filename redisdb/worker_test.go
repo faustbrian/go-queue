@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
-	queue "github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/job"
+	queue "github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/job"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

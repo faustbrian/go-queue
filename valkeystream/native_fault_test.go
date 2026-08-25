@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/internal/streamqueue"
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/internal/streamqueue"
+	"github.com/faustbrian/go-queue/management"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	valkey "github.com/valkey-io/valkey-go"

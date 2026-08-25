@@ -2,7 +2,7 @@
 
 The project uses semantic versioning.
 
-- Before v1, minor releases may change APIs, but release notes identify every
+- Breaking API changes require a new major release, and release notes identify every
   delivery, ack, retry, or shutdown semantic change.
 - At v1, exported APIs and documented semantics are stable within the major
   version.

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
+	"github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
 
 	"github.com/nats-io/nats.go"
 )

@@ -1,5 +1,4 @@
-# Repository Instructions
+# Claude Instructions
 
-The authoritative agent and contributor automation rules are in
-[`AGENTS.md`](AGENTS.md). All automated coding tools MUST follow that file
-and the [Go safety baseline](docs/go-safety-and-concurrency.md).
+Follow [`AGENTS.md`](AGENTS.md) as the canonical repository policy. Do not
+duplicate or weaken its requirements in this file.

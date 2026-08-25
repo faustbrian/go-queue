@@ -11,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/job"
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/management"
 
 	"github.com/jpillora/backoff"
 )

@@ -7,10 +7,10 @@ import (
 	"sync/atomic" //nolint:typecheck,nolintlint
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/internal/safeerr"
-	"github.com/faustbrian/golib/pkg/queue/job"
+	"github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/internal/safeerr"
+	"github.com/faustbrian/go-queue/job"
 
 	nats "github.com/nats-io/nats.go"
 )

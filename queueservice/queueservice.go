@@ -27,12 +27,12 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/faustbrian/golib/pkg/correlation"
-	queuecorrelation "github.com/faustbrian/golib/pkg/correlation/queue"
-	queue "github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/job"
-	"github.com/faustbrian/golib/pkg/service"
+	"github.com/faustbrian/go-correlation"
+	queuecorrelation "github.com/faustbrian/go-correlation/queue"
+	queue "github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-service"
 	"go.opentelemetry.io/otel/propagation"
 )
 

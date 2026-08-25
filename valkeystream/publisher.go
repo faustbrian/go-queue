@@ -5,11 +5,11 @@ import (
 	"errors"
 	"sync/atomic"
 
-	queue "github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/internal/safeerr"
-	"github.com/faustbrian/golib/pkg/queue/internal/streamqueue"
-	"github.com/faustbrian/golib/pkg/queue/job"
+	queue "github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/internal/safeerr"
+	"github.com/faustbrian/go-queue/internal/streamqueue"
+	"github.com/faustbrian/go-queue/job"
 )
 
 // Publisher appends durable Valkey Stream jobs without joining a consumer

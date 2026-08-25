@@ -3,12 +3,12 @@ package queueservice_test
 import (
 	"context"
 
-	"github.com/faustbrian/golib/pkg/correlation"
-	queue "github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/job"
-	"github.com/faustbrian/golib/pkg/queue/queueservice"
-	"github.com/faustbrian/golib/pkg/service"
+	"github.com/faustbrian/go-correlation"
+	queue "github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/queueservice"
+	"github.com/faustbrian/go-service"
 	"go.opentelemetry.io/otel/propagation"
 )
 

@@ -1,5 +1,15 @@
 # queue
 
+[![CI](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
+[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-queue.svg)](https://pkg.go.dev/github.com/faustbrian/go-queue)
+[![Release](https://img.shields.io/github/v/release/faustbrian/go-queue?sort=semver)](https://github.com/faustbrian/go-queue/releases)
+[![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 `queue` is a consolidated worker queue with owned implementations for
 in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, NSQ, and RabbitMQ. It preserves
 the recognizable `golang-queue` programming model while owning correctness,
@@ -7,7 +17,7 @@ operations, and releases in one module.
 
 ## Status
 
-The package is pre-v1 and undergoing hardening. Production code is held to
+The package has a stable v1 API. Production code is held to
 meaningful 100% coverage; durable delivery claims require backend-specific
 integration evidence.
 
@@ -19,7 +29,7 @@ integration evidence.
 ## Installation
 
 ```sh
-go get github.com/faustbrian/golib/pkg/queue
+go get github.com/faustbrian/go-queue
 ```
 
 Backend packages ship in the same module and are imported explicitly.

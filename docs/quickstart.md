@@ -3,7 +3,7 @@
 ## Install
 
 ```sh
-go get github.com/faustbrian/golib/pkg/queue
+go get github.com/faustbrian/go-queue
 ```
 
 ## Choose A Backend

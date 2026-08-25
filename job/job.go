@@ -8,7 +8,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/core"
+	"github.com/faustbrian/go-queue/core"
 )
 
 // TaskFunc is the task function

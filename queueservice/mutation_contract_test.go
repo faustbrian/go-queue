@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/job"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/job"
 )
 
 func TestStartupDiagnosticReportsWhetherRollbackAlsoFailed(t *testing.T) {

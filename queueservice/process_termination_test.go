@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/core"
+	"github.com/faustbrian/go-queue/core"
 )
 
 const processHelperEnvironment = "QUEUE_SERVICE_PROCESS_HELPER"

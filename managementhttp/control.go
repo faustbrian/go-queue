@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue/management"
 )
 
 const maxCommandRequestBytes int64 = 16 << 10

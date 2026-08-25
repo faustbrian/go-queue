@@ -3,7 +3,7 @@ package redisdb
 import (
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/queue/job"
+	"github.com/faustbrian/go-queue/job"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )

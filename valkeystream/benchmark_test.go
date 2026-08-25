@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/faustbrian/golib/pkg/queue/internal/streamqueue"
-	"github.com/faustbrian/golib/pkg/queue/job"
+	"github.com/faustbrian/go-queue/internal/streamqueue"
+	"github.com/faustbrian/go-queue/job"
 	valkey "github.com/valkey-io/valkey-go"
 )
 

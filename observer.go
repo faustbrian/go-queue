@@ -3,7 +3,7 @@ package queue
 import (
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue/management"
 )
 
 // EventKind identifies an observable queue lifecycle transition.

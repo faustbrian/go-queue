@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	queue "github.com/faustbrian/golib/pkg/queue"
+	queue "github.com/faustbrian/go-queue"
 	"github.com/stretchr/testify/assert"
 )
 

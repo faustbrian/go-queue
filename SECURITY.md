@@ -2,9 +2,9 @@
 
 ## Supported Versions
 
-Before `v1.0.0`, security fixes are applied to the latest revision of
-`main`. After the first stable release, supported release lines and
-end-of-support dates will be documented here.
+Security fixes are applied to the latest stable v1 release and `main`.
+Additional supported release lines and end-of-support dates will be documented
+here when offered.
 
 ## Reporting A Vulnerability
 

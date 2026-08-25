@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue/management"
 )
 
 // MaxFleetEndpoints bounds one resolved management fleet and all operation fan-out.

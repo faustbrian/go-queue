@@ -23,7 +23,7 @@ integration evidence.
 ## Installation
 
 ```sh
-go get github.com/faustbrian/golib/pkg/queue
+go get github.com/faustbrian/go-queue
 ```
 
 Backend packages ship in the same module and are imported explicitly.
@@ -198,7 +198,7 @@ Use this index to evaluate backend guarantees before deploying workers.
 ## Install
 
 ```sh
-go get github.com/faustbrian/golib/pkg/queue
+go get github.com/faustbrian/go-queue
 ```
 
 ## Choose A Backend
@@ -726,13 +726,13 @@ provide durable acknowledgement or replay.
 
 | Upstream | Consolidated import |
 | --- | --- |
-| `github.com/golang-queue/queue` | `github.com/faustbrian/golib/pkg/queue` |
-| `github.com/golang-queue/redisdb` | `github.com/faustbrian/golib/pkg/queue/redisdb` |
-| `github.com/golang-queue/redisdb-stream` | `github.com/faustbrian/golib/pkg/queue/redisstream` |
-| No upstream package | `github.com/faustbrian/golib/pkg/queue/valkeystream` |
-| `github.com/golang-queue/nats` | `github.com/faustbrian/golib/pkg/queue/nats` |
-| `github.com/golang-queue/nsq` | `github.com/faustbrian/golib/pkg/queue/nsq` |
-| `github.com/golang-queue/rabbitmq` | `github.com/faustbrian/golib/pkg/queue/rabbitmq` |
+| `github.com/golang-queue/queue` | `github.com/faustbrian/go-queue` |
+| `github.com/golang-queue/redisdb` | `github.com/faustbrian/go-queue/redisdb` |
+| `github.com/golang-queue/redisdb-stream` | `github.com/faustbrian/go-queue/redisstream` |
+| No upstream package | `github.com/faustbrian/go-queue/valkeystream` |
+| `github.com/golang-queue/nats` | `github.com/faustbrian/go-queue/nats` |
+| `github.com/golang-queue/nsq` | `github.com/faustbrian/go-queue/nsq` |
+| `github.com/golang-queue/rabbitmq` | `github.com/faustbrian/go-queue/rabbitmq` |
 
 The `redisstream` package retains the upstream Go package name `redisdb`, so an
 explicit import alias is recommended.
@@ -1535,7 +1535,7 @@ versioning and Keep a Changelog structure.
   results do not depend on scheduler selection between simultaneously ready
   channels.
 
-[Unreleased]: https://github.com/faustbrian/golib/commits/main/pkg/queue
+[Unreleased]: https://github.com/faustbrian/go-queue/commits/main
 
 ## Source: docs/backend-support.md
 
@@ -1678,7 +1678,7 @@ RabbitMQ 3.13.7 with `amqp091-go` 1.11.0.
 
 # Redis Streams setup
 
-Import `github.com/faustbrian/golib/pkg/queue/redisstream` (the Go package identifier is
+Import `github.com/faustbrian/go-queue/redisstream` (the Go package identifier is
 currently `redisdb` for upstream compatibility). Configure a stream, group, and
 unique consumer name.
 
@@ -3343,7 +3343,7 @@ repositories.
 # Service integration
 
 `queueservice` connects concrete queue resources to
-`github.com/faustbrian/golib/pkg/service` without hiding backend APIs or moving
+`github.com/faustbrian/go-service` without hiding backend APIs or moving
 retry, ordering, acknowledgement, dead-letter, or business-handler policy out
 of `queue`.
 

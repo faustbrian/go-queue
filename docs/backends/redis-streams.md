@@ -1,6 +1,6 @@
 # Redis Streams setup
 
-Import `github.com/faustbrian/golib/pkg/queue/redisstream` (the Go package identifier is
+Import `github.com/faustbrian/go-queue/redisstream` (the Go package identifier is
 currently `redisdb` for upstream compatibility). Configure a stream, group, and
 unique consumer name.
 

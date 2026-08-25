@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/internal/safeerr"
-	"github.com/faustbrian/golib/pkg/queue/internal/streamqueue"
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue/internal/safeerr"
+	"github.com/faustbrian/go-queue/internal/streamqueue"
+	"github.com/faustbrian/go-queue/management"
 	"github.com/redis/go-redis/v9"
 )
 

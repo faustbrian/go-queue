@@ -1,25 +1,21 @@
-## Why
+## Result
 
-Explain the user, protocol, interoperability, or maintenance problem.
+Describe the resulting behavior and why it is needed.
 
-## Behavior And Compatibility
+## Compatibility And Delivery
 
-- Public APIs or formats affected:
-- Behavior or guarantees changed:
-- Compatibility risk and migration path:
-- Dependency or provenance impact:
+Describe material compatibility, migration, rollout, or risk consequences.
+Omit topics that do not apply.
 
-## Evidence
+## Specification Decisions
 
-- Regression or conformance tests:
-- Meaningful coverage:
-- Fuzz, fixture, integration, or benchmark evidence:
+For parsing, validation, serialization, resolution, canonicalization,
+transport, or protocol changes, list:
 
-## Verification
+- affected decision identifiers;
+- changed normative sources, registries, fixtures, or errata;
+- selected observable behavior and alternatives considered;
+- compatibility and wire consequences;
+- executable conformance and interoperability evidence.
 
-List exact commands and results.
-
-- [ ] `make check`
-- [ ] Package-specific integration checks, when required
-- [ ] `CHANGELOG.md` and affected public documentation updated
-- [ ] `NOTICE` and `THIRD_PARTY_NOTICES.md` reviewed
+State `Not applicable` only when no specification-backed behavior can change.

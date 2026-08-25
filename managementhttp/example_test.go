@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/management"
-	"github.com/faustbrian/golib/pkg/queue/managementhttp"
+	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/managementhttp"
 )
 
 func ExampleClient_Execute() {

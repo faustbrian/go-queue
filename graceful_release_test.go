@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	queue "github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
+	queue "github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
 )
 
 func boundedReleaseContext(t *testing.T) context.Context {

@@ -4,13 +4,13 @@
 
 | Upstream | Consolidated import |
 | --- | --- |
-| `github.com/golang-queue/queue` | `github.com/faustbrian/golib/pkg/queue` |
-| `github.com/golang-queue/redisdb` | `github.com/faustbrian/golib/pkg/queue/redisdb` |
-| `github.com/golang-queue/redisdb-stream` | `github.com/faustbrian/golib/pkg/queue/redisstream` |
-| No upstream package | `github.com/faustbrian/golib/pkg/queue/valkeystream` |
-| `github.com/golang-queue/nats` | `github.com/faustbrian/golib/pkg/queue/nats` |
-| `github.com/golang-queue/nsq` | `github.com/faustbrian/golib/pkg/queue/nsq` |
-| `github.com/golang-queue/rabbitmq` | `github.com/faustbrian/golib/pkg/queue/rabbitmq` |
+| `github.com/golang-queue/queue` | `github.com/faustbrian/go-queue` |
+| `github.com/golang-queue/redisdb` | `github.com/faustbrian/go-queue/redisdb` |
+| `github.com/golang-queue/redisdb-stream` | `github.com/faustbrian/go-queue/redisstream` |
+| No upstream package | `github.com/faustbrian/go-queue/valkeystream` |
+| `github.com/golang-queue/nats` | `github.com/faustbrian/go-queue/nats` |
+| `github.com/golang-queue/nsq` | `github.com/faustbrian/go-queue/nsq` |
+| `github.com/golang-queue/rabbitmq` | `github.com/faustbrian/go-queue/rabbitmq` |
 
 The `redisstream` package retains the upstream Go package name `redisdb`, so an
 explicit import alias is recommended.

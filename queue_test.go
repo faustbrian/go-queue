@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/appleboy/com/bytesconv"
-	"github.com/faustbrian/golib/pkg/queue/core"
-	"github.com/faustbrian/golib/pkg/queue/job"
-	"github.com/faustbrian/golib/pkg/queue/mocks"
+	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/goleak"

@@ -1,4 +1,4 @@
-module github.com/faustbrian/golib/pkg/queue
+module github.com/faustbrian/go-queue
 
 go 1.26.6
 

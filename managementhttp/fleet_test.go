@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue/management"
 )
 
 func TestFleetClientForwardsSharedRecordsAndReportsPartialFanout(t *testing.T) {

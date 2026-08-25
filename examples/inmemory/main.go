@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	queue "github.com/faustbrian/golib/pkg/queue"
-	"github.com/faustbrian/golib/pkg/queue/core"
+	queue "github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/core"
 )
 
 type message string

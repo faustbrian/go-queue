@@ -3,7 +3,7 @@ package nats
 import (
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/queue/job"
+	"github.com/faustbrian/go-queue/job"
 	natsgo "github.com/nats-io/nats.go"
 )
 

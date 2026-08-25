@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/queue/management"
+	"github.com/faustbrian/go-queue/management"
 )
 
 func ExampleDesiredStateReconciler_Reconcile() {
