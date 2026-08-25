@@ -1,8 +1,18 @@
-# queue Complete Documentation
+# go-queue Complete Documentation
 
 ## Source: README.md
 
 # queue
+
+[![CI](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
+[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-queue.svg)](https://pkg.go.dev/github.com/faustbrian/go-queue)
+[![Release](https://img.shields.io/github/v/release/faustbrian/go-queue?sort=semver)](https://github.com/faustbrian/go-queue/releases)
+[![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 `queue` is a consolidated worker queue with owned implementations for
 in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, NSQ, and RabbitMQ. It preserves
@@ -11,7 +21,7 @@ operations, and releases in one module.
 
 ## Status
 
-The package is pre-v1 and undergoing hardening. Production code is held to
+The package has a stable v1 API. Production code is held to
 meaningful 100% coverage; durable delivery claims require backend-specific
 integration evidence.
 
@@ -782,7 +792,7 @@ client-side operation.
 
 The project uses semantic versioning.
 
-- Before v1, minor releases may change APIs, but release notes identify every
+- Breaking API changes require a new major release, and release notes identify every
   delivery, ack, retry, or shutdown semantic change.
 - At v1, exported APIs and documented semantics are stable within the major
   version.
@@ -1055,66 +1065,60 @@ move a published tag, or force-push release history.
 
 # Contributing
 
-## Before Opening A Change
+## Before Editing
 
-Use an issue for changes affecting worker lifecycle, retries, settlement, backends, observability, and compatibility. Explain the user problem,
-compatibility impact, and why the behavior belongs in this generic package.
+1. Read [`AGENTS.md`](AGENTS.md) and the affected module's goals and docs.
+2. Run `make inventory` and the narrow baseline gate for the module.
+3. Identify owned dependencies and reverse dependants in `modules.json`.
+4. Preserve unrelated work and generated/corpus provenance.
 
-## Development Setup
+## Changes
 
-Requirements:
+Keep commits focused and conventional. Update every affected changelog with
+the behavior and migration impact. Public API changes require compatibility
+evidence and documentation. Specification behavior requires a decision record,
+fixture coverage, and interoperability evidence.
 
-- Go 1.26.6 or later
-- Git
-- `golangci-lint` v2
-- network access on the first mutation run so the pinned Gremlins binary can
-  be installed into the temporary tool directory
+New direct dependencies and dependency updates must follow the
+[dependency governance policy](AGENTS.md#dependencies-and-supply-chain). Package-local
+update bots are forbidden; the root policy owns every module and action update.
 
-```sh
-go mod download
+Specification-backed changes must follow the
+[specification governance contract](AGENTS.md#design), update
+the affected stable decision entries, and complete the Specification Decisions
+section of the pull request template. An unresolved interpretation or stale
+source pin is release-blocking; peer behavior cannot silently select policy.
+
+Required mutation gates must finish with zero surviving viable mutants.
+
+Do not add package-local workflows, permanent replacements, machine-specific
+paths, bypass flags, broad mutation exclusions, or aggregate quality metrics
+that hide a failing package.
+
+## Verification
+
+Run during development:
+
+```bash
+make inventory
 make check
 ```
 
-## Change Requirements
+Before submitting a repository-wide change:
 
-- Add regression coverage before fixing a defect.
-- Maintain meaningful 100% production-code coverage.
-- Update public examples and documentation with behavior changes.
-- Update `.ai/GOAL.md` or `.ai/GOAL_HARDEN.md` when scope or acceptance criteria
-  change.
-- Add an `Unreleased` entry to `CHANGELOG.md`.
-- Explain every dependency addition, upgrade, or removal.
-- Update `NOTICE` when project or inherited ownership notices change and
-  `THIRD_PARTY_NOTICES.md` when detailed fork provenance or attribution changes.
-
-## Package-Specific Review
-
-Document delivery, durability, acknowledgement, redelivery, and shutdown impact for every affected backend. Backend changes MUST pass `make integration` with the documented services. Redis Streams and Valkey Streams changes MUST also pass their independent native-client integration jobs; Valkey support is standalone-only until another topology has pinned evidence.
-
-## Local Verification
-
-Run the complete local gate:
-
-```sh
-make check
+```bash
+make ci
 ```
 
-Backend changes also require:
+The full scheduled and release gate is `make ci`. Report every unavailable or
+failing command; do not describe partial results as release-ready.
 
-```sh
-make integration
-```
+## Adding A Module
 
-## Commits And Pull Requests
-
-Use focused conventional commits with a body explaining why the change is
-needed. Pull requests must describe compatibility impact, tests, verification
-commands and results, documentation updates, and changelog updates.
-
-## Reporting Security Issues
-
-Do not open a public issue for a suspected vulnerability. Follow
-[SECURITY.md](SECURITY.md).
+Follow [repository structure policy](AGENTS.md#repository-structure). New modules
+require an explicit purpose, ownership boundary, dependency review, package
+catalog entry, full quality gates, documentation, changelog, license, security
+policy, compatibility plan, and release dry-run.
 
 ## Source: SECURITY.md
 
@@ -1122,9 +1126,9 @@ Do not open a public issue for a suspected vulnerability. Follow
 
 ## Supported Versions
 
-Before `v1.0.0`, security fixes are applied to the latest revision of
-`main`. After the first stable release, supported release lines and
-end-of-support dates will be documented here.
+Security fixes are applied to the latest stable v1 release and `main`.
+Additional supported release lines and end-of-support dates will be documented
+here when offered.
 
 ## Reporting A Vulnerability
 
@@ -1186,6 +1190,8 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-25
+
 ### Documentation
 
 - Replace obsolete standalone-repository links and workflow claims with
@@ -1203,6 +1209,7 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Publish the module from its standalone `github.com/faustbrian/go-queue` identity while preserving its documented API and behavior.
 - Valkey Streams terminal delivery limits now accept one attempt, allowing a
   failed first handler execution to move directly to the dead-letter stream.
 - Strengthen exact queue semantic, settlement-callback, retry, replay-lineage,
@@ -1535,7 +1542,8 @@ versioning and Keep a Changelog structure.
   results do not depend on scheduler selection between simultaneously ready
   channels.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/commits/main
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.0
 
 ## Source: docs/backend-support.md
 

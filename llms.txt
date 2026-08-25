@@ -1,4 +1,4 @@
-# queue
+# go-queue
 
 > Documentation map for package users, adopters, operators, and contributors.
 
