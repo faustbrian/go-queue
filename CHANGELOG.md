@@ -7,6 +7,10 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Upgrade `moby/go-archive` and `golang.org/x/crypto` to their current
+  security-fixed releases and reconcile the resulting indirect dependency
+  graph.
+
 - Build CodeQL against a deterministic proxy of the current root module so
   nested modules never resolve stale public or bootstrap archives.
 
