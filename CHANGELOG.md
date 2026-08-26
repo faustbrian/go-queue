@@ -7,6 +7,9 @@ versioning and Keep a Changelog structure.
 
 ### Documentation
 
+- Align maintained documentation with the stable v1 release contract and
+  remove obsolete candidate or verdict wording.
+
 - Clarify how shared safety-policy updates are coordinated across standalone
   repositories.
 
