@@ -298,4 +298,5 @@ measure lifecycle drain separately from broker latency and handler work.
 
 ## Documentation
 
-See the [root package documentation](../../../README.md) for queue lifecycle, adapter boundaries, and related packages.
+See the [root package documentation](../../README.md) for queue lifecycle,
+adapter boundaries, and related packages.
