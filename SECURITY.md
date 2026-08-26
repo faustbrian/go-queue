@@ -30,5 +30,5 @@ and business-level validation. Package safeguards do not replace those
 controls.
 
 See [docs/security.md](docs/security.md) and
-[docs/hardening.md](docs/hardening.md) for adoption guidance and maintained
-evidence.
+[docs/failure-model.md](docs/failure-model.md) for adoption guidance and the
+maintained security boundary.

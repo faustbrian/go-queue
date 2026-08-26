@@ -121,8 +121,6 @@ Start with the [documentation index](docs/README.md), [quickstart](docs/quicksta
 [integration evidence](docs/integration-evidence.md) before production use.
 Valkey adopters should use the [Valkey 9 Streams guide](docs/backends/valkey-streams.md)
 and [runnable example](examples/valkey).
-
-AI tools can use [llms.txt](llms.txt) and [llms-full.txt](llms-full.txt).
 Release history is maintained in [CHANGELOG.md](CHANGELOG.md).
 
 ## Development
@@ -147,8 +145,3 @@ Review [docs/security.md](docs/security.md) before processing untrusted jobs.
 `queue` is available under the [MIT License](LICENSE). Fork provenance and
 third-party attribution are recorded in [NOTICE](NOTICE) and
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Ecosystem
-
-Use the [Golib documentation portal](https://github.com/faustbrian/golib/blob/main/docs/index.md)
-to choose companion packages, supported stacks, recipes, and operations guidance.

@@ -293,7 +293,6 @@ license, and SBOM checks without changing this module's local test scope.
 path overhead. `BenchmarkProducerDrain` and `BenchmarkLifecycleWorkerDrain`
 measure lifecycle drain separately from broker latency and handler work.
 
-## Ecosystem
+## Documentation
 
-Use the [Golib documentation portal](https://github.com/faustbrian/golib/blob/main/docs/index.md)
-to choose companion packages, supported stacks, recipes, and operations guidance.
+See the [root package documentation](../../README.md) for queue lifecycle, adapter boundaries, and related packages.
