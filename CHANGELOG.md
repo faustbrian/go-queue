@@ -50,7 +50,7 @@ versioning and Keep a Changelog structure.
 - Replace obsolete standalone-repository links and workflow claims with
   monorepo-canonical targets and current release guidance.
 
-- Link the package README to the repository-wide Golib documentation portal.
+- Link the package README to package-owned documentation.
 
 ### Added
 

@@ -35,6 +35,10 @@ Use this index to evaluate backend guarantees before deploying workers.
 - [Migration](migration.md)
 - [Releasing](releasing.md)
 
+## Optional modules
+
+- [Service lifecycle adapter](../queueservice/docs/README.md)
+
 ## Maintainers
 
 - [Repository standards](repository-standards.md)
