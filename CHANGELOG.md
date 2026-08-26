@@ -7,6 +7,9 @@ versioning and Keep a Changelog structure.
 
 ### Documentation
 
+- Clarify how shared safety-policy updates are coordinated across standalone
+  repositories.
+
 - Replace archived monorepo links and completed execution artifacts with a
   standalone, human-oriented documentation structure.
 

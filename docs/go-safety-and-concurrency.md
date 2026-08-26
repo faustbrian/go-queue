@@ -137,6 +137,6 @@ be described as an equivalent type-system guarantee.
 - Changes touching shared state, goroutines, callbacks, retries, settlement,
   parsing, or resource limits MUST include an explicit safety review in the
   pull request.
-- Updates to this baseline MUST bump its identifier and be propagated across
-  `jsonapi`, `jsonrpc`, `queue`, `wire`, `tabular`,
-  and the monorepo Go standard.
+- Updates to this baseline MUST bump its identifier and be propagated to the
+  corresponding policy documents in `jsonapi`, `jsonrpc`, `queue`, `wire`,
+  and `tabular`.
