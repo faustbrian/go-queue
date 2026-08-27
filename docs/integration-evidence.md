@@ -11,17 +11,17 @@ evidence environment.
 | Valkey Streams | Valkey 9.1.0, `sha256:8e8d64...e09411`, standalone | `valkey-go` 1.0.76 |
 | NATS | NATS Server 2.10.29, `sha256:5498ba...6e2f`; hermetic server 2.11.15 | `nats.go` 1.52.0 |
 | NSQ | nsqd 1.3.0, `sha256:1a369c...c78a` | `go-nsq` 1.1.0 |
-| RabbitMQ | RabbitMQ 3.13.7 management, `sha256:e582c0...1f69` | `amqp091-go` 1.11.0 |
+| RabbitMQ compatibility adapter | RabbitMQ 4.3.5 management-alpine, `sha256:722416...511dc`, TLS 1.2/1.3 | `go-rabbitmq-queues` at `26f7f42`; `amqp091-go` 1.14.0 |
 
-The local audit ran with Go 1.26.5 on Darwin arm64 while the supported minimum
-remains Go 1.25.12. Container tests cover enqueue, consume, handler failure,
-timeout, shutdown, backend-specific settlement, and same-endpoint broker
-interruption/restart. Core NATS and NSQ reconnect live. Redis Pub/Sub rejects
-an outage publish and resubscribes after restart. Redis Streams retains backlog
-across restart. RabbitMQ channels are terminal after connection loss, so the
-test proves that a replacement worker is required and restores delivery. Unit
-fault injection covers partial initialization, closed channels, malformed
-delivery, settlement error, and publish confirmation failure.
+Container tests cover enqueue, consume, handler failure, timeout, shutdown,
+and backend-specific settlement. Core NATS and NSQ reconnect live. Redis
+Pub/Sub rejects an outage publish and resubscribes after restart. Redis Streams
+retains backlog across restart. The nested RabbitMQ adapter job proves
+mandatory confirmed queueing, request and broker-confirmed settlement,
+confirmed retry-before-ACK, confirmed terminal replacement, TLS, and producer/
+consumer failure isolation against CI-hosted Docker. The native dependency
+separately proves bounded recovery, restart, node loss, quorum leader failover,
+network partition, rolling upgrade, prolonged outage, and reconnect storms.
 
 Valkey runs in its own release-blocking job and proves server version, enqueue,
 group consume, post-handler ack, exact group stats, verified TLS, rejected TLS,
@@ -39,7 +39,8 @@ Container stop/start closes live connections and proves same-endpoint outage
 and restart behavior. It does not model every packet-drop, half-open TCP,
 firewall, DNS, proxy, or load-balancer partition. The package makes no broader
 partition-recovery guarantee: bounded operations return client/backend errors,
-lossy transports may drop work, and RabbitMQ requires worker replacement.
+lossy transports may drop work, while RabbitMQ recovery is bounded by the
+explicit native connection policy.
 Deployments must inject their actual network intermediary failure modes before
 relying on a recovery objective.
 

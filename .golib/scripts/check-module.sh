@@ -42,7 +42,7 @@ if [[ ! -f "${directory}/go.mod" ]]; then
 fi
 
 enable_local_proxy() {
-    local no_sum_db upstream upstream_flags
+    local no_sum_db root_version upstream upstream_flags
 
     if [[ -z "${GOLIB_REAL_GO:-}" ]]; then
         GOLIB_REAL_GO="$(command -v go)"
@@ -56,8 +56,9 @@ enable_local_proxy() {
     if [[ -z "${GOLIB_LOCAL_PROXY:-}" ]]; then
         GOLIB_LOCAL_PROXY="$(mktemp -d "${TMPDIR:-/tmp}/golib-proxy.XXXXXX")"
         local_proxy_owned=1
+        root_version="$(jq -er '.modules[] | select(.directory == ".") | .version' "${root}/modules.json")"
         "${root}/.golib/scripts/build-local-proxy.sh" \
-            "${GOLIB_LOCAL_PROXY}" v1.0.0 "${module}"
+            "${GOLIB_LOCAL_PROXY}" "v${root_version}" "${module}"
     fi
     export GOLIB_LOCAL_PROXY
 

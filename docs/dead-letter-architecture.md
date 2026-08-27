@@ -50,7 +50,7 @@ unless a documented correctness fix changes them.
 | Valkey Streams | Failed attempts are appended to a failure stream; idle PEL work is reclaimed; exhaustion appends before `XACK` | Package-managed append-before-ack with at-least-once duplicate risk | List, inspect, retry, bounded bulk retry, allowlisted replay, delete, and record purge |
 | Core NATS | Handler retries execute after a lossy Core NATS delivery; shutdown republishes best effort | No durable acknowledgement or terminal state | Unsupported |
 | NSQ | Success sends `FIN`; recoverable failure sends `REQ`; exhausted, permanent, and malformed work publishes a terminal envelope before `FIN` | Package-managed publish-before-FIN with duplicate risk | Public envelope decoder; topic listing and mutations unsupported |
-| RabbitMQ | Success sends `basic.ack`; retryable failure confirms a bounded-attempt republish; exhausted, permanent, and malformed work confirms a terminal publish before source ack | Package-managed confirmed publish-before-ack with duplicate risk at the confirm/ack boundary | Broker terminal queue; package record management unsupported |
+| RabbitMQ adapter | Success sends `basic.ack`; retryable failure confirms a bounded-attempt republish; exhausted, permanent, and malformed work confirms a configured terminal publish before source ack | Adapter-managed confirmed publish-before-ack with duplicate risk at the confirm/ack boundary | Broker terminal queue; package record management unsupported |
 
 The root queue currently treats `RetryCount` as the number of retries after the
 initial handler invocation. The initial delivery is attempt one. Retries happen
@@ -73,7 +73,7 @@ The root queue passes the final handler error through the additive
 contract. Root handler failures become bounded classified failures before they
 reach logs, observers, or settlement. Recovered panics use permanent
 `handler_panic`; acknowledgement and failure-settlement failures use
-infrastructure codes. Redis Streams, Valkey Streams, NSQ, and RabbitMQ consume
+infrastructure codes. Redis Streams, Valkey Streams, NSQ, and the RabbitMQ adapter consume
 the same winning classification/code resolution. Stable unsupported-version,
 lease-loss, dead-letter-destination, and administrative-quarantine codes are
 exported by `management`. Durable package backends produce the destination
@@ -83,11 +83,11 @@ administrative quarantine integrations use the same canonical constants.
 
 ## Capability reconciliation
 
-| Capability | Ring | Redis Pub/Sub | Redis Streams | Valkey Streams | Core NATS | NSQ | RabbitMQ |
+| Capability | Ring | Redis Pub/Sub | Redis Streams | Valkey Streams | Core NATS | NSQ | RabbitMQ adapter |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Durable delivery | No | No | Yes | Yes | No | Yes | Yes when broker durability is configured |
 | Reliable attempt count | Process only | Process only | PEL deliveries are measurable | PEL deliveries are recorded | Process only | Native delivery attempts are persisted | Package attempt header is persisted |
-| Package dead-letter persistence | No | No | Implemented | Implemented | No | Implemented | Implemented when manual ack is enabled |
+| Package dead-letter persistence | No | No | Implemented | Implemented | No | Implemented | Configured terminal route; manual settlement required |
 | Atomic source transfer | N/A | N/A | Not implemented | No; append then ack | N/A | No; publish then FIN | No; confirmed terminal publish then source ack |
 | List and inspect | Unsupported | Unsupported | Implemented | Implemented | Unsupported | Unsupported | Unsupported |
 | Retry and bulk retry | Unsupported | Unsupported | Implemented | Implemented | Unsupported | Unsupported | Unsupported |
@@ -109,7 +109,7 @@ a backend capable by themselves.
 - Redis Streams and Valkey Streams implement `management.RecordReader` and
   record `management.Controller` operations, including replay only when an
   explicit destination allowlist is configured.
-- Ring, Redis Pub/Sub, Core NATS, NSQ, and RabbitMQ advertise no failure or
+- Ring, Redis Pub/Sub, Core NATS, NSQ, and the RabbitMQ adapter advertise no failure or
   dead-letter management capability.
 - `queue-control-plane` consumes these contracts without acquiring Redis or
   Valkey clients and intersects retention and mutation capabilities across
@@ -154,7 +154,7 @@ can therefore leave a duplicate record or destination entry, but not silently
 remove the recoverable source before durable acceptance. Partial and unknown
 responses require reconciliation by original stream ID and replay lineage.
 
-RabbitMQ also confirms retry or terminal publication before acknowledging the
+The RabbitMQ adapter also confirms retry or terminal publication before acknowledging the
 source. Destination failure requeues the source; process death or a failed ack
 after confirm can duplicate the republished or terminal message. Its bounded
 attempt and source headers are the reconciliation identity available today.
@@ -170,7 +170,7 @@ Unsupported behavior is part of the stable contract, not a placeholder for an
 in-memory emulation:
 
 - Ring, Redis Pub/Sub, and Core NATS have no durable dead-letter capability.
-- NSQ and RabbitMQ expose terminal destinations but no package record reader or
+- NSQ and the RabbitMQ adapter expose terminal destinations but no package record reader or
   mutation controller; their retention and capacity policies remain broker
   owned.
 - Redis Streams and Valkey Streams support deliberate exact record-count

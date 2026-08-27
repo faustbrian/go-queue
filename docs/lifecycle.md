@@ -41,7 +41,8 @@ releases that reservation before the scheduler exits.
 ## Delivery path
 
 1. `Queue` or `QueueTask` builds and validates a `job.Message`.
-2. `Worker.Queue` publishes it. RabbitMQ waits for a publisher confirmation.
+2. `Worker.Queue` publishes it. The RabbitMQ adapter reconciles mandatory
+   routing and waits for the exact publisher confirmation.
 3. The scheduler requests a delivery only while a worker slot is available.
 4. One handler attempt receives a context bounded by the message timeout.
 5. Retries remain inside that delivery and are limited to 100.

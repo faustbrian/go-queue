@@ -11,7 +11,7 @@ idempotent whenever a transport can redeliver.
 | Valkey Streams | At-least-once | After handler success | Final failure remains pending, idle work is reclaimed, terminal work is appended to DLQ | Ack and DLQ source settlement can be ambiguous; handlers and DLQ consumers must be idempotent |
 | Core NATS | At-most-once | None | Disconnect can lose work | This is not JetStream |
 | NSQ | At-least-once | FIN after success | REQ for recoverable failures; exhausted, permanent, and malformed work is published to the terminal topic before FIN | Publish/FIN crash windows may duplicate; ordering is not guaranteed |
-| RabbitMQ | At-least-once when `autoAck=false` | Ack after success | Confirmed retry republish; exhausted, permanent, and malformed work is confirmed to the package-owned terminal exchange before source ack | `autoAck=true` disables post-handler settlement; confirm/ack crash windows may duplicate; connection loss requires a replacement worker |
+| RabbitMQ adapter | At-least-once with required manual settlement | Ack after success | Confirmed retry republish; exhausted, permanent, and malformed work is confirmed to the configured terminal exchange before source ack | Confirm/ack crash windows may duplicate; runtime recovery is bounded and can become terminal |
 
 Retryable failures may retry inside a delivery attempt. Permanent, malformed,
 canceled, and infrastructure failures proceed to backend settlement after the
@@ -29,15 +29,17 @@ receive the classified final handler error. `job.Message` exposes
 `SetFailureAcknowledgement` for this path and falls back to the legacy `Nack`
 callback when no error-aware callback is attached.
 
-RabbitMQ enqueue uses persistent delivery mode and waits for a positive
+RabbitMQ adapter enqueue uses mandatory persistent delivery mode and reconciles
+returns before reporting a positive
 publisher confirmation. This confirms broker acceptance, not completion of the
 handler. All network deliveries are rejected above one mebibyte of encoded JSON.
 
 Restart evidence distinguishes transport behavior. Core NATS and Redis Pub/Sub
 remain lossy despite reconnecting because disconnected subscribers have no
 replay. NSQ reconnects and resumes its durable topic/channel. Redis Streams
-retains queued backlog. The current RabbitMQ worker does not rebuild a closed
-AMQP connection or channel; supervision must replace it.
+retains queued backlog. RabbitMQ producer and consumer resources independently
+run bounded native recovery and expose a terminal state when that policy is
+exhausted.
 
 Valkey Streams uses package-managed bounded `XAUTOCLAIM` recovery. A worker
 crash, process termination, or failed settlement leaves an entry pending unless

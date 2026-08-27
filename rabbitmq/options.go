@@ -58,31 +58,43 @@ type Option func(*options)
 options struct holds all configuration parameters for a RabbitMQ worker or queue.
 
 Fields:
-- runFunc: The function to execute for each task.
-- logger: Logger instance for logging.
-- addr: AMQP server URI.
-- queue: Name of the queue to use.
-- tag: Consumer tag for identification.
-- exchangeName: Name of the AMQP exchange.
-- exchangeType: Type of the AMQP exchange (direct, fanout, topic, headers).
-- autoAck: Whether to enable automatic message acknowledgment.
-- routingKey: AMQP routing key for message delivery.
+  - runFunc: The function to execute for each task.
+  - logger: Logger instance for logging.
+  - addr: AMQP server URI.
+  - queue: Name of the queue to use.
+  - tag: Consumer tag for identification.
+  - exchangeName: Name of the AMQP exchange.
+  - exchangeType: Legacy AMQP exchange option; the native adapter accepts direct
+    and topic exchanges.
+  - autoAck: Whether to enable automatic message acknowledgment.
+  - routingKey: AMQP routing key for message delivery.
 */
 type options struct {
-	runFunc        func(context.Context, core.TaskMessage) error
-	logger         queue.Logger
-	addr           string
-	queue          string
-	tag            string
-	exchangeName   string // Durable AMQP exchange name
-	exchangeType   string // Exchange Types: Direct, Fanout, Topic and Headers
-	autoAck        bool
-	routingKey     string // AMQP routing key
-	reconnect      ReconnectConfig
-	requestTimeout time.Duration
-	publishTimeout time.Duration
-	deadLetter     DeadLetterConfig
-	deadConfigured bool
+	runFunc          func(context.Context, core.TaskMessage) error
+	logger           queue.Logger
+	addr             string
+	queue            string
+	tag              string
+	exchangeName     string // Durable AMQP exchange name
+	exchangeType     string // The native adapter accepts direct and topic exchanges.
+	autoAck          bool
+	routingKey       string // AMQP routing key
+	reconnect        ReconnectConfig
+	requestTimeout   time.Duration
+	publishTimeout   time.Duration
+	deadLetter       DeadLetterConfig
+	deadConfigured   bool
+	native           NativeConfig
+	nativeConfigured bool
+}
+
+// WithNativeConfig enables the compatibility adapter with explicit native
+// connection, resource, queue-type, and stable message-identity policy.
+func WithNativeConfig(config NativeConfig) Option {
+	return func(options *options) {
+		options.native = config
+		options.nativeConfigured = true
+	}
 }
 
 // DeadLetterConfig owns RabbitMQ terminal routing and bounded delivery policy.
@@ -93,8 +105,9 @@ type DeadLetterConfig struct {
 	MaxDeliveryAttempts uint32
 }
 
-// WithDeadLetter configures the durable exchange, queue, routing key, and
-// maximum broker delivery attempts used for terminal RabbitMQ failures.
+// WithDeadLetter identifies the infrastructure-owned durable terminal exchange,
+// queue, routing key, and maximum delivery attempts. The adapter publishes to
+// the exchange and routing key but does not declare or repair the queue.
 func WithDeadLetter(config DeadLetterConfig) Option {
 	return func(w *options) {
 		w.deadLetter = config
@@ -116,22 +129,21 @@ func (o options) validateDeadLetter() error {
 	return nil
 }
 
-/*
-WithAddr sets the AMQP server URI.
-
-Parameters:
-- addr: The AMQP URI to connect to.
-
-Returns:
-- Option: Functional option to set the address.
-*/
+// WithAddr retains source compatibility with the legacy direct-AMQP worker.
+// NativeConfig.Connection owns endpoints, credentials, virtual host, and TLS;
+// the compatibility adapter does not use this URI.
+//
+// Deprecated: configure WithNativeConfig instead.
 func WithAddr(addr string) Option {
 	return func(w *options) {
 		w.addr = addr
 	}
 }
 
-// WithReconnectConfig configures connection retry timing.
+// WithReconnectConfig retains source compatibility with the legacy worker.
+// NativeConfig.Connection.Recovery owns startup and runtime recovery.
+//
+// Deprecated: configure WithNativeConfig instead.
 func WithReconnectConfig(config ReconnectConfig) Option {
 	return func(w *options) {
 		w.reconnect = config
@@ -157,7 +169,9 @@ func WithExchangeName(val string) Option {
 }
 
 /*
-WithExchangeType sets the type of the AMQP exchange.
+WithExchangeType sets the type of the AMQP exchange. The compatibility adapter
+accepts direct and topic exchanges. Fanout and headers constants remain for
+source compatibility but NewWorkerE rejects them.
 
 Parameters:
 - val: The exchange type (direct, fanout, topic, headers).
@@ -325,11 +339,6 @@ func newOptions(opts ...Option) options {
 			RoutingKey:          defaultOpts.routingKey + ".dead",
 			MaxDeliveryAttempts: 5,
 		}
-	}
-
-	// Validate the exchange type
-	if !isVaildExchange(defaultOpts.exchangeType) {
-		defaultOpts.logger.Fatal("invaild exchange type: ", defaultOpts.exchangeType)
 	}
 
 	return defaultOpts

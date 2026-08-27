@@ -1,45 +1,41 @@
-# RabbitMQ setup
+# RabbitMQ compatibility adapter
 
-Configure the AMQP URI, durable exchange name and type, routing key, queue,
-consumer tag, and `autoAck`. Keep `autoAck=false` for at-least-once processing
-and package-owned terminal settlement.
+RabbitMQ support is released from the nested
+`github.com/faustbrian/go-queue/rabbitmq` module. It preserves the backend-
+neutral worker contract while delegating connections, TLS, publishing,
+consumption, recovery, and broker settlement to `go-rabbitmq-queues`. New
+RabbitMQ-native applications should use `go-rabbitmq-queues` directly.
 
-Published jobs use persistent delivery mode and synchronous publisher
-confirms. `WithPublishTimeout` bounds publish plus confirmation wait and
-defaults to five seconds. A negative confirmation or closed confirmation
-channel fails enqueue.
+Configure `WithNativeConfig` with verified TLS, bounded recovery, explicit
+classic or quorum queue identity, producer and consumer limits, and a stable
+application message-ID function. Configure the legacy queue, exchange,
+routing-key, and consumer-tag options with the same infrastructure-owned
+topology identities. The adapter performs no topology declaration or repair.
 
-RabbitMQ declares a durable dead-letter exchange and queue by default, derived
-from the configured exchange, queue, and routing key. `WithDeadLetter` accepts
-an explicit `DeadLetterConfig` with distinct terminal names and a maximum of 2
-through 101 broker delivery attempts. Existing queues declared without the
-matching `x-dead-letter-exchange` and `x-dead-letter-routing-key` arguments
-must be migrated or configured consistently before adoption; RabbitMQ rejects
-inequivalent queue redeclaration.
+Published jobs are mandatory, persistent, and synchronously confirmed.
+`WithPublishTimeout` bounds transmission, return reconciliation, and
+confirmation. Returned, rejected, not-sent, ambiguous, and failed outcomes do
+not report acceptance.
 
-Retryable handler failures are republished persistently to the original
-exchange with an incremented bounded attempt header. The publisher confirm is
-received before the source is acknowledged. Exhausted, permanent, and
-malformed deliveries are instead confirmed to the terminal exchange with
-envelope version, classification, stable failure code, attempts, and bounded
-source topology headers. Cancellation and infrastructure failures requeue the
-source without incrementing the terminal attempt policy. Package job retries
-still happen inside each broker delivery before this broker-level decision.
+Manual settlement is required. Handler success precedes ACK. A bare NACK and
+canceled or infrastructure failures requeue the source. Retryable failures
+publish a confirmed replacement with a bounded incremented attempt before
+ACK. Exhausted, permanent, and malformed deliveries publish a confirmed
+terminal replacement with stable classification and source metadata before
+ACK. If either replacement is not confirmed, the source remains recoverable.
 
-Confirmed publish and source acknowledgement are not atomic. A destination
-failure requeues the source. Process death or acknowledgement failure after a
-positive confirm may create a duplicate, so consumers must use job identity
-and terminal headers for reconciliation. Exactly-once transfer is not
-claimed. RabbitMQ record listing and mutation remain explicitly unsupported;
-operate the terminal queue with broker tooling. `autoAck=true` disables these
-post-handler guarantees.
+Replacement publication and source acknowledgement are separate effects. A
+crash after the replacement confirm and before source ACK can duplicate work;
+applications must use stable identity and remain idempotent. Exactly-once
+processing is not claimed.
 
-`WithReconnectConfig` controls initial startup attempts. Runtime reconnection
-is not hidden by v1; a closed connection or channel is terminal, so shut down
-that queue and construct a replacement worker. The broker-restart integration
-test proves both the old-worker failure and replacement-worker recovery. TTL
-and priorities remain explicit RabbitMQ concerns. Credential-bearing AMQP URL
-failures return sanitized constructor text.
+The producer opens eagerly and never creates a consumer. The consumer opens
+lazily on the first `Request`. Each owns an independent native connection and
+bounded recovery lifecycle. Fanout, headers, and automatic acknowledgement
+are rejected because their legacy job-migration semantics are not defined;
+direct and topic exchanges are supported.
 
-`WithRequestTimeout` bounds an idle delivery request. Integration uses
-RabbitMQ 3.13.7 with `amqp091-go` 1.11.0.
+CI broker evidence uses RabbitMQ 4.3.5 over TLS with `go-rabbitmq-queues` and
+`amqp091-go` 1.14.0. See the
+[module guide](../../rabbitmq/README.md) for migration, rollback, limitations,
+security, and API details.

@@ -18,7 +18,8 @@ Production capacity must account for:
 - Redis Streams source admission, pending-entry growth, and claim policy;
 - Valkey hard source admission capacity, read/reclaim batch bounds, blocking
   pool, pending age, and DLQ growth;
-- RabbitMQ synchronous publisher-confirm latency;
+- RabbitMQ adapter overhead separately from native synchronous publisher-
+  confirm latency;
 - handler deadline and retry delay within the shutdown budget; and
 - broker depth, lag, oldest age, redelivery, and settlement errors.
 

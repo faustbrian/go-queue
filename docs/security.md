@@ -20,8 +20,8 @@ responsibilities.
 - There is no decompression layer. Base64 payload decoding remains inside the
   encoded-envelope limit.
 
-Redis Pub/Sub, Core NATS, NSQ, and RabbitMQ do not expose durable depth or
-retention controls through this package. Redis Streams direct admission is
+Redis Pub/Sub, Core NATS, NSQ, and the RabbitMQ compatibility adapter do not
+expose durable depth or retention controls through their Go APIs. Redis Streams direct admission is
 bounded only when a positive `WithMaxLength` is configured; administrative
 cross-key admission remains subject to documented race overrun. Valkey bounds source admission,
 individual reads, reclaim scans, payloads, buffers, pools, waits, and attempts,
@@ -32,16 +32,17 @@ Configure broker-side quotas, retention, dead-lettering, and connection limits.
 ## Credentials and transport security
 
 Do not put credentials in logs, observer metadata, queue names, subjects, or
-payloads. Redis debug output is redacted. Redis, NATS, and RabbitMQ constructor
-errors expose sanitized text when a client parser or dialer rejects a
-credential-bearing URI; the original cause remains available to
+payloads. Redis debug output is redacted. Redis and NATS constructor errors
+expose sanitized text when a client parser or dialer rejects a credential-
+bearing URI; the original cause remains available to
 `errors.Is`/`errors.As`, so application code must not separately log an
 unwrapped client error.
 
 Redis TLS is opt-in in both Redis packages. `WithSkipTLSVerify` is deliberately
 named and MUST NOT be used in production. NATS uses the transport selected by
-the configured client URL, and RabbitMQ uses `amqps` when supplied; this wrapper
-does not expose every client TLS option. NSQ authentication and TLS are not
+the configured client URL. The RabbitMQ adapter requires a verified native TLS
+policy with an explicit server name and optional owned roots or mTLS material;
+credentials are supplied through a provider rather than a URI. NSQ authentication and TLS are not
 configured by this package. Use authenticated, certificate-verified endpoints
 or a trusted private transport boundary, and verify those controls in the
 deployment environment.
@@ -62,9 +63,8 @@ Malformed, oversized, or invalid-state envelopes are rejected before handler
 execution. Redis Streams and Valkey Streams append malformed work to their
 dead-letter streams before acknowledging the source and strip an
 oversized poison body before terminal transfer; NSQ omits it from the terminal
-envelope before `FIN`; RabbitMQ
-confirms it to the terminal exchange before source acknowledgement when manual
-acknowledgement is enabled. Redis Pub/Sub and Core NATS have no durable poison
+envelope before `FIN`; the RabbitMQ adapter confirms it to the configured
+terminal exchange before source acknowledgement. Redis Pub/Sub and Core NATS have no durable poison
 message to settle.
 
 Handlers must cooperate with context cancellation and bound their own network

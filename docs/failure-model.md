@@ -19,9 +19,9 @@ not assumed.
 | NSQ process loss | Unfinished work is eligible for redelivery | Make handlers idempotent |
 | RabbitMQ process loss | Before confirm the source remains recoverable; after terminal confirm but before source ack a duplicate may remain | Reconcile by job identity and bounded terminal headers; use durable queues |
 | Broker unavailable at startup | Error-returning constructor fails and cleans partial state | Supervise restart with bounded backoff |
-| Runtime connection loss | NATS, NSQ, Redis, and Valkey reconnect on later commands; RabbitMQ worker is terminal | Accept lossy gaps or replace the worker as documented |
+| Runtime connection loss | NATS, NSQ, Redis, and Valkey reconnect on later commands; RabbitMQ uses bounded cancellation-aware native recovery | Configure recovery below supervision and shutdown budgets; treat exhausted recovery as terminal |
 | Credential-bearing broker URI | Debug output and constructor error text are redacted | Do not log raw options or separately unwrapped client errors |
-| TLS disabled or verification skipped | Redis TLS is opt-in; skip-verify is explicit; Valkey accepts only caller-supplied verified TLS configuration | Require verified TLS and broker authentication in policy |
+| TLS disabled or verification skipped | Redis TLS is opt-in; skip-verify is explicit; Valkey accepts only caller-supplied verified TLS configuration; RabbitMQ requires verified native TLS | Require verified TLS and broker authentication in policy |
 | Process termination | In-memory and lossy transports lose work | Use a durable backend and idempotent side effects |
 
 There is no compression layer, so decompression bombs do not apply. JSON base64
@@ -62,7 +62,7 @@ The public `management.FailureCodeUnsupportedPayloadVersion`,
 `management.FailureCodeDeadLetterDestinationUnavailable`, and
 `management.FailureCodeAdministrativeQuarantine` constants are the canonical
 codes for package backends, custom adapters, and administrative integrations.
-Redis Streams, Valkey Streams, NSQ, and RabbitMQ produce the destination code
+Redis Streams, Valkey Streams, NSQ, and the RabbitMQ adapter produce the destination code
 when terminal persistence fails; stream settlement with no remaining owned
 delivery produces the lease-loss code.
 

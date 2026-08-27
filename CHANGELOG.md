@@ -5,6 +5,19 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+### Added
+
+- Add the independently versioned `rabbitmq` compatibility module over
+  `go-rabbitmq-queues`, with explicit native policy, stable message identity,
+  mandatory persistent publishing, confirmed retry and terminal replacement,
+  bounded request bridging, and independent producer and consumer resources.
+
+### Changed
+
+- Remove direct AMQP ownership from the root module. RabbitMQ adopters now use
+  `github.com/faustbrian/go-queue/rabbitmq` as a nested release after upgrading
+  the parent module to the release that excludes the former package archive.
+
 ### Documentation
 
 - Align maintained documentation with the stable v1 release contract and

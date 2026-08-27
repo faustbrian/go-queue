@@ -167,6 +167,9 @@ jobs:
             ./.golib/scripts/restore-ci-mutation-evidence.sh \
               '${{ matrix.directory }}'
           fi
+      - name: Start RabbitMQ adapter broker
+        if: matrix.directory == 'rabbitmq' && inputs.release_dry_run != true
+        run: ./scripts/ci-rabbitmq-adapter.sh start
       - name: Run strict module contract
         id: strict_contract
         if: inputs.release_dry_run != true
@@ -186,6 +189,9 @@ jobs:
           ./.golib/scripts/with-disposable-go-cache.sh \
             ./.golib/scripts/run-modules.sh release-dry-run \
             --modules '${{ matrix.directory }}' 2>&1 | tee "${output}"
+      - name: Stop RabbitMQ adapter broker
+        if: always() && matrix.directory == 'rabbitmq' && inputs.release_dry_run != true
+        run: ./scripts/ci-rabbitmq-adapter.sh stop
       - name: Stage attributable evidence
         if: always()
         env:

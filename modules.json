@@ -214,18 +214,6 @@
         },
         {
           "module_directory": ".",
-          "directory": "rabbitmq",
-          "name": "rabbitmq",
-          "import_path": "github.com/faustbrian/go-queue/rabbitmq",
-          "kind": "public",
-          "production": true,
-          "executable": true,
-          "coverage_required": true,
-          "build_required": true,
-          "build_tags": []
-        },
-        {
-          "module_directory": ".",
           "directory": "redisdb",
           "name": "redisdb",
           "import_path": "github.com/faustbrian/go-queue/redisdb",
@@ -261,7 +249,7 @@
           "build_tags": []
         }
       ],
-      "purpose": "`queue` is a consolidated worker queue with owned implementations for in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, NSQ, and RabbitMQ. It preserves the recognizable `golang-queue` programming model while owning correctness, operations, and releases in one module.",
+      "purpose": "`queue` is a consolidated worker queue with owned implementations for in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ. It preserves the recognizable `golang-queue` programming model while owning correctness, operations, and releases in one module. RabbitMQ compatibility is released independently from the `rabbitmq` nested module.",
       "lifecycle": "stable",
       "kind": "public library",
       "releasable": true,
@@ -269,7 +257,7 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tag_prefix": "v",
       "owned_dependencies": [],
       "reverse_owned_dependencies": [
@@ -295,7 +283,6 @@
         "github.com/nats-io/nats-server/v2",
         "github.com/nats-io/nats.go",
         "github.com/nsqio/go-nsq",
-        "github.com/rabbitmq/amqp091-go",
         "github.com/redis/go-redis/v9",
         "github.com/stretchr/testify",
         "github.com/testcontainers/testcontainers-go",
@@ -306,9 +293,73 @@
       "required_services": [
         "nats",
         "nsq",
-        "rabbitmq",
         "redis",
         "valkey"
+      ],
+      "build_tags": [],
+      "test_tags": [
+        "integration"
+      ],
+      "interoperability_tools": [],
+      "specifications": [],
+      "conformance_corpora": [],
+      "provenance": [],
+      "goal_files": [],
+      "goal_status": "not-applicable",
+      "goal_evidence": [],
+      "gates": {
+        "api_compatibility": true,
+        "benchmarks": true,
+        "conformance": false,
+        "coverage": true,
+        "documentation": true,
+        "fuzz": true,
+        "lint": true,
+        "mutation": true,
+        "race": true,
+        "security": true,
+        "tests": true
+      }
+    },
+    {
+      "directory": "rabbitmq",
+      "module_path": "github.com/faustbrian/go-queue/rabbitmq",
+      "go_version": "1.27.0",
+      "packages": [
+        {
+          "module_directory": "rabbitmq",
+          "directory": ".",
+          "name": "rabbitmq",
+          "import_path": "github.com/faustbrian/go-queue/rabbitmq",
+          "kind": "public",
+          "production": true,
+          "executable": true,
+          "coverage_required": true,
+          "build_required": true,
+          "build_tags": []
+        }
+      ],
+      "purpose": "`rabbitmq` is the independently versioned compatibility adapter between the backend-neutral `go-queue` worker contract and the RabbitMQ-native policy in `go-rabbitmq-queues`. It preserves bounded job submission, request, settlement, retry, dead-letter, and shutdown behavior without re-owning AMQP connections or topology.",
+      "lifecycle": "stable",
+      "kind": "public library",
+      "releasable": true,
+      "family": "persistence-and-durability",
+      "family_label": "Persistence And Durability",
+      "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
+      "family_order": 4,
+      "version": "1.0.0",
+      "tag_prefix": "rabbitmq/v",
+      "owned_dependencies": [
+        "github.com/faustbrian/go-queue",
+        "github.com/faustbrian/go-rabbitmq-queues"
+      ],
+      "reverse_owned_dependencies": [],
+      "external_runtime_dependencies": [
+        "github.com/stretchr/testify",
+        "go.uber.org/goleak"
+      ],
+      "required_services": [
+        "rabbitmq"
       ],
       "build_tags": [],
       "test_tags": [

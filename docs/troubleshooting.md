@@ -46,16 +46,18 @@ Split large payloads into external object storage and enqueue a reference.
 
 ## RabbitMQ enqueue times out
 
-`Queue` waits for a publisher confirmation. Check broker alarms, disk/network
-latency, and `WithPublishTimeout`; do not treat a timeout as proof that the
-broker did not receive the message. Use an idempotency key when retrying.
+`Queue` reconciles a mandatory return and publisher confirmation. Check broker
+alarms, disk/network latency, topology routing, and `WithPublishTimeout`; do not
+treat an ambiguous timeout as proof that the broker did not receive the
+message. Reuse the stable message ID and preserve application idempotency.
 
 ## RabbitMQ does not recover after a broker restart
 
-`WithReconnectConfig` bounds initial connection attempts; it does not rebuild a
-live worker's AMQP connection and channel. Treat a connection-loss error as
-terminal, shut down that queue, and construct a replacement worker under a
-supervisor. The integration suite proves this replacement flow.
+`NativeConfig.Connection.Recovery` owns bounded cancellation-aware recovery for
+the producer and consumer resources. Check its attempt and delay bounds,
+endpoint set, DNS, credentials, TLS roots, and broker cancellation reason. If
+recovery reaches its terminal state, drain or stop the queue and let process
+supervision replace the worker; do not loop unboundedly inside the adapter.
 
 ## No NATS redelivery
 

@@ -35,9 +35,11 @@ explicit import alias is recommended.
     `WithQueueSize(0)` only when intentionally preserving unlimited growth.
 11. RabbitMQ publishes are persistent and synchronously confirmed within
     `WithPublishTimeout` (five seconds by default).
-12. RabbitMQ declares package-owned dead-letter topology by default. Existing
-    queues must use matching dead-letter arguments or be safely drained and
-    redeclared before upgraded workers start.
+12. RabbitMQ now requires explicit `NativeConfig`, stable message identity,
+    verified TLS, infrastructure-owned topology, manual settlement, and a
+    distinct configured terminal route. Upgrade the parent module first so its
+    archive no longer owns the same package path, then install the independently
+    tagged `rabbitmq` module.
 13. NSQ now publishes bounded terminal envelopes before `FIN`; configure the
     terminal topic and update operations that previously expected malformed
     work to disappear.
@@ -46,6 +48,10 @@ explicit import alias is recommended.
 
 Migrate one backend at a time, compare retry and shutdown behavior in staging,
 and verify handler idempotency before enabling explicit redelivery paths.
+For RabbitMQ, canary the adapter against the existing topology, drain legacy
+consumers before cutover, and retain the same topology and message-ID derivation
+for rollback. Do not run old and new workers together when retry or terminal
+policy differs.
 
 For Redis-to-Valkey adoption, deploy a separate Valkey stream and group. If a
 temporary dual-publish is necessary, carry the same application idempotency key
