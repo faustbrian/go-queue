@@ -10,7 +10,6 @@ targets=(
   "./managementhttp:FuzzHandlerCommandBody"
   "./nats:FuzzRequestDelivery"
   "./nsq:FuzzRequestDelivery"
-  "./rabbitmq:FuzzRequestDelivery"
   "./redisdb:FuzzRequestDelivery"
   "./redisstream:FuzzRequestDelivery"
   "./valkeystream:FuzzDeliveryEnvelope"
