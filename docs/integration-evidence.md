@@ -19,7 +19,8 @@ Pub/Sub rejects an outage publish and resubscribes after restart. Redis Streams
 retains backlog across restart. The nested RabbitMQ adapter job proves
 mandatory confirmed queueing, request and broker-confirmed settlement,
 confirmed retry-before-ACK, confirmed terminal replacement, TLS, and producer/
-consumer failure isolation against CI-hosted Docker. The native dependency
+consumer failure isolation against CI-hosted Docker with Go 1.27.0 on Ubuntu
+24.04 amd64. The native dependency
 separately proves bounded recovery, restart, node loss, quorum leader failover,
 network partition, rolling upgrade, prolonged outage, and reconnect storms.
 

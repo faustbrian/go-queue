@@ -14,6 +14,9 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Run repository verification with Go 1.27.0 so the nested RabbitMQ adapter
+  and CodeQL build use the toolchain required by the native queue dependency.
+
 - Remove direct AMQP ownership from the root module. RabbitMQ adopters now use
   `github.com/faustbrian/go-queue/rabbitmq` as a nested release after upgrading
   the parent module to the release that excludes the former package archive.

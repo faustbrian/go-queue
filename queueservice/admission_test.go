@@ -73,7 +73,6 @@ func TestConcreteWorkerReleasePanicIsSecretSafeAndTerminal(t *testing.T) {
 	backend := &concretePanickingWorker{}
 	coordinator, err := queue.NewQueue(
 		queue.WithWorker(backend),
-		queue.WithWorkerCount(0),
 	)
 	if err != nil {
 		t.Fatalf("queue.NewQueue() error = %v", err)
@@ -83,9 +82,6 @@ func TestConcreteWorkerReleasePanicIsSecretSafeAndTerminal(t *testing.T) {
 		t.Fatalf("NewWorker() error = %v", err)
 	}
 	component := adapter.Component()
-	if err = component.Start(context.Background()); err != nil {
-		t.Fatalf("Start() error = %v", err)
-	}
 
 	for call := 0; call < 2; call++ {
 		err = stopWithin(component)

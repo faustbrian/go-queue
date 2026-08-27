@@ -5,6 +5,11 @@ versioning once released.
 
 ## Unreleased
 
+### Changed
+
+- Align the parent queue dependency with `v1.0.1`, the archive required by the
+  independently released RabbitMQ compatibility adapter.
+
 ### Documentation
 
 - Move detailed module guidance behind a concise README and documentation index.

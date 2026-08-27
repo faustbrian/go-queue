@@ -130,6 +130,9 @@ Credential providers must return fresh owned credentials. Do not include
 credentials, certificates, payloads, or arbitrary headers in logs or errors.
 Message identity and failure codes must be stable, bounded, and non-sensitive.
 
+CI broker evidence runs with Go 1.27.0 on Ubuntu 24.04 amd64 and RabbitMQ
+4.3.5 over verified TLS.
+
 ## FAQ
 
 ### Should new services use this module?

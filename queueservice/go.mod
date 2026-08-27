@@ -4,7 +4,7 @@ go 1.26.6
 
 require (
 	github.com/faustbrian/go-correlation v1.0.0
-	github.com/faustbrian/go-queue v1.0.0
+	github.com/faustbrian/go-queue v1.0.1
 	github.com/faustbrian/go-service v1.0.0
 	github.com/redis/go-redis/v9 v9.19.0
 	go.opentelemetry.io/otel v1.44.0
