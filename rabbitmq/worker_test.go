@@ -366,6 +366,50 @@ func TestQueueEstablishesBindingBeforePublishing(t *testing.T) {
 	assert.Equal(t, (<-chan amqp.Delivery)(deliveries), worker.tasks)
 }
 
+func TestQueuePreservesLegacyExchangeRouting(t *testing.T) {
+	for _, exchangeKind := range []string{
+		ExchangeDirect,
+		ExchangeTopic,
+		ExchangeFanout,
+		ExchangeHeaders,
+	} {
+		t.Run(exchangeKind, func(t *testing.T) {
+			connection := &fakeAMQPConnection{}
+			confirmations := make(chan amqp.Confirmation, 1)
+			confirmations <- amqp.Confirmation{DeliveryTag: 1, Ack: true}
+			channel := &fakeAMQPChannel{
+				deliveries:    make(chan amqp.Delivery),
+				confirmations: confirmations,
+			}
+			withRabbitConnector(t, connection, channel, nil)
+			worker, err := NewWorkerE(
+				WithExchangeName("events"),
+				WithExchangeType(exchangeKind),
+				WithQueue("jobs"),
+				WithRoutingKey("jobs.created"),
+			)
+			require.NoError(t, err)
+
+			message := job.NewMessage(rawMessage("payload"))
+			require.NoError(t, worker.Queue(&message))
+
+			require.Len(t, channel.declaredExchanges, 2)
+			assert.Equal(t, exchangeDeclaration{
+				name: "events", kind: exchangeKind, durable: true,
+			}, channel.declaredExchanges[0])
+			require.Len(t, channel.bindings, 2)
+			assert.Equal(t, queueBinding{
+				queue: "jobs", routingKey: "jobs.created", exchange: "events",
+				arguments: nil,
+			}, channel.bindings[1])
+			assert.Equal(t, "events", channel.publishExchange)
+			assert.Equal(t, "jobs.created", channel.publishRoutingKey)
+			assert.False(t, channel.publishMandatory)
+			require.NoError(t, worker.Shutdown())
+		})
+	}
+}
+
 func TestQueueRequiresPositivePublisherConfirmation(t *testing.T) {
 	message := job.NewMessage(rawMessage("payload"))
 
@@ -600,6 +644,7 @@ type fakeAMQPChannel struct {
 	publishContext    context.Context
 	publishExchange   string
 	publishRoutingKey string
+	publishMandatory  bool
 	confirmations     chan amqp.Confirmation
 	confirms          int
 	cancels           int
@@ -625,6 +670,7 @@ type queueBinding struct {
 	queue      string
 	routingKey string
 	exchange   string
+	arguments  amqp.Table
 }
 
 func (c *fakeAMQPChannel) ExchangeDeclare(
@@ -652,10 +698,11 @@ func (c *fakeAMQPChannel) QueueDeclare(
 }
 
 func (c *fakeAMQPChannel) QueueBind(
-	queue, routingKey, exchange string, _ bool, _ amqp.Table,
+	queue, routingKey, exchange string, _ bool, arguments amqp.Table,
 ) error {
 	c.bindings = append(c.bindings, queueBinding{
 		queue: queue, routingKey: routingKey, exchange: exchange,
+		arguments: arguments,
 	})
 	if c.bindCalls < len(c.bindErrors) {
 		err := c.bindErrors[c.bindCalls]
@@ -695,12 +742,13 @@ func (c *fakeAMQPChannel) NotifyPublish(receiver chan amqp.Confirmation) chan am
 func (c *fakeAMQPChannel) PublishWithContext(
 	ctx context.Context,
 	exchange, routingKey string,
-	_, _ bool,
+	mandatory, _ bool,
 	message amqp.Publishing,
 ) error {
 	c.publishContext = ctx
 	c.publishExchange = exchange
 	c.publishRoutingKey = routingKey
+	c.publishMandatory = mandatory
 	c.published = message
 	return c.publishErr
 }
