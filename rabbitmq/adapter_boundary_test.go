@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"context"
 	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -290,7 +291,7 @@ func TestAdapterRequestReportsEveryBoundedTerminalState(t *testing.T) {
 			prepare: func(adapter *adapterWorker, _ *recordingNativeConsumer) {
 				adapter.consumerErr = consumerErr
 			},
-			timeout: time.Hour, want: consumerErr,
+			timeout: time.Nanosecond, want: consumerErr,
 		},
 		"request timeout": {
 			prepare: func(*adapterWorker, *recordingNativeConsumer) {},
@@ -325,6 +326,125 @@ func TestAdapterRequestReportsEveryBoundedTerminalState(t *testing.T) {
 				t.Fatalf("request() = (%v, %v), want %v", message, err, test.want)
 			}
 		})
+	}
+}
+
+func TestAdapterOmitsZeroPriorityFromReplacementPublication(t *testing.T) {
+	t.Parallel()
+
+	producer := &recordingNativeProducer{
+		result: rabbitmqqueue.PublishResult{State: rabbitmqqueue.PublishConfirmed},
+	}
+	message := job.NewMessage(adapterTask{body: []byte("payload")})
+	adapter := &adapterWorker{
+		config: testNativeConfig(),
+		options: newOptions(
+			WithQueue("jobs"), WithExchangeName("events"),
+			WithExchangeType(ExchangeDirect), WithRoutingKey("jobs.created"),
+		),
+		producer: producer,
+	}
+	settlement := adapter.resolveFailure(
+		t.Context(),
+		rabbitmqqueue.Delivery{
+			Body: message.Bytes(), MessageID: "job-1", Priority: 0,
+			Headers: []rabbitmqqueue.Header{
+				rabbitmqqueue.Int64Header(deliveryAttemptHeader, 1),
+			},
+		},
+		&message,
+		errors.New("retryable"),
+	)
+	if settlement.Method != rabbitmqqueue.SettlementAcknowledge {
+		t.Fatalf("source settlement = %#v, want ACK", settlement)
+	}
+	if priority := producer.publications[0].Message.Priority; priority != nil {
+		t.Fatalf("replacement priority = %d, want omitted", *priority)
+	}
+}
+
+func TestAdapterDeliveryAttemptHonorsHeaderIdentityAndBounds(t *testing.T) {
+	t.Parallel()
+
+	for _, test := range []struct {
+		name    string
+		headers []rabbitmqqueue.Header
+		want    int64
+		valid   bool
+	}{
+		{name: "absent", want: 1, valid: true},
+		{
+			name: "unrelated header before attempt",
+			headers: []rabbitmqqueue.Header{
+				rabbitmqqueue.StringHeader("tenant", "one"),
+				rabbitmqqueue.Int64Header(deliveryAttemptHeader, 2),
+			},
+			want: 2, valid: true,
+		},
+		{
+			name: "minimum", headers: []rabbitmqqueue.Header{
+				rabbitmqqueue.Int64Header(deliveryAttemptHeader, 1),
+			}, want: 1, valid: true,
+		},
+		{
+			name: "maximum", headers: []rabbitmqqueue.Header{
+				rabbitmqqueue.Int64Header(deliveryAttemptHeader, job.MaxRetryCount+1),
+			}, want: job.MaxRetryCount + 1, valid: true,
+		},
+		{
+			name: "zero", headers: []rabbitmqqueue.Header{
+				rabbitmqqueue.Int64Header(deliveryAttemptHeader, 0),
+			}, valid: false,
+		},
+		{
+			name: "above maximum", headers: []rabbitmqqueue.Header{
+				rabbitmqqueue.Int64Header(deliveryAttemptHeader, job.MaxRetryCount+2),
+			}, want: job.MaxRetryCount + 2, valid: false,
+		},
+		{
+			name: "wrong type", headers: []rabbitmqqueue.Header{
+				rabbitmqqueue.StringHeader(deliveryAttemptHeader, "1"),
+			}, valid: false,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, valid := adapterDeliveryAttempt(test.headers)
+			if got != test.want || valid != test.valid {
+				t.Fatalf("adapterDeliveryAttempt() = (%d, %t), want (%d, %t)", got, valid, test.want, test.valid)
+			}
+		})
+	}
+}
+
+func TestAdapterSettlementHeadersReplaceOwnedMetadataOnly(t *testing.T) {
+	t.Parallel()
+
+	headers := []rabbitmqqueue.Header{
+		rabbitmqqueue.Int64Header(deliveryAttemptHeader, 1),
+		rabbitmqqueue.StringHeader(classificationHeader, "retryable"),
+		rabbitmqqueue.StringHeader(failureCodeHeader, "temporary"),
+		rabbitmqqueue.Int64Header(envelopeVersionHeader, 1),
+		rabbitmqqueue.StringHeader(sourceQueueHeader, "old-queue"),
+		rabbitmqqueue.StringHeader(sourceExchangeHeader, "old-exchange"),
+		rabbitmqqueue.StringHeader(sourceRoutingKeyHeader, "old-route"),
+		rabbitmqqueue.StringHeader("tenant", "one"),
+	}
+	want := []rabbitmqqueue.Header{
+		rabbitmqqueue.StringHeader("tenant", "one"),
+		rabbitmqqueue.Int64Header(deliveryAttemptHeader, 2),
+	}
+	if got := adapterSettlementHeaders(headers, 2); !reflect.DeepEqual(got, want) {
+		t.Fatalf("adapterSettlementHeaders() = %#v, want %#v", got, want)
+	}
+}
+
+func TestWorkerRequestRejectsShutdownBeforeAdapterAccess(t *testing.T) {
+	t.Parallel()
+
+	worker := &Worker{stopFlag: 1}
+	message, err := worker.Request()
+	if message != nil || !errors.Is(err, queue.ErrQueueHasBeenClosed) {
+		t.Fatalf("Request() = (%v, %v), want closed queue", message, err)
 	}
 }
 
