@@ -389,7 +389,6 @@ func adapterSettlementHeaders(headers []rabbitmqqueue.Header, attempt int64) []r
 		switch header.Key {
 		case deliveryAttemptHeader, classificationHeader, failureCodeHeader, envelopeVersionHeader,
 			sourceQueueHeader, sourceExchangeHeader, sourceRoutingKeyHeader:
-			continue
 		default:
 			result = append(result, header)
 		}

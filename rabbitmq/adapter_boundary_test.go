@@ -439,8 +439,6 @@ func TestAdapterSettlementHeadersReplaceOwnedMetadataOnly(t *testing.T) {
 }
 
 func TestWorkerRequestRejectsShutdownBeforeAdapterAccess(t *testing.T) {
-	t.Parallel()
-
 	worker := &Worker{stopFlag: 1}
 	message, err := worker.Request()
 	if message != nil || !errors.Is(err, queue.ErrQueueHasBeenClosed) {
