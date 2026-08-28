@@ -5,6 +5,8 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-08-28
+
 ### Added
 
 - Add the independently versioned `rabbitmq` compatibility module over
@@ -411,5 +413,6 @@ versioning and Keep a Changelog structure.
   results do not depend on scheduler selection between simultaneously ready
   channels.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.1
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.0
