@@ -4,6 +4,8 @@ All notable changes to the RabbitMQ compatibility module are documented here.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-28
+
 ### Added
 
 - Replace direct AMQP ownership with an explicit compatibility adapter over
@@ -25,3 +27,6 @@ All notable changes to the RabbitMQ compatibility module are documented here.
 - Preserve malformed, permanent, exhausted, canceled, infrastructure, repeated
   settlement, and repeated shutdown outcomes without exposing broker details.
 - Reject invalid exchange policy without logging caller-controlled identities.
+
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/rabbitmq/v1.0.0...HEAD
+[1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/rabbitmq/v1.0.0
