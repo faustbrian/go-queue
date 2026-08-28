@@ -5,6 +5,33 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+### Added
+
+- Add the independently versioned `rabbitmq` compatibility module over
+  `go-rabbitmq-queues`, with explicit native policy, stable message identity,
+  mandatory persistent publishing, confirmed retry and terminal replacement,
+  bounded request bridging, and independent producer and consumer resources.
+
+### Changed
+
+- Run repository verification with Go 1.27.0 so the nested RabbitMQ adapter
+  and CodeQL build use the toolchain required by the native queue dependency.
+
+- Remove direct AMQP ownership from the root module. RabbitMQ adopters now use
+  `github.com/faustbrian/go-queue/rabbitmq` as a nested release after upgrading
+  the parent module to the release that excludes the former package archive.
+
+### Documentation
+
+- Align maintained documentation with the stable v1 release contract and
+  remove obsolete candidate or verdict wording.
+
+- Clarify how shared safety-policy updates are coordinated across standalone
+  repositories.
+
+- Replace archived monorepo links and completed execution artifacts with a
+  standalone, human-oriented documentation structure.
+
 ## [1.0.0] - 2026-08-25
 
 ### Changed
@@ -39,7 +66,7 @@ versioning and Keep a Changelog structure.
 - Replace obsolete standalone-repository links and workflow claims with
   monorepo-canonical targets and current release guidance.
 
-- Link the package README to the repository-wide Golib documentation portal.
+- Link the package README to package-owned documentation.
 
 ### Added
 

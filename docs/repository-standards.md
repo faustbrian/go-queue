@@ -8,12 +8,10 @@ This repository follows the shared maintenance baseline used by the
 Every repository contains `.gitattributes`, `.gitignore`,
 `.golangci.yml`, `AGENTS.md`, `CHANGELOG.md`, `CLAUDE.md`,
 `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `LICENSE`, `Makefile`, `NOTICE`,
-`README.md`, `ROADMAP.md`, `SECURITY.md`, `THIRD_PARTY_NOTICES.md`,
-`llms.txt`, and `llms-full.txt`.
+`README.md`, `ROADMAP.md`, `SECURITY.md`, and `THIRD_PARTY_NOTICES.md`.
 
-AI planning and execution briefs live in `.ai/GOAL.md` and
-`.ai/GOAL_HARDEN.md`, keeping internal agent material separate from the
-package's public documentation surface.
+Completed implementation plans and verification snapshots belong in issue
+tracking or Git history rather than the released source tree.
 
 `NOTICE` identifies project and inherited ownership. `THIRD_PARTY_NOTICES.md`
 separately records detailed fork provenance and third-party attribution. Both
@@ -24,9 +22,9 @@ provenance requires it.
 ## Mandatory Documentation
 
 The shared taxonomy is lowercase kebab-case and includes a documentation
-index, quickstart, adoption guide, API reference, architecture, examples,
+index, quickstart, usage guidance, API reference, architecture, examples,
 cookbook, FAQ, troubleshooting, migration, compatibility, performance,
-hardening, security, Go safety and concurrency, and releasing guide.
+security, Go safety and concurrency, and releasing guide.
 Package-specific documents extend this taxonomy without renaming shared
 concepts.
 

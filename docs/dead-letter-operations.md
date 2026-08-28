@@ -21,7 +21,7 @@ from an HTTP route or control-plane screen.
 ## Destination outage or capacity pressure
 
 Redis Streams and Valkey Streams leave the source pending when terminal append
-fails. NSQ sends `REQ` when terminal publication fails. RabbitMQ negatively
+fails. NSQ sends `REQ` when terminal publication fails. The RabbitMQ adapter negatively
 acknowledges and requeues after a failed terminal publish or confirmation.
 Do not delete or acknowledge the source to reduce the visible backlog. Restore
 the destination, verify one canary terminal transfer, then increase worker or
@@ -36,7 +36,7 @@ must never be treated as successful dead-lettering.
 ## Ambiguous append and settlement outcomes
 
 For Redis Streams and Valkey Streams, append succeeds before source `XACK`.
-For NSQ, terminal publish succeeds before `FIN`. For RabbitMQ, a publisher
+For NSQ, terminal publish succeeds before `FIN`. For the RabbitMQ adapter, a publisher
 confirmation arrives before source `basic.ack`. Process death or response loss
 between those steps can produce a dead letter plus a recoverable source.
 

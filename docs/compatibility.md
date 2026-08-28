@@ -14,11 +14,11 @@ The project uses semantic versioning.
   replace Redis.
 - Security bounds are contracts: encoded messages default to 1 MiB, retry count
   is at most 100, and the in-memory queue defaults to 10,000 pending jobs.
-- `CloseAdmission`, `ReleaseContext`, and `queueservice` are additive pre-v1
-  APIs. Existing `Shutdown` and `Release` retain their force-compatible
+- `CloseAdmission`, `ReleaseContext`, and `queueservice` are stable v1 APIs.
+  Existing `Shutdown` and `Release` retain their force-compatible
   signatures and cancellation behavior.
 - `job.Metadata.TraceContext`, `Message.TraceContextMetadata`, and
-  `queueservice` caller-owned trace propagators are additive pre-v1 APIs.
+  `queueservice` caller-owned trace propagators are stable v1 APIs.
   `Metadata.TraceID` remains an operational field and is not interpreted as
   W3C propagation state.
 

@@ -20,7 +20,7 @@ honor its context for prompt cancellation.
 
 Set finite package and backend retry counts and observe `handler_failed` plus
 `rejected`. v1 does not hide backend dead-letter differences: configure the
-RabbitMQ `DeadLetterConfig`, NSQ `WithDeadLetter`, or Redis Streams record
+RabbitMQ adapter `DeadLetterConfig`, NSQ `WithDeadLetter`, or Redis Streams record
 operations explicitly.
 
 Valkey Streams provides a bounded built-in terminal policy through

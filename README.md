@@ -10,10 +10,11 @@
 [![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-`queue` is a consolidated worker queue with owned implementations for
-in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, NSQ, and RabbitMQ. It preserves
-the recognizable `golang-queue` programming model while owning correctness,
-operations, and releases in one module.
+`queue` is a consolidated worker queue with root-module implementations for
+in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ. The
+independently released [`rabbitmq`](rabbitmq/) compatibility module preserves
+the same worker contract while delegating AMQP policy to
+[`go-rabbitmq-queues`](https://github.com/faustbrian/go-rabbitmq-queues).
 
 ## Status
 
@@ -32,7 +33,9 @@ integration evidence.
 go get github.com/faustbrian/go-queue
 ```
 
-Backend packages ship in the same module and are imported explicitly.
+Root backend packages ship in the same module and are imported explicitly.
+Install `github.com/faustbrian/go-queue/rabbitmq` separately when migrating an
+existing `go-queue` RabbitMQ worker.
 
 ## Quickstart
 
@@ -91,7 +94,9 @@ every current replica.
 - handler backoff limited to retryable failures so terminal and uncertain
   classifications reach backend settlement without repeated side effects
 - optional one-time decoded-delivery validation before handler retry execution
-- durable Redis Streams, Valkey Streams, NSQ, and RabbitMQ paths with explicit settlement
+- durable Redis Streams, Valkey Streams, and NSQ paths with explicit settlement
+- an independently versioned RabbitMQ compatibility adapter with confirmed
+  publish-before-ack settlement
 - observable lifecycle events, metrics, and backend identity
 - stable management-protocol version and capability negotiation for external
   control planes
@@ -109,7 +114,8 @@ every current replica.
   admission at safe boundaries and reports in-flight work honestly
 - bounded failed-job and dead-letter inspection with payloads hidden by
   default and privileged content capped at one mebibyte
-- one module and release unit for all maintained backends
+- one root release unit for maintained root backends, with explicit nested
+  release units for optional integrations
 - backend-specific guarantees documented without abstraction leakage
 
 ## Documentation
@@ -121,8 +127,7 @@ Start with the [documentation index](docs/README.md), [quickstart](docs/quicksta
 [integration evidence](docs/integration-evidence.md) before production use.
 Valkey adopters should use the [Valkey 9 Streams guide](docs/backends/valkey-streams.md)
 and [runnable example](examples/valkey).
-
-AI tools can use [llms.txt](llms.txt) and [llms-full.txt](llms-full.txt).
+RabbitMQ migrations should use the [compatibility adapter guide](rabbitmq/README.md).
 Release history is maintained in [CHANGELOG.md](CHANGELOG.md).
 
 ## Development
@@ -147,8 +152,3 @@ Review [docs/security.md](docs/security.md) before processing untrusted jobs.
 `queue` is available under the [MIT License](LICENSE). Fork provenance and
 third-party attribution are recorded in [NOTICE](NOTICE) and
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Ecosystem
-
-Use the [Golib documentation portal](https://github.com/faustbrian/golib/blob/main/docs/index.md)
-to choose companion packages, supported stacks, recipes, and operations guidance.

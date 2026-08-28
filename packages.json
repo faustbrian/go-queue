@@ -219,8 +219,8 @@
       "build_tags": []
     },
     {
-      "module_directory": ".",
-      "directory": "rabbitmq",
+      "module_directory": "rabbitmq",
+      "directory": ".",
       "name": "rabbitmq",
       "import_path": "github.com/faustbrian/go-queue/rabbitmq",
       "kind": "public",

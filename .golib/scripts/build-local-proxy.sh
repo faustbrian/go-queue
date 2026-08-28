@@ -35,10 +35,15 @@ cleanup() {
 }
 trap cleanup EXIT HUP INT TERM
 
-rewrite_owned_dependencies() {
-    GOLIB_PROXY_VERSION="${version}" perl -pi -e \
-        's#(github\.com/faustbrian/go-[a-z0-9/-]+) v0\.0\.0(?:-[0-9]{14}-[0-9a-f]{12})?#$1 $ENV{GOLIB_PROXY_VERSION}#g' \
-        "$1"
+rewrite_repository_dependencies() {
+    local dependency
+    while IFS= read -r dependency; do
+        [[ -n "${dependency}" ]] || continue
+        GOLIB_PROXY_DEPENDENCY="${dependency}" \
+            GOLIB_PROXY_VERSION="${version}" perl -pi -e \
+            's#(\Q$ENV{GOLIB_PROXY_DEPENDENCY}\E) v0\.0\.0(?:-[0-9]{14}-[0-9a-f]{12})?#$1 $ENV{GOLIB_PROXY_VERSION}#g' \
+            "$1"
+    done < <(jq -r '.modules[].module_path' "${root}/modules.json")
 }
 
 selection_file="${temporary}/selected-modules"
@@ -128,7 +133,7 @@ while IFS=$'\t' read -r module_path module_directory; do
 
     cp "${root}/${module_directory}/go.mod" \
         "${proxy_directory}/${version}.mod"
-    rewrite_owned_dependencies "${proxy_directory}/${version}.mod"
+    rewrite_repository_dependencies "${proxy_directory}/${version}.mod"
     printf '{"Version":"%s","Time":"2000-01-01T00:00:00Z"}\n' \
         "${version}" >"${proxy_directory}/${version}.info"
     printf '%s\n' "${version}" >"${proxy_directory}/list"
@@ -165,7 +170,7 @@ while IFS=$'\t' read -r module_path module_directory; do
     )
     tar -xf "${archive_tar}" -C "${archive_root}"
     rm -f "${archive_tar}"
-    rewrite_owned_dependencies "${archive_root}/go.mod"
+    rewrite_repository_dependencies "${archive_root}/go.mod"
 
     find "${archive_directory}" -exec touch -t 200001010000 {} +
     (

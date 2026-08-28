@@ -1,27 +1,44 @@
 package rabbitmq
 
 import (
-	"errors"
+	"context"
 	"testing"
+
+	"github.com/faustbrian/go-queue/core"
+	rabbitmqqueue "github.com/faustbrian/go-rabbitmq-queues"
 )
 
-func BenchmarkReconnectRecovery(b *testing.B) {
-	original := dialAMQP
-	b.Cleanup(func() { dialAMQP = original })
-	attempts := 0
-	dialAMQP = func(string) (amqpConnection, error) {
-		attempts++
-		if attempts%2 == 1 {
-			return nil, errors.New("unavailable")
-		}
-		return &fakeAMQPConnection{}, nil
-	}
-	config := ReconnectConfig{MaxRetries: 2}
+type benchmarkNativeProducer struct{}
 
-	b.ReportAllocs()
-	for b.Loop() {
-		if _, err := dialWithRetry("amqp://rabbit", config); err != nil {
-			b.Fatal(err)
+func (benchmarkNativeProducer) Publish(
+	context.Context,
+	rabbitmqqueue.Publication,
+) (rabbitmqqueue.PublishResult, error) {
+	return rabbitmqqueue.PublishResult{State: rabbitmqqueue.PublishConfirmed}, nil
+}
+
+func (benchmarkNativeProducer) Close(context.Context) error { return nil }
+
+func BenchmarkAdapterConfirmedPublishOverhead(benchmark *testing.B) {
+	config := testNativeConfig()
+	config.MessageID = func(core.TaskMessage) (string, error) { return "benchmark-job", nil }
+	adapter := &adapterWorker{
+		config:   config,
+		producer: benchmarkNativeProducer{},
+		lifetime: benchmark.Context(),
+	}
+	options := newOptions(
+		WithExchangeName("events"),
+		WithExchangeType(ExchangeDirect),
+		WithRoutingKey("jobs"),
+	)
+	task := adapterTask{body: []byte("representative adapter payload")}
+
+	benchmark.ReportAllocs()
+	benchmark.ResetTimer()
+	for range benchmark.N {
+		if err := adapter.queue(options, task); err != nil {
+			benchmark.Fatal(err)
 		}
 	}
 }

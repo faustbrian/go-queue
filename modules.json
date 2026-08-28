@@ -214,18 +214,6 @@
         },
         {
           "module_directory": ".",
-          "directory": "rabbitmq",
-          "name": "rabbitmq",
-          "import_path": "github.com/faustbrian/go-queue/rabbitmq",
-          "kind": "public",
-          "production": true,
-          "executable": true,
-          "coverage_required": true,
-          "build_required": true,
-          "build_tags": []
-        },
-        {
-          "module_directory": ".",
           "directory": "redisdb",
           "name": "redisdb",
           "import_path": "github.com/faustbrian/go-queue/redisdb",
@@ -261,7 +249,7 @@
           "build_tags": []
         }
       ],
-      "purpose": "`queue` is a consolidated worker queue with owned implementations for in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, NSQ, and RabbitMQ. It preserves the recognizable `golang-queue` programming model while owning correctness, operations, and releases in one module.",
+      "purpose": "`queue` is a consolidated worker queue with owned implementations for in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ. It preserves the recognizable `golang-queue` programming model while owning correctness, operations, and releases in one module. RabbitMQ compatibility is released independently from the `rabbitmq` nested module.",
       "lifecycle": "stable",
       "kind": "public library",
       "releasable": true,
@@ -269,7 +257,7 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tag_prefix": "v",
       "owned_dependencies": [],
       "reverse_owned_dependencies": [
@@ -295,7 +283,6 @@
         "github.com/nats-io/nats-server/v2",
         "github.com/nats-io/nats.go",
         "github.com/nsqio/go-nsq",
-        "github.com/rabbitmq/amqp091-go",
         "github.com/redis/go-redis/v9",
         "github.com/stretchr/testify",
         "github.com/testcontainers/testcontainers-go",
@@ -306,7 +293,6 @@
       "required_services": [
         "nats",
         "nsq",
-        "rabbitmq",
         "redis",
         "valkey"
       ],
@@ -318,174 +304,74 @@
       "specifications": [],
       "conformance_corpora": [],
       "provenance": [],
-      "goal_files": [
-        ".ai/GOAL.md",
-        ".ai/GOAL_DEAD_LETTER.md",
-        ".ai/GOAL_HARDEN.md",
-        ".ai/GOAL_VALKEY.md"
-      ],
-      "goal_status": "implementation-evidence-inventoried",
-      "goal_evidence": [
+      "goal_files": [],
+      "goal_status": "not-applicable",
+      "goal_evidence": [],
+      "gates": {
+        "api_compatibility": true,
+        "benchmarks": true,
+        "conformance": false,
+        "coverage": true,
+        "documentation": true,
+        "fuzz": true,
+        "lint": true,
+        "mutation": true,
+        "race": true,
+        "security": true,
+        "tests": true
+      }
+    },
+    {
+      "directory": "rabbitmq",
+      "module_path": "github.com/faustbrian/go-queue/rabbitmq",
+      "go_version": "1.27.0",
+      "packages": [
         {
-          "file": ".ai/GOAL.md",
-          "requirements_sha256": "187e3d8416a502a60e622d55d06186c01b7e6672f0e93b66b426b4f5190bf8eb",
-          "implementation_evidence": [
-            "CHANGELOG.md",
-            "README.md",
-            "docs/README.md",
-            "docs/api.md",
-            "docs/architecture.md",
-            "docs/compatibility.md",
-            "docs/hardening.md",
-            "docs/performance.md",
-            "docs/security.md"
-          ],
-          "verification_gates": [
-            "format-check",
-            "tidy-check",
-            "safety",
-            "vet",
-            "test",
-            "race",
-            "coverage",
-            "lint",
-            "staticcheck",
-            "vulnerability",
-            "secrets",
-            "licenses",
-            "sbom",
-            "fuzz",
-            "mutation",
-            "nilaway",
-            "docs",
-            "api",
-            "conformance",
-            "interoperability",
-            "benchmark"
-          ],
-          "implementation_status": "implemented-requires-fresh-verification"
-        },
-        {
-          "file": ".ai/GOAL_DEAD_LETTER.md",
-          "requirements_sha256": "f5341108a91569b3550bcfe02adfdc7ee6b9fce1740454acc5716ba2b54c795c",
-          "implementation_evidence": [
-            "CHANGELOG.md",
-            "README.md",
-            "docs/README.md",
-            "docs/api.md",
-            "docs/architecture.md",
-            "docs/compatibility.md",
-            "docs/dead-letter-architecture.md",
-            "docs/dead-letter-operations.md",
-            "docs/hardening.md",
-            "docs/performance.md",
-            "docs/security.md"
-          ],
-          "verification_gates": [
-            "format-check",
-            "tidy-check",
-            "safety",
-            "vet",
-            "test",
-            "race",
-            "coverage",
-            "lint",
-            "staticcheck",
-            "vulnerability",
-            "secrets",
-            "licenses",
-            "sbom",
-            "fuzz",
-            "mutation",
-            "nilaway",
-            "docs",
-            "api",
-            "conformance",
-            "interoperability",
-            "benchmark"
-          ],
-          "implementation_status": "implemented-requires-fresh-verification"
-        },
-        {
-          "file": ".ai/GOAL_HARDEN.md",
-          "requirements_sha256": "1c8f6a27c345ea725349d4bd888f4ed468e487c8388079c3cd07607dbe04f3c5",
-          "implementation_evidence": [
-            "CHANGELOG.md",
-            "README.md",
-            "docs/README.md",
-            "docs/api.md",
-            "docs/architecture.md",
-            "docs/compatibility.md",
-            "docs/hardening.md",
-            "docs/performance.md",
-            "docs/security.md"
-          ],
-          "verification_gates": [
-            "format-check",
-            "tidy-check",
-            "safety",
-            "vet",
-            "test",
-            "race",
-            "coverage",
-            "lint",
-            "staticcheck",
-            "vulnerability",
-            "secrets",
-            "licenses",
-            "sbom",
-            "fuzz",
-            "mutation",
-            "nilaway",
-            "docs",
-            "api",
-            "conformance",
-            "interoperability",
-            "benchmark"
-          ],
-          "implementation_status": "implemented-requires-fresh-verification"
-        },
-        {
-          "file": ".ai/GOAL_VALKEY.md",
-          "requirements_sha256": "581cfd4caa13a31a15633aee587a6c72875df24cd26e16afd970dce7e3849056",
-          "implementation_evidence": [
-            "CHANGELOG.md",
-            "README.md",
-            "docs/README.md",
-            "docs/api.md",
-            "docs/architecture.md",
-            "docs/backends/valkey-streams.md",
-            "docs/compatibility.md",
-            "docs/hardening.md",
-            "docs/performance.md",
-            "docs/security.md"
-          ],
-          "verification_gates": [
-            "format-check",
-            "tidy-check",
-            "safety",
-            "vet",
-            "test",
-            "race",
-            "coverage",
-            "lint",
-            "staticcheck",
-            "vulnerability",
-            "secrets",
-            "licenses",
-            "sbom",
-            "fuzz",
-            "mutation",
-            "nilaway",
-            "docs",
-            "api",
-            "conformance",
-            "interoperability",
-            "benchmark"
-          ],
-          "implementation_status": "implemented-requires-fresh-verification"
+          "module_directory": "rabbitmq",
+          "directory": ".",
+          "name": "rabbitmq",
+          "import_path": "github.com/faustbrian/go-queue/rabbitmq",
+          "kind": "public",
+          "production": true,
+          "executable": true,
+          "coverage_required": true,
+          "build_required": true,
+          "build_tags": []
         }
       ],
+      "purpose": "`rabbitmq` is the independently versioned compatibility adapter between the backend-neutral `go-queue` worker contract and the RabbitMQ-native policy in `go-rabbitmq-queues`. It preserves bounded job submission, request, settlement, retry, dead-letter, and shutdown behavior without re-owning AMQP connections or topology.",
+      "lifecycle": "stable",
+      "kind": "public library",
+      "releasable": true,
+      "family": "persistence-and-durability",
+      "family_label": "Persistence And Durability",
+      "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
+      "family_order": 4,
+      "version": "1.0.0",
+      "tag_prefix": "rabbitmq/v",
+      "owned_dependencies": [
+        "github.com/faustbrian/go-queue",
+        "github.com/faustbrian/go-rabbitmq-queues"
+      ],
+      "reverse_owned_dependencies": [],
+      "external_runtime_dependencies": [
+        "github.com/stretchr/testify",
+        "go.uber.org/goleak"
+      ],
+      "required_services": [
+        "rabbitmq"
+      ],
+      "build_tags": [],
+      "test_tags": [
+        "integration"
+      ],
+      "interoperability_tools": [],
+      "specifications": [],
+      "conformance_corpora": [],
+      "provenance": [],
+      "goal_files": [],
+      "goal_status": "not-applicable",
+      "goal_evidence": [],
       "gates": {
         "api_compatibility": true,
         "benchmarks": true,
@@ -558,77 +444,9 @@
       "specifications": [],
       "conformance_corpora": [],
       "provenance": [],
-      "goal_files": [
-        "queueservice/.ai/GOAL.md",
-        "queueservice/.ai/GOAL_HARDEN.md"
-      ],
-      "goal_status": "implementation-evidence-inventoried",
-      "goal_evidence": [
-        {
-          "file": "queueservice/.ai/GOAL.md",
-          "requirements_sha256": "228328089362ceea6d1a05107e6a628d33b1a49b5ada456ef38eb398b43bd02f",
-          "implementation_evidence": [
-            "queueservice/CHANGELOG.md",
-            "queueservice/README.md"
-          ],
-          "verification_gates": [
-            "format-check",
-            "tidy-check",
-            "safety",
-            "vet",
-            "test",
-            "race",
-            "coverage",
-            "lint",
-            "staticcheck",
-            "vulnerability",
-            "secrets",
-            "licenses",
-            "sbom",
-            "fuzz",
-            "mutation",
-            "nilaway",
-            "docs",
-            "api",
-            "conformance",
-            "interoperability",
-            "benchmark"
-          ],
-          "implementation_status": "implemented-requires-fresh-verification"
-        },
-        {
-          "file": "queueservice/.ai/GOAL_HARDEN.md",
-          "requirements_sha256": "81f5b32d2d9a7d4315a7cdb53910aa15027e0c5b189fdd54ad599f059f263f01",
-          "implementation_evidence": [
-            "queueservice/CHANGELOG.md",
-            "queueservice/README.md"
-          ],
-          "verification_gates": [
-            "format-check",
-            "tidy-check",
-            "safety",
-            "vet",
-            "test",
-            "race",
-            "coverage",
-            "lint",
-            "staticcheck",
-            "vulnerability",
-            "secrets",
-            "licenses",
-            "sbom",
-            "fuzz",
-            "mutation",
-            "nilaway",
-            "docs",
-            "api",
-            "conformance",
-            "interoperability",
-            "benchmark"
-          ],
-          "implementation_status": "implemented-requires-fresh-verification"
-        }
-      ],
+      "goal_files": [],
+      "goal_status": "not-applicable",
+      "goal_evidence": [],
       "gates": {
         "api_compatibility": true,
         "benchmarks": true,

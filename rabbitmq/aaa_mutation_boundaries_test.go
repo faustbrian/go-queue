@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
@@ -85,58 +84,4 @@ func TestDefaultOptionsPreserveOperationalBounds(t *testing.T) {
 		Exchange: "test-exchange-dead", Queue: "golang-queue-dead",
 		RoutingKey: "test-key.dead", MaxDeliveryAttempts: 5,
 	}, defaults.deadLetter)
-}
-
-func TestDialWithRetryMakesExactlyTheConfiguredAttempts(t *testing.T) {
-	originalDial := dialAMQP
-	t.Cleanup(func() {
-		dialAMQP = originalDial
-	})
-
-	attempts := 0
-	dialAMQP = func(string) (amqpConnection, error) {
-		attempts++
-		if attempts > 3 {
-			return &fakeAMQPConnection{}, nil
-		}
-		return nil, errors.New("unavailable")
-	}
-	config := ReconnectConfig{
-		MaxRetries: 3, InitialDelay: 2 * time.Millisecond, MaxDelay: 3 * time.Millisecond,
-	}
-	assert.Equal(t, 3*time.Millisecond, nextRabbitMQRetryDelay(config.InitialDelay, config.MaxDelay))
-	assert.Equal(t, 3*time.Millisecond, nextRabbitMQRetryDelay(config.MaxDelay, config.MaxDelay))
-
-	connection, err := dialWithRetry("amqp://rabbit", ReconnectConfig{MaxRetries: 3})
-	assert.Nil(t, connection)
-	assert.Error(t, err)
-	assert.Equal(t, 3, attempts)
-
-	attempts = 0
-	connection, err = dialWithRetry("amqp://rabbit", ReconnectConfig{MaxRetries: 1})
-	assert.Nil(t, connection)
-	assert.Error(t, err)
-	assert.Equal(t, 1, attempts)
-}
-
-func TestWorkerPublishTimeoutBoundaryPrecedesBrokerSetup(t *testing.T) {
-	original := connectRabbitMQ
-	t.Cleanup(func() { connectRabbitMQ = original })
-
-	connections := 0
-	connectRabbitMQ = func(string, ReconnectConfig) (amqpConnection, amqpChannel, error) {
-		connections++
-		return &fakeAMQPConnection{}, &fakeAMQPChannel{}, nil
-	}
-
-	worker, err := NewWorkerE(WithPublishTimeout(0))
-	assert.Nil(t, worker)
-	assert.ErrorContains(t, err, "publish timeout")
-	assert.Zero(t, connections)
-
-	worker, err = NewWorkerE(WithPublishTimeout(time.Nanosecond))
-	assert.NoError(t, err)
-	assert.NotNil(t, worker)
-	assert.Equal(t, 1, connections)
-	assert.NoError(t, worker.Shutdown())
 }

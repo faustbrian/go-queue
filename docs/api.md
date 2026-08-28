@@ -70,11 +70,14 @@ and in Go doc comments beside each option.
 
 All network backends provide `WithRequestTimeout`. Redis Pub/Sub and Redis
 Streams provide `WithConnectTimeout`; NATS and NSQ provide the same startup
-bound, while RabbitMQ uses `WithReconnectConfig`. NSQ also provides
+bound. The nested RabbitMQ adapter requires `WithNativeConfig`, whose
+connection policy owns endpoints, verified TLS, credentials, dial/heartbeat,
+and bounded runtime recovery. NSQ also provides
 `WithTouchInterval`, `WithDeadLetter`, and `DecodeDeadLetter` for converting a
 terminal envelope into a hidden-by-default `management.JobRecord`. RabbitMQ
 provides `WithPublishTimeout`, `DeadLetterConfig`, and `WithDeadLetter` for
-confirmed publish and terminal policy.
+mandatory confirmed publish and terminal policy. `WithReconnectConfig` remains
+only for source compatibility and does not override native recovery.
 
 Redis Streams exposes `Worker.Stats(context.Context)`. Its result reports
 consumer-group `Depth`, `Pending`, `Lag`, whether lag is known, and

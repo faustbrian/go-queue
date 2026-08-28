@@ -10,8 +10,6 @@ required=(
   CLAUDE.md
   CODE_OF_CONDUCT.md
   CONTRIBUTING.md
-  .ai/GOAL.md
-  .ai/GOAL_HARDEN.md
   LICENSE
   Makefile
   NOTICE
@@ -19,8 +17,6 @@ required=(
   ROADMAP.md
   SECURITY.md
   THIRD_PARTY_NOTICES.md
-  llms.txt
-  llms-full.txt
   docs/README.md
   docs/quickstart.md
   docs/adoption.md
@@ -34,7 +30,6 @@ required=(
   docs/migration.md
   docs/compatibility.md
   docs/performance.md
-  docs/hardening.md
   docs/security.md
   docs/releasing.md
   docs/repository-standards.md
@@ -80,5 +75,4 @@ for document in Path(".").rglob("*.md"):
 print("all required files exist and relative Markdown links resolve")
 PY
 
-python3 scripts/generate-llms.py --check
 go test ./... -run '^Example'
