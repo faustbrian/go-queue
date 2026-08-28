@@ -686,6 +686,51 @@ func TestWorkerPreservesPublicSurfaceAndProducerConsumerIsolation(t *testing.T) 
 	}
 }
 
+func TestAdapterShutdownAfterTypedNilConsumerOpenFailure(t *testing.T) {
+	producer := &recordingNativeProducer{}
+	consumerOpenErr := errors.New("consumer unavailable")
+	originalProducer := openNativeProducer
+	originalConsumer := openNativeConsumer
+	openNativeProducer = func(
+		context.Context,
+		rabbitmqqueue.ConnectionConfig,
+		rabbitmqqueue.ProducerConfig,
+	) (nativeProducer, error) {
+		return producer, nil
+	}
+	openNativeConsumer = func(
+		context.Context,
+		rabbitmqqueue.ConnectionConfig,
+		rabbitmqqueue.ConsumerConfig,
+		rabbitmqqueue.DeliveryHandler,
+	) (nativeConsumer, error) {
+		var consumer *rabbitmqqueue.Consumer
+		return consumer, consumerOpenErr
+	}
+	t.Cleanup(func() {
+		openNativeProducer = originalProducer
+		openNativeConsumer = originalConsumer
+	})
+
+	worker, err := NewWorkerE(
+		WithNativeConfig(testNativeConfig()), WithQueue("jobs"), WithTag("worker"),
+		WithExchangeName("events"), WithExchangeType(ExchangeDirect),
+		WithRoutingKey("jobs.created"),
+	)
+	if err != nil {
+		t.Fatalf("NewWorkerE(): %v", err)
+	}
+	if message, err := worker.Request(); message != nil || !errors.Is(err, consumerOpenErr) {
+		t.Fatalf("Request() = (%v, %v), want consumer error", message, err)
+	}
+	if err := worker.Shutdown(); err != nil {
+		t.Fatalf("Shutdown(): %v", err)
+	}
+	if producer.closeCalls != 1 {
+		t.Fatalf("producer close calls = %d, want one", producer.closeCalls)
+	}
+}
+
 func TestNewWorkerPreservesPanicConstructor(t *testing.T) {
 	defer func() {
 		if recover() == nil {

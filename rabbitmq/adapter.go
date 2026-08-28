@@ -163,6 +163,9 @@ func (adapter *adapterWorker) ensureConsumer() error {
 		consumer, openErr := openNativeConsumer(
 			adapter.lifetime, adapter.config.Connection, adapter.config.Consumer, adapter.handle,
 		)
+		if openErr != nil {
+			consumer = nil
+		}
 		adapter.consumerMu.Lock()
 		stopping := adapter.consumerStop
 		if !stopping {

@@ -169,7 +169,7 @@ func TestAdapterDeadLettersMalformedAttemptMetadata(t *testing.T) {
 		rabbitmqqueue.Delivery{
 			Body: []byte("payload"), MessageID: "job-1",
 			Headers: []rabbitmqqueue.Header{
-				rabbitmqqueue.Int64Header(deliveryAttemptHeader, int64(job.MaxRetryCount+2)),
+				rabbitmqqueue.Int64Header(deliveryAttemptHeader, job.MaxRetryCount+2),
 			},
 		},
 		&message,

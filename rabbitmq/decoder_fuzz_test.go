@@ -10,7 +10,7 @@ import (
 func FuzzAdapterDeliveryAttempt(f *testing.F) {
 	f.Add(uint8(rabbitmqqueue.HeaderInt64), int64(1))
 	f.Add(uint8(rabbitmqqueue.HeaderString), int64(1))
-	f.Add(uint8(rabbitmqqueue.HeaderInt64), int64(job.MaxRetryCount+2))
+	f.Add(uint8(rabbitmqqueue.HeaderInt64), job.MaxRetryCount+2)
 
 	f.Fuzz(func(t *testing.T, kind uint8, value int64) {
 		headerKind := rabbitmqqueue.HeaderKind(kind)
