@@ -87,7 +87,7 @@ jq -r --arg selected "${selected}" '
         .releasable == true
         and (.directory as $directory | $directories | index($directory))
     )
-    | [.module_path, .directory]
+    | [.module_path, .directory, .tag_prefix]
     | @tsv
 ' "${root}/modules.json" >"${selection_file}"
 if [[ ! -s "${selection_file}" ]]; then
@@ -106,12 +106,16 @@ if [[ ! -s "${selection_file}" ]]; then
     exit 1
 fi
 
-while IFS=$'\t' read -r module_path module_directory; do
+while IFS=$'\t' read -r module_path module_directory tag_prefix; do
     [[ -n "${module_path}" && -n "${module_directory}" ]] || continue
     if [[ "${module_path}" =~ [A-Z] ]]; then
         printf 'local proxy does not support unescaped uppercase module paths: %s\n' \
             "${module_path}" >&2
         exit 1
+    fi
+    tag="${tag_prefix}${version#v}"
+    if git -C "${root}" show-ref --verify --quiet "refs/tags/${tag}"; then
+        continue
     fi
 
     proxy_directory="${temporary}/proxy/${module_path}/@v"
