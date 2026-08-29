@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "repository": "github.com/faustbrian/go-queue",
-  "go_version": "1.26.6",
+  "go_version": "1.27.0",
   "modules": [
     {
       "directory": ".",
@@ -358,13 +358,9 @@
         "github.com/stretchr/testify",
         "go.uber.org/goleak"
       ],
-      "required_services": [
-        "rabbitmq"
-      ],
+      "required_services": [],
       "build_tags": [],
-      "test_tags": [
-        "integration"
-      ],
+      "test_tags": [],
       "interoperability_tools": [],
       "specifications": [],
       "conformance_corpora": [],

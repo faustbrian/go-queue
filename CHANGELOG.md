@@ -5,6 +5,14 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+### Changed
+
+- Adopt the immutable `go-library-tools` v1.0.6 repository contract while
+  retaining queue-owned API baselines, broker fixtures, and approved mutation
+  evidence.
+- Run the independently versioned modules through one checksum-verified shared
+  workflow without changing their runtime APIs or backend behavior.
+
 ## [1.0.1] - 2026-08-28
 
 ### Added
