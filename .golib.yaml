@@ -1,0 +1,148 @@
+schema_version: 1
+tool_version: v1.0.7
+tool_checksums_sha256: beb57df2dff76b4a0044af843398baecab55a3d420986d9be7c9b14ca88befef
+
+manifest:
+  modules: modules.json
+  packages: packages.json
+
+evidence:
+  root: .verification
+
+mutation:
+  root: .verification/mutation
+  imports:
+    - module: .
+      archive: .verification/mutation/bootstrap/root.zip
+      ledger: .verification/mutation/migration-ledger.json
+    - module: queueservice
+      archive: .verification/mutation/bootstrap/queueservice.zip
+      ledger: .verification/mutation/migration-ledger.json
+
+api:
+  baselines:
+    - module: .
+      mode: apidiff
+      path: api/baseline.txt
+    - module: rabbitmq
+      mode: apidiff
+      path: rabbitmq/api/baseline.txt
+    - module: queueservice
+      mode: apidiff
+      path: queueservice/api/baseline.txt
+
+operations:
+  - module: .
+    gate: fuzz
+    steps:
+      - type: go-test
+        packages: [./job]
+        fuzz: '^FuzzDecodeE$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./job]
+        fuzz: '^FuzzMessageValidation$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./managementhttp]
+        fuzz: '^FuzzStatusHandlerFailsClosed$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./managementhttp]
+        fuzz: '^FuzzHandlerCommandBody$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./nats]
+        fuzz: '^FuzzRequestDelivery$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./nsq]
+        fuzz: '^FuzzRequestDelivery$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./nsq]
+        fuzz: '^FuzzDeadLetterRecord$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./redisdb]
+        fuzz: '^FuzzRequestDelivery$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./redisstream]
+        fuzz: '^FuzzRequestDelivery$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./valkeystream]
+        fuzz: '^FuzzDeliveryEnvelope$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./valkeystream]
+        fuzz: '^FuzzOptions$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./valkeystream]
+        fuzz: '^FuzzNativeResponses$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./valkeystream]
+        fuzz: '^FuzzSettlementStateTransitions$'
+        budget: 10000x
+        timeout: 20m
+  - module: .
+    gate: benchmark
+    steps:
+      - type: make
+        makefile: verification/package.mk
+        target: benchmark
+        timeout: 20m
+  - module: rabbitmq
+    gate: test
+    steps:
+      - type: make
+        makefile: verification/package.mk
+        target: integration
+        timeout: 20m
+  - module: rabbitmq
+    gate: fuzz
+    steps:
+      - type: go-test
+        packages: [.]
+        fuzz: '^FuzzAdapterDeliveryAttempt$'
+        budget: 10000x
+        timeout: 20m
+  - module: rabbitmq
+    gate: benchmark
+    steps:
+      - type: go-test
+        packages: [./...]
+        benchmark: .
+        budget: 100ms
+        timeout: 20m
+  - module: queueservice
+    gate: fuzz
+    steps:
+      - type: go-test
+        packages: [.]
+        fuzz: '^FuzzTransportMetadataIsolation$'
+        budget: 10000x
+        timeout: 20m
+  - module: queueservice
+    gate: benchmark
+    steps:
+      - type: go-test
+        packages: [./...]
+        benchmark: .
+        budget: 100ms
+        timeout: 20m

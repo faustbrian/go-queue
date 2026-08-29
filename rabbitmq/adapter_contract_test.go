@@ -414,6 +414,15 @@ func TestAdapterPublishesTerminalFailuresWithLegacyDeadLetterMetadata(t *testing
 			attempt: 1,
 			code:    "invalid_order",
 		},
+		"permanent at attempt limit": {
+			failure: management.NewFailure(
+				management.ClassificationPermanent,
+				"invalid_order",
+				errors.New("invalid order detail"),
+			),
+			attempt: 5,
+			code:    "invalid_order",
+		},
 		"attempts exhausted": {
 			failure: errors.New("temporary failure"),
 			attempt: 5,
