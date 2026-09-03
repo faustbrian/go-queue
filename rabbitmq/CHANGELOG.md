@@ -4,6 +4,16 @@ All notable changes to the RabbitMQ compatibility module are documented here.
 
 ## [Unreleased]
 
+### Changed
+
+- Publish schema-v2 cohesion metadata for the RabbitMQ compatibility module
+  and include it in the repository's v1.3.0 local and CI cohesion gates.
+
+### Documentation
+
+- Link module guidance to the immutable v1.3.0 Golib ecosystem index and
+  package-family selection contract.
+
 ## [1.0.0] - 2026-08-28
 
 ### Added

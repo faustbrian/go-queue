@@ -7,11 +7,19 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
-- Adopt the immutable `go-library-tools` v1.0.13 repository contract while
+- Adopt the immutable `go-library-tools` v1.3.0 repository contract while
   retaining queue-owned API baselines, broker fixtures, and approved mutation
   evidence.
 - Run the independently versioned modules through one checksum-verified shared
   workflow without changing their runtime APIs or backend behavior.
+- Publish schema-v2 family, selection, ownership, lifecycle, compatibility,
+  and delivery metadata for every releasable module and enforce it through
+  local and required CI cohesion gates.
+
+### Documentation
+
+- Link the queue documentation to the immutable v1.3.0 Golib ecosystem index
+  and package-family guidance.
 
 ## [1.0.1] - 2026-08-28
 
