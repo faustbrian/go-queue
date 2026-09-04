@@ -2,21 +2,22 @@
 
 set -euo pipefail
 
-if [[ "${CI:-}" != true || "${GITHUB_ACTIONS:-}" != true ]]; then
-    printf '%s\n' 'ci-rabbitmq-adapter.sh may run only in GitHub Actions CI' >&2
-    exit 1
-fi
-
 operation="${1:-}"
 if [[ "${operation}" != start && "${operation}" != stop ]]; then
     printf '%s\n' 'usage: ci-rabbitmq-adapter.sh <start|stop>' >&2
     exit 2
 fi
 
+runtime_temp="${RUNNER_TEMP:-${TMPDIR:-/tmp}}"
+if [[ ! -d "${runtime_temp}" ]]; then
+    printf '%s\n' 'RabbitMQ task root does not exist' >&2
+    exit 1
+fi
+
 cleanup_task_root() {
     local task_root="$1"
     case "${task_root}" in
-        "${RUNNER_TEMP}"/go-queue-rabbitmq-adapter.*) ;;
+        "${runtime_temp}"/go-queue-rabbitmq-adapter.*) ;;
         *)
             printf '%s\n' 'refusing to clean an unexpected RabbitMQ task root' >&2
             return 1
@@ -30,42 +31,75 @@ cleanup_task_root() {
 
 if [[ "${operation}" == stop ]]; then
     task_root="${RABBITMQ_ADAPTER_TASK_ROOT:-}"
-    [[ -n "${task_root}" && -f "${task_root}/container-name" ]] || exit 0
+    [[ -n "${task_root}" && -f "${task_root}/container-name" && -f "${task_root}/owner-token" ]] || exit 0
     container_name="$(<"${task_root}/container-name")"
-    if [[ "${container_name}" =~ ^go-queue-rabbitmq-adapter-[0-9]+-[0-9]+$ ]]; then
-        docker rm --force "${container_name}" >/dev/null 2>&1 || true
-    else
+    owner_token="$(<"${task_root}/owner-token")"
+    if [[ ! "${owner_token}" =~ ^[0-9a-f]{24}$ || "${container_name}" != "go-queue-rabbitmq-adapter-${owner_token}" ]]; then
         printf '%s\n' 'refusing to remove an unexpected RabbitMQ container' >&2
         exit 1
+    fi
+    if docker inspect "${container_name}" >/dev/null 2>&1; then
+        container_owner="$(docker inspect --format '{{ index .Config.Labels "com.faustbrian.owner" }}' "${container_name}")"
+        if [[ "${container_owner}" != "${owner_token}" ]]; then
+            printf '%s\n' 'refusing to remove an unowned RabbitMQ container' >&2
+            exit 1
+        fi
+        docker rm --force "${container_name}" >/dev/null
     fi
     cleanup_task_root "${task_root}"
     exit 0
 fi
 
-task_root="$(mktemp -d "${RUNNER_TEMP}/go-queue-rabbitmq-adapter.XXXXXX")"
-container_name="go-queue-rabbitmq-adapter-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-bootstrap_password="$(openssl rand -hex 24)"
-client_password="$(openssl rand -hex 24)"
-erlang_cookie="$(openssl rand -hex 24)"
-cleanup_failure() {
-    local result=$?
+state_file="${RABBITMQ_ADAPTER_STATE_FILE:-}"
+if [[ -z "${state_file}" ]]; then
+    printf '%s\n' 'RABBITMQ_ADAPTER_STATE_FILE is required' >&2
+    exit 1
+fi
+
+owner_token="$(openssl rand -hex 12)"
+if [[ ! "${owner_token}" =~ ^[0-9a-f]{24}$ ]]; then
+    printf '%s\n' 'RabbitMQ owner token must be hexadecimal' >&2
+    exit 1
+fi
+container_name="go-queue-rabbitmq-adapter-${owner_token}"
+task_root="$(mktemp -d "${runtime_temp}/go-queue-rabbitmq-adapter.XXXXXX")"
+cleanup_and_exit() {
+    local result="$1"
     trap - EXIT HUP INT TERM
-    if (( result != 0 )) && docker inspect "${container_name}" >/dev/null 2>&1; then
-        docker logs "${container_name}" 2>&1 |
-            sed \
-                -e "s/${bootstrap_password}/[REDACTED]/g" \
-                -e "s/${client_password}/[REDACTED]/g" \
-                -e "s/${erlang_cookie}/[REDACTED]/g" >&2 || true
+    if docker inspect "${container_name}" >/dev/null 2>&1; then
+        container_owner="$(docker inspect --format '{{ index .Config.Labels "com.faustbrian.owner" }}' "${container_name}")"
+        if [[ "${container_owner}" == "${owner_token}" ]]; then
+            if (( result != 0 )); then
+                docker logs "${container_name}" 2>&1 |
+                    sed \
+                        -e "s/${bootstrap_password:-}/[REDACTED]/g" \
+                        -e "s/${client_password:-}/[REDACTED]/g" \
+                        -e "s/${erlang_cookie:-}/[REDACTED]/g" >&2 || true
+            fi
+            docker rm --force "${container_name}" >/dev/null 2>&1 || true
+        else
+            printf '%s\n' 'refusing to remove an unowned RabbitMQ container during cleanup' >&2
+        fi
     fi
-    docker rm --force "${container_name}" >/dev/null 2>&1 || true
     cleanup_task_root "${task_root}"
     exit "${result}"
 }
-trap cleanup_failure EXIT HUP INT TERM
+handle_exit() {
+    cleanup_and_exit "$?"
+}
+trap handle_exit EXIT
+trap 'cleanup_and_exit 129' HUP
+trap 'cleanup_and_exit 130' INT
+trap 'cleanup_and_exit 143' TERM
+
+bootstrap_password="$(openssl rand -hex 24)"
+client_password="$(openssl rand -hex 24)"
+erlang_cookie="$(openssl rand -hex 24)"
 
 mkdir -p "${task_root}/tls" "${task_root}/rabbitmq-data"
 chmod 0700 "${task_root}/rabbitmq-data"
 printf '%s\n' "${container_name}" >"${task_root}/container-name"
+printf '%s\n' "${owner_token}" >"${task_root}/owner-token"
 
 openssl req -x509 -newkey rsa:2048 -sha256 -days 1 -nodes \
     -subj '/CN=go-queue-rabbitmq-adapter-ci-ca' \
@@ -113,6 +147,7 @@ docker run --detach \
     --name "${container_name}" \
     --user "$(id -u):$(id -g)" \
     --label 'com.faustbrian.task=go-queue-rabbitmq-adapter-ci' \
+    --label "com.faustbrian.owner=${owner_token}" \
     --env "RABBITMQ_DEFAULT_USER=${bootstrap_user}" \
     --env "RABBITMQ_DEFAULT_PASS=${bootstrap_password}" \
     --env "RABBITMQ_DEFAULT_VHOST=${vhost}" \
@@ -193,15 +228,15 @@ post_json "bindings/${encoded_vhost}/e/go-queue-adapter.events/q/go-queue-adapte
 post_json "bindings/${encoded_vhost}/e/go-queue-adapter.dead/q/go-queue-adapter.dead" \
     '{"routing_key":"dead","arguments":{}}'
 
-openssl s_client \
-    -connect "127.0.0.1:${amqp_port}" \
+docker exec -i "${container_name}" openssl s_client \
+    -connect '127.0.0.1:5671' \
     -servername localhost \
-    -CAfile "${task_root}/tls/ca.pem" \
+    -CAfile /etc/rabbitmq/tls/ca.pem \
     -tls1_2 </dev/null >/dev/null 2>&1
-openssl s_client \
-    -connect "127.0.0.1:${amqp_port}" \
+docker exec -i "${container_name}" openssl s_client \
+    -connect '127.0.0.1:5671' \
     -servername localhost \
-    -CAfile "${task_root}/tls/ca.pem" \
+    -CAfile /etc/rabbitmq/tls/ca.pem \
     -tls1_3 </dev/null >/dev/null 2>&1
 
 jq -n \
@@ -225,6 +260,8 @@ jq -n \
     }' >"${task_root}/live-broker.json"
 chmod 0600 "${task_root}/live-broker.json"
 
-printf 'RABBITMQ_ADAPTER_TASK_ROOT=%s\n' "${task_root}" >>"${GITHUB_ENV}"
-printf 'RABBITMQ_ADAPTER_LIVE_CONFIG=%s\n' "${task_root}/live-broker.json" >>"${GITHUB_ENV}"
+jq -n \
+    --arg task_root "${task_root}" \
+    --arg live_config "${task_root}/live-broker.json" \
+    '{task_root: $task_root, live_config: $live_config}' >"${state_file}"
 trap - EXIT HUP INT TERM

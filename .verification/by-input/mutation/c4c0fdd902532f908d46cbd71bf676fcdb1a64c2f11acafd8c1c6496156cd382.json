@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-queue",
+  "module": ".",
+  "package": "job",
+  "gate": "mutation",
+  "input_digest": "sha256:c4c0fdd902532f908d46cbd71bf676fcdb1a64c2f11acafd8c1c6496156cd382",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:9afc2de071dcc434a6381bca2d0c516e87ea7db1f8bf9f0cfedbbab6717800e0",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.27.0",
+    "gremlins_binary_sha256": "sha256:6a2beddc477eb410f8a670b6c9049558563d3c4327498fe31604d31c773a959e"
+  },
+  "completed_at": "2026-09-03T11:05:30.630473Z"
+}
