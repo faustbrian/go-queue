@@ -1,6 +1,6 @@
 GOLIB ?= golib
 
-.PHONY: check ci config inventory repository-check workflows
+.PHONY: check ci cohesion config inventory repository-check specification-check workflows
 
 config:
 	$(GOLIB) config validate
@@ -11,10 +11,16 @@ inventory:
 repository-check:
 	$(GOLIB) repository check
 
+specification-check:
+	$(GOLIB) specification check --online
+
 workflows:
 	$(GOLIB) workflows check
+
+cohesion:
+	$(GOLIB) cohesion check
 
 check:
 	$(GOLIB) check --all
 
-ci: config inventory repository-check workflows check
+ci: config inventory cohesion repository-check specification-check workflows check

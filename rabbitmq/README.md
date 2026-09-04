@@ -75,6 +75,10 @@ The producer opens during construction. The consumer opens lazily on the first
 The complete exported API is available on
 [`pkg.go.dev`](https://pkg.go.dev/github.com/faustbrian/go-queue/rabbitmq).
 
+For ecosystem-wide selection and ownership guidance, see the versioned
+[Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
+and [Persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection).
+
 ## Topology ownership
 
 Production exchanges, queues, bindings, dead-letter policy, and permissions

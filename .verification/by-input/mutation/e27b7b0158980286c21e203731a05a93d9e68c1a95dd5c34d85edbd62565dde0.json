@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-queue",
+  "module": ".",
+  "package": "internal/safeerr",
+  "gate": "mutation",
+  "input_digest": "sha256:e27b7b0158980286c21e203731a05a93d9e68c1a95dd5c34d85edbd62565dde0",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:e7b1bb100b9f1baf97d336f36cd689a2cec4c4aa44238c950e5c4ec307d4df9d",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.27.0",
+    "gremlins_binary_sha256": "sha256:6a2beddc477eb410f8a670b6c9049558563d3c4327498fe31604d31c773a959e"
+  },
+  "completed_at": "2026-09-03T10:44:52.828147Z"
+}

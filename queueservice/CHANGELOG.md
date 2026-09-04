@@ -7,11 +7,21 @@ versioning once released.
 
 ### Changed
 
+- Publish schema-v2 cohesion metadata for the queue service adapter and include
+  it in the repository's v1.3.0 local and CI cohesion gates.
+- Advance the queue service adapter to the repository's v1.4.0 local and CI
+  cohesion gates.
+- Resolve the CLI, correlation, identifier, and service dependencies through
+  their canonical public v1.0.0 module identities.
 - Align the parent queue dependency with `v1.0.1`, the archive required by the
   independently released RabbitMQ compatibility adapter.
 
 ### Documentation
 
+- Link module guidance to the immutable v1.3.0 Golib ecosystem index and
+  package-family selection contract.
+- Advance module guidance links to the immutable v1.4.0 Golib ecosystem index
+  and package-family selection contract.
 - Move detailed module guidance behind a concise README and documentation index.
 ## 1.0.0 - 2026-08-25
 
