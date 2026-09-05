@@ -30,6 +30,12 @@ api:
     - module: queueservice
       mode: apidiff
       path: queueservice/api/baseline.txt
+    - module: adapters/rabbitmq
+      mode: apidiff
+      path: adapters/rabbitmq/api/baseline.txt
+    - module: adapters/service
+      mode: apidiff
+      path: adapters/service/api/baseline.txt
 
 operations:
   - module: .
@@ -139,6 +145,45 @@ operations:
         budget: 10000x
         timeout: 20m
   - module: queueservice
+    gate: benchmark
+    steps:
+      - type: go-test
+        packages: [./...]
+        benchmark: .
+        budget: 100ms
+        timeout: 20m
+  - module: adapters/rabbitmq
+    gate: test
+    steps:
+      - type: make
+        makefile: verification/package.mk
+        target: integration
+        timeout: 20m
+  - module: adapters/rabbitmq
+    gate: fuzz
+    steps:
+      - type: go-test
+        packages: [.]
+        fuzz: '^FuzzAdapterDeliveryAttempt$'
+        budget: 10000x
+        timeout: 20m
+  - module: adapters/rabbitmq
+    gate: benchmark
+    steps:
+      - type: go-test
+        packages: [./...]
+        benchmark: .
+        budget: 100ms
+        timeout: 20m
+  - module: adapters/service
+    gate: fuzz
+    steps:
+      - type: go-test
+        packages: [.]
+        fuzz: '^FuzzTransportMetadataIsolation$'
+        budget: 10000x
+        timeout: 20m
+  - module: adapters/service
     gate: benchmark
     steps:
       - type: go-test

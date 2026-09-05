@@ -5,6 +5,12 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+### Added
+
+- Add independently releasable `adapters/rabbitmq` and `adapters/service`
+  modules alongside the released v1 compatibility paths. Deprecating those
+  paths behind thin facades follows after the successor releases are public.
+
 ## [1.1.0] - 2026-09-05
 
 ### Added

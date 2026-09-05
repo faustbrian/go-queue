@@ -20,7 +20,7 @@ responsibilities.
 - There is no decompression layer. Base64 payload decoding remains inside the
   encoded-envelope limit.
 
-Redis Pub/Sub, Core NATS, NSQ, and the RabbitMQ compatibility adapter do not
+Redis Pub/Sub, Core NATS, NSQ, and the RabbitMQ adapter do not
 expose durable depth or retention controls through their Go APIs. Redis Streams direct admission is
 bounded only when a positive `WithMaxLength` is configured; administrative
 cross-key admission remains subject to documented race overrun. Valkey bounds source admission,
