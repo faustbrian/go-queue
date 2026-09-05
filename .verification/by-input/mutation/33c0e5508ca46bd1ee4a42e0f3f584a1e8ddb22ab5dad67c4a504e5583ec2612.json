@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-queue",
+  "module": "adapters/rabbitmq",
+  "package": ".",
+  "gate": "mutation",
+  "input_digest": "sha256:33c0e5508ca46bd1ee4a42e0f3f584a1e8ddb22ab5dad67c4a504e5583ec2612",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:b845f8df685318cc8674f027fa1be12637300fee28fd021411df4d2b14789b27",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.27.0",
+    "gremlins_binary_sha256": "sha256:6a2beddc477eb410f8a670b6c9049558563d3c4327498fe31604d31c773a959e"
+  },
+  "completed_at": "2026-09-05T15:19:55.97187Z"
+}

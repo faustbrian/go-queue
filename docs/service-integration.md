@@ -1,6 +1,7 @@
 # Service integration
 
-`queueservice` connects concrete queue resources to
+`github.com/faustbrian/go-queue/adapters/service` (package `queueservice`)
+connects concrete queue resources to
 `github.com/faustbrian/go-service` without hiding backend APIs or moving
 retry, ordering, acknowledgement, dead-letter, or business-handler policy out
 of `queue`.

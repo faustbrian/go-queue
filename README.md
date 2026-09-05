@@ -11,12 +11,10 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 `queue` is a consolidated worker queue with root-module implementations for
-in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ. The
-target-oriented Redis Streams API lives at
-[`adapters/redisstream`](adapters/redisstream/), while the released
-[`redisstream`](redisstream/) path remains a deprecated compatibility facade.
-The independently released [`rabbitmq`](rabbitmq/) compatibility module
-preserves the same worker contract while delegating AMQP policy to
+in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ.
+Independently versioned target-oriented adapters provide
+[RabbitMQ](adapters/rabbitmq/) and [service lifecycle](adapters/service/)
+integration. The RabbitMQ adapter delegates AMQP policy to
 [`go-rabbitmq-queues`](https://github.com/faustbrian/go-rabbitmq-queues).
 
 ## Status
@@ -37,11 +35,10 @@ go get github.com/faustbrian/go-queue
 ```
 
 Root backend packages, including `adapters/redisstream`, ship in the same
-module and are imported explicitly. Existing `/redisstream` consumers may
-change the import path and rename the historical `redisdb` package identifier
-to `redisstream`, or retain an explicit `redisdb` import alias. Install
-`github.com/faustbrian/go-queue/rabbitmq` separately when migrating an
-existing `go-queue` RabbitMQ worker.
+module and are imported explicitly. Install the independently versioned
+`github.com/faustbrian/go-queue/adapters/rabbitmq` or
+`github.com/faustbrian/go-queue/adapters/service` module when needed. Existing
+v1 paths remain available during the successor-first release sequence.
 
 ## Quickstart
 
@@ -74,7 +71,7 @@ Scheduler and API processes that only submit Valkey work should use
 or starting worker loops.
 
 Services should compose concrete producers and workers through
-[`queueservice`](docs/service-integration.md). The adapter keeps concrete queue
+[`adapters/service`](docs/service-integration.md). The adapter keeps concrete queue
 APIs visible, closes queue admission during service drain, drains accepted
 publishers before closing an owned transport,
 uses the existing correlation queue boundary for every message and delivery
@@ -101,7 +98,7 @@ every current replica.
   classifications reach backend settlement without repeated side effects
 - optional one-time decoded-delivery validation before handler retry execution
 - durable Redis Streams, Valkey Streams, and NSQ paths with explicit settlement
-- an independently versioned RabbitMQ compatibility adapter with confirmed
+- an independently versioned RabbitMQ adapter with confirmed
   publish-before-ack settlement
 - observable lifecycle events, metrics, and backend identity
 - stable management-protocol version and capability negotiation for external
@@ -133,7 +130,7 @@ Start with the [documentation index](docs/README.md), [quickstart](docs/quicksta
 [integration evidence](docs/integration-evidence.md) before production use.
 Valkey adopters should use the [Valkey 9 Streams guide](docs/backends/valkey-streams.md)
 and [runnable example](examples/valkey).
-RabbitMQ migrations should use the [compatibility adapter guide](rabbitmq/README.md).
+RabbitMQ migrations should use the [target-oriented adapter guide](adapters/rabbitmq/README.md).
 Release history is maintained in [CHANGELOG.md](CHANGELOG.md).
 
 For ecosystem-wide selection and ownership guidance, see the versioned

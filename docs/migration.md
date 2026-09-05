@@ -1,5 +1,33 @@
 # Migration from golang-queue
 
+## Target-oriented adapter paths
+
+Three integration paths have additive successors. The root-module Redis
+Streams pair is already released; RabbitMQ and service lifecycle publish their
+successors before converting the existing v1 paths into deprecated facades:
+
+| Compatibility path | Successor path | Package identifier |
+| --- | --- | --- |
+| `github.com/faustbrian/go-queue/redisstream` | `github.com/faustbrian/go-queue/adapters/redisstream` | `redisdb` becomes unambiguous `redisstream` |
+| `github.com/faustbrian/go-queue/rabbitmq` | `github.com/faustbrian/go-queue/adapters/rabbitmq` | `rabbitmq` |
+| `github.com/faustbrian/go-queue/queueservice` | `github.com/faustbrian/go-queue/adapters/service` | `queueservice` |
+
+For RabbitMQ and service integration, change only the import path. The existing
+v1 implementations remain source-compatible during successor publication and
+become delegating facades in their following patch releases. Redis Streams also
+requires callers that relied on the implicit package identifier to rename
+`redisdb` references to `redisstream`, or to retain an explicit `redisdb`
+import alias. Do not deploy both paths as separate workers: they implement the
+same delivery and ownership rules.
+
+Release order is mandatory. Root `v1.1.0` publishes the Redis Streams successor
+and compatibility facade atomically. Publish `adapters/service/v1.0.0` after
+root `v1.1.0`, then publish the `queueservice` compatibility patch. RabbitMQ is
+an independent sequence: publish `adapters/rabbitmq/v1.0.0`, verify it as a
+clean external consumer, then publish the `rabbitmq` compatibility patch.
+Rollback changes imports back to the v1 path without changing queue topology,
+message identity, retry policy, or shutdown order.
+
 ## Import mapping
 
 | Upstream | Consolidated import |
@@ -10,10 +38,11 @@
 | No upstream package | `github.com/faustbrian/go-queue/valkeystream` |
 | `github.com/golang-queue/nats` | `github.com/faustbrian/go-queue/nats` |
 | `github.com/golang-queue/nsq` | `github.com/faustbrian/go-queue/nsq` |
-| `github.com/golang-queue/rabbitmq` | `github.com/faustbrian/go-queue/rabbitmq` |
+| `github.com/golang-queue/rabbitmq` | `github.com/faustbrian/go-queue/adapters/rabbitmq` |
 
-The `redisstream` package retains the upstream Go package name `redisdb`, so an
-explicit import alias is recommended.
+The compatibility `github.com/faustbrian/go-queue/redisstream` package retains
+the upstream Go package name `redisdb`; the successor package identifier is
+`redisstream`.
 
 ## Intentional divergences
 
@@ -37,9 +66,10 @@ explicit import alias is recommended.
     `WithPublishTimeout` (five seconds by default).
 12. RabbitMQ now requires explicit `NativeConfig`, stable message identity,
     verified TLS, infrastructure-owned topology, manual settlement, and a
-    distinct configured terminal route. Upgrade the parent module first so its
-    archive no longer owns the same package path, then install the independently
-    tagged `rabbitmq` module.
+    distinct configured terminal route. Upgrade the parent module first, then
+    install the independently tagged `adapters/rabbitmq` module. The former
+    `rabbitmq` module becomes a deprecated compatibility facade in its following
+    patch release.
 13. NSQ now publishes bounded terminal envelopes before `FIN`; configure the
     terminal topic and update operations that previously expected malformed
     work to disappear.

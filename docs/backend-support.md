@@ -19,6 +19,6 @@
 “Supported” means the implementation is owned in this module. It does not mean
 identical guarantees. Redis Streams and Valkey Streams remain separate durable
 paths with native clients. Redis Pub/Sub is supported for transient delivery
-only. RabbitMQ is an independently versioned compatibility adapter over
+only. RabbitMQ is an independently versioned target-oriented adapter over
 `go-rabbitmq-queues`, not an implementation owned by the root module. No
 Valkey cluster or managed-failover guarantee is implied.
