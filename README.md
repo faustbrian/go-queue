@@ -12,8 +12,11 @@
 
 `queue` is a consolidated worker queue with root-module implementations for
 in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ. The
-independently released [`rabbitmq`](rabbitmq/) compatibility module preserves
-the same worker contract while delegating AMQP policy to
+target-oriented Redis Streams API lives at
+[`adapters/redisstream`](adapters/redisstream/), while the released
+[`redisstream`](redisstream/) path remains a deprecated compatibility facade.
+The independently released [`rabbitmq`](rabbitmq/) compatibility module
+preserves the same worker contract while delegating AMQP policy to
 [`go-rabbitmq-queues`](https://github.com/faustbrian/go-rabbitmq-queues).
 
 ## Status
@@ -33,8 +36,11 @@ integration evidence.
 go get github.com/faustbrian/go-queue
 ```
 
-Root backend packages ship in the same module and are imported explicitly.
-Install `github.com/faustbrian/go-queue/rabbitmq` separately when migrating an
+Root backend packages, including `adapters/redisstream`, ship in the same
+module and are imported explicitly. Existing `/redisstream` consumers may
+change the import path and rename the historical `redisdb` package identifier
+to `redisstream`, or retain an explicit `redisdb` import alias. Install
+`github.com/faustbrian/go-queue/rabbitmq` separately when migrating an
 existing `go-queue` RabbitMQ worker.
 
 ## Quickstart

@@ -5,6 +5,14 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-05
+
+### Added
+
+- Add target-oriented `adapters/redisstream` to the root module while
+  preserving the released `redisstream` path as a deprecated compatibility
+  facade.
+
 ### Changed
 
 - Adopt the immutable `go-library-tools` v1.0.7 repository contract while
@@ -438,6 +446,7 @@ versioning and Keep a Changelog structure.
   results do not depend on scheduler selection between simultaneously ready
   channels.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.1.0
 [1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.1
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.0

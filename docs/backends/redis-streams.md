@@ -1,8 +1,9 @@
 # Redis Streams setup
 
-Import `github.com/faustbrian/go-queue/redisstream` (the Go package identifier is
-currently `redisdb` for upstream compatibility). Configure a stream, group, and
-unique consumer name.
+Import `github.com/faustbrian/go-queue/adapters/redisstream` as `redisstream`.
+The former `/redisstream` path and its historical `redisdb` identifier remain
+a deprecated compatibility facade. Configure a stream, group, and unique
+consumer name.
 
 Use `WithConnectTimeout`, `WithRequestTimeout`, and `WithBlockTime` to bound
 startup, queue polling, and Redis blocking reads. `Worker.Stats(ctx)` reports
