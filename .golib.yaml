@@ -76,7 +76,7 @@ operations:
         budget: 10000x
         timeout: 20m
       - type: go-test
-        packages: [./redisstream]
+        packages: [./adapters/redisstream]
         fuzz: '^FuzzRequestDelivery$'
         budget: 10000x
         timeout: 20m

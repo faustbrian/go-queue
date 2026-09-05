@@ -1,4 +1,4 @@
-package redisdb
+package redisstream
 
 import (
 	"testing"

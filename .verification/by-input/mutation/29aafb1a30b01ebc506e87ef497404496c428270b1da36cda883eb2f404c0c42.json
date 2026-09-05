@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-queue",
+  "module": ".",
+  "package": "redisstream",
+  "gate": "mutation",
+  "input_digest": "sha256:29aafb1a30b01ebc506e87ef497404496c428270b1da36cda883eb2f404c0c42",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:c000fdecfa18412ce5a967bed7672cbd1e5b906a77dc08fe5ef69c39a6d02755",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.27.0",
+    "gremlins_binary_sha256": "sha256:6a2beddc477eb410f8a670b6c9049558563d3c4327498fe31604d31c773a959e"
+  },
+  "completed_at": "2026-09-05T15:00:44.603951Z"
+}

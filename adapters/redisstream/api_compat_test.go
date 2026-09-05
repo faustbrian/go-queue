@@ -1,4 +1,4 @@
-package redisdb_test
+package redisstream_test
 
 import (
 	"context"
@@ -6,9 +6,9 @@ import (
 	"time"
 
 	queue "github.com/faustbrian/go-queue"
+	"github.com/faustbrian/go-queue/adapters/redisstream"
 	"github.com/faustbrian/go-queue/core"
 	"github.com/faustbrian/go-queue/internal/testutil/apiguard"
-	redisstream "github.com/faustbrian/go-queue/redisstream"
 	"github.com/stretchr/testify/assert"
 )
 
