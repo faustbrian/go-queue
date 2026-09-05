@@ -11,10 +11,10 @@ go get github.com/faustbrian/go-queue
 Redis Streams and Valkey Streams are independent durable adoption paths backed
 by their native Go clients. Select one only after reading its acknowledgement,
 reclaim, dead-letter, and topology guarantees in [backend support](backend-support.md).
-Redis Pub/Sub, NATS, and NSQ remain explicit root-module alternatives. Existing
-RabbitMQ job workers can use the independently versioned
-[`rabbitmq` compatibility adapter](../rabbitmq/README.md); native messaging
-should use `go-rabbitmq-queues` directly.
+Redis Pub/Sub, NATS, and NSQ remain explicit root-module alternatives. RabbitMQ
+job workers should use the independently versioned
+[`adapters/rabbitmq` successor](../adapters/rabbitmq/README.md); native
+messaging should use `go-rabbitmq-queues` directly.
 
 ## Build A Worker
 

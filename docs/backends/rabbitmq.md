@@ -1,7 +1,7 @@
-# RabbitMQ compatibility adapter
+# RabbitMQ adapter
 
-RabbitMQ support is released from the nested
-`github.com/faustbrian/go-queue/rabbitmq` module. It preserves the backend-
+RabbitMQ support is provided by the independently versioned nested
+`github.com/faustbrian/go-queue/adapters/rabbitmq` module. It preserves the backend-
 neutral worker contract while delegating connections, TLS, publishing,
 consumption, recovery, and broker settlement to `go-rabbitmq-queues`. New
 RabbitMQ-native applications should use `go-rabbitmq-queues` directly.
@@ -37,5 +37,5 @@ direct and topic exchanges are supported.
 
 CI broker evidence uses RabbitMQ 4.3.5 over TLS with `go-rabbitmq-queues` and
 `amqp091-go` 1.14.0. See the
-[module guide](../../rabbitmq/README.md) for migration, rollback, limitations,
+[module guide](../../adapters/rabbitmq/README.md) for migration, rollback, limitations,
 security, and API details.

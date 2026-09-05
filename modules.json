@@ -261,7 +261,7 @@
           "build_tags": []
         }
       ],
-      "purpose": "`queue` owns the backend-neutral worker model and root in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ backends. The target-oriented Redis Streams package is released atomically with its deprecated compatibility facade. RabbitMQ compatibility remains independently released from the `rabbitmq` nested module.",
+      "purpose": "`queue` owns the backend-neutral worker model and root in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ backends. The target-oriented Redis Streams package is released atomically with its compatibility facade; RabbitMQ and service lifecycle adapters are independently releasable nested modules.",
       "lifecycle": "stable",
       "kind": "public library",
       "releasable": true,
@@ -273,6 +273,8 @@
       "tag_prefix": "v",
       "owned_dependencies": [],
       "reverse_owned_dependencies": [
+        "github.com/faustbrian/go-queue/adapters/rabbitmq",
+        "github.com/faustbrian/go-queue/adapters/service",
         "github.com/faustbrian/go-cloudevents/adapters/golib",
         "github.com/faustbrian/go-event-sourcing/adapters/queue",
         "github.com/faustbrian/go-idempotency/compatibility/ecosystem",
@@ -380,7 +382,9 @@
         },
         "optional_owned_dependencies": [],
         "adapters": [
+          "github.com/faustbrian/go-queue/adapters/rabbitmq",
           "github.com/faustbrian/go-queue/adapters/redisstream",
+          "github.com/faustbrian/go-queue/adapters/service",
           "github.com/faustbrian/go-queue/managementhttp",
           "github.com/faustbrian/go-queue/nats",
           "github.com/faustbrian/go-queue/nsq",
@@ -439,6 +443,313 @@
         "delivery": {
           "implementation": "in-progress",
           "hardening": "not-started",
+          "release": "not-started"
+        }
+      },
+      "gates": {
+        "api_compatibility": true,
+        "benchmarks": true,
+        "conformance": false,
+        "coverage": true,
+        "documentation": true,
+        "fuzz": true,
+        "lint": true,
+        "mutation": true,
+        "race": true,
+        "security": true,
+        "tests": true
+      }
+    },
+    {
+      "directory": "adapters/rabbitmq",
+      "module_path": "github.com/faustbrian/go-queue/adapters/rabbitmq",
+      "go_version": "1.27.0",
+      "packages": [
+        {
+          "module_directory": "adapters/rabbitmq",
+          "directory": ".",
+          "name": "rabbitmq",
+          "import_path": "github.com/faustbrian/go-queue/adapters/rabbitmq",
+          "kind": "public",
+          "production": true,
+          "executable": true,
+          "coverage_required": true,
+          "build_required": true,
+          "build_tags": []
+        }
+      ],
+      "purpose": "Target-oriented RabbitMQ adapter between go-queue and go-rabbitmq-queues.",
+      "lifecycle": "stable",
+      "kind": "public library",
+      "releasable": true,
+      "family": "persistence-and-durability",
+      "family_label": "Persistence And Durability",
+      "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
+      "family_order": 4,
+      "version": "1.0.0",
+      "tag_prefix": "adapters/rabbitmq/v",
+      "owned_dependencies": [
+        "github.com/faustbrian/go-queue",
+        "github.com/faustbrian/go-rabbitmq-queues"
+      ],
+      "reverse_owned_dependencies": [
+        "github.com/faustbrian/go-queue/rabbitmq"
+      ],
+      "external_runtime_dependencies": [
+        "github.com/stretchr/testify",
+        "go.uber.org/goleak"
+      ],
+      "required_services": [],
+      "build_tags": [],
+      "test_tags": [],
+      "interoperability_tools": [],
+      "specifications": [],
+      "conformance_corpora": [],
+      "provenance": [],
+      "goal_files": [],
+      "goal_status": "not-applicable",
+      "goal_evidence": [],
+      "cohesion": {
+        "family": "persistence-and-durability",
+        "secondary_capabilities": [
+          "configuration",
+          "eventing-and-messaging",
+          "resilience-and-admission",
+          "transport-and-networking"
+        ],
+        "responsibility": "Adapt the backend-neutral go-queue worker contract to RabbitMQ AMQP 0-9-1 publishing, consumption, recovery, settlement, retry, dead-letter, and shutdown policy owned by go-rabbitmq-queues.",
+        "non_goals": [
+          "Own RabbitMQ topology, credentials, application schemas, business idempotency, service lifecycle, or exactly-once processing.",
+          "Project native event distribution, RPC, independent fan-out, or advanced RabbitMQ policy through the compatibility worker surface."
+        ],
+        "public_package_identifier": "rabbitmq",
+        "primary_entry_packages": [
+          "github.com/faustbrian/go-queue/adapters/rabbitmq"
+        ],
+        "package_selection": {
+          "github.com/faustbrian/go-queue/adapters/rabbitmq": "Use when an existing go-queue job workflow must preserve its worker surface over RabbitMQ; use go-rabbitmq-queues directly for native messaging."
+        },
+        "lifecycle_status": "active",
+        "maturity": "stable",
+        "construction_styles": [
+          "functional-options",
+          "must-helper",
+          "open"
+        ],
+        "lifecycle_styles": [
+          "run",
+          "shutdown"
+        ],
+        "ownership": {
+          "configuration": "caller",
+          "mutable_inputs": [
+            "borrow",
+            "copy"
+          ],
+          "runtime_resources": "package",
+          "background_work": "package"
+        },
+        "optional_owned_dependencies": [],
+        "adapters": [],
+        "companions": [
+          "github.com/faustbrian/go-queue/rabbitmq"
+        ],
+        "supported_go": {
+          "minimum": "1.27.0",
+          "tested": [
+            "1.27.0"
+          ]
+        },
+        "supported_platforms": [
+          "portable-go"
+        ],
+        "supported_backends": [
+          "rabbitmq"
+        ],
+        "supported_protocols": [
+          "amqp-0-9-1"
+        ],
+        "documentation": {
+          "readme": "adapters/rabbitmq/README.md",
+          "api": "adapters/rabbitmq/README.md",
+          "adoption": "adapters/rabbitmq/README.md",
+          "security": "adapters/rabbitmq/README.md",
+          "compatibility": "docs/migration.md",
+          "performance": null,
+          "examples": "adapters/rabbitmq/example_test.go",
+          "faq": "adapters/rabbitmq/README.md",
+          "changelog": "adapters/rabbitmq/CHANGELOG.md",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/rabbitmq",
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.5.3/docs/ecosystem/README.md"
+        },
+        "known_good_compatibility_sets": [],
+        "delivery": {
+          "implementation": "in-progress",
+          "hardening": "in-progress",
+          "release": "not-started"
+        }
+      },
+      "gates": {
+        "api_compatibility": true,
+        "benchmarks": true,
+        "conformance": false,
+        "coverage": true,
+        "documentation": true,
+        "fuzz": true,
+        "lint": true,
+        "mutation": true,
+        "race": true,
+        "security": true,
+        "tests": true
+      }
+    },
+    {
+      "directory": "adapters/service",
+      "module_path": "github.com/faustbrian/go-queue/adapters/service",
+      "go_version": "1.26.6",
+      "packages": [
+        {
+          "module_directory": "adapters/service",
+          "directory": ".",
+          "name": "queueservice",
+          "import_path": "github.com/faustbrian/go-queue/adapters/service",
+          "kind": "public",
+          "production": true,
+          "executable": true,
+          "coverage_required": true,
+          "build_required": true,
+          "build_tags": []
+        }
+      ],
+      "purpose": "Target-oriented integration of caller-owned queue resources with go-service lifecycle.",
+      "lifecycle": "stable",
+      "kind": "public library",
+      "releasable": true,
+      "family": "persistence-and-durability",
+      "family_label": "Persistence And Durability",
+      "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
+      "family_order": 4,
+      "version": "1.0.0",
+      "tag_prefix": "adapters/service/v",
+      "owned_dependencies": [
+        "github.com/faustbrian/go-cli",
+        "github.com/faustbrian/go-correlation",
+        "github.com/faustbrian/go-identifier",
+        "github.com/faustbrian/go-queue",
+        "github.com/faustbrian/go-service"
+      ],
+      "reverse_owned_dependencies": [
+        "github.com/faustbrian/go-queue/queueservice",
+        "github.com/faustbrian/go-service/integration/adoption"
+      ],
+      "external_runtime_dependencies": [
+        "github.com/redis/go-redis/v9",
+        "go.opentelemetry.io/otel",
+        "go.opentelemetry.io/otel/trace"
+      ],
+      "required_services": [
+        "nats",
+        "nsq",
+        "rabbitmq",
+        "redis",
+        "valkey"
+      ],
+      "build_tags": [],
+      "test_tags": [
+        "integration"
+      ],
+      "interoperability_tools": [],
+      "specifications": [],
+      "conformance_corpora": [],
+      "provenance": [],
+      "goal_files": [],
+      "goal_status": "not-applicable",
+      "goal_evidence": [],
+      "cohesion": {
+        "family": "persistence-and-durability",
+        "secondary_capabilities": [
+          "configuration",
+          "eventing-and-messaging",
+          "observability",
+          "scheduling-and-orchestration"
+        ],
+        "responsibility": "Integrate caller-selected queue producers and workers with go-service startup, readiness, supervision, admission closure, drain, and shutdown while preserving backend-owned delivery semantics.",
+        "non_goals": [
+          "Choose a queue backend or own retry, scheduling, acknowledgement, redelivery, dead-letter, topology, or application idempotency policy.",
+          "Own telemetry infrastructure, process signals, service construction, or caller resources that were not explicitly transferred for shutdown."
+        ],
+        "public_package_identifier": "queueservice",
+        "primary_entry_packages": [
+          "github.com/faustbrian/go-queue/adapters/service"
+        ],
+        "package_selection": {
+          "github.com/faustbrian/go-queue/adapters/service": "Use to attach queue producers and workers to go-service startup, readiness, supervision, drain, and shutdown."
+        },
+        "lifecycle_status": "active",
+        "maturity": "stable",
+        "construction_styles": [
+          "new-options"
+        ],
+        "lifecycle_styles": [
+          "drain",
+          "run",
+          "shutdown",
+          "start"
+        ],
+        "ownership": {
+          "configuration": "caller",
+          "mutable_inputs": [
+            "borrow",
+            "copy",
+            "transfer"
+          ],
+          "runtime_resources": "shared",
+          "background_work": "caller"
+        },
+        "optional_owned_dependencies": [],
+        "adapters": [],
+        "companions": [
+          "github.com/faustbrian/go-queue/queueservice"
+        ],
+        "supported_go": {
+          "minimum": "1.26.6",
+          "tested": [
+            "1.26.6",
+            "1.27.0"
+          ]
+        },
+        "supported_platforms": [
+          "portable-go"
+        ],
+        "supported_backends": [
+          "in-memory",
+          "nats-core",
+          "nsq",
+          "rabbitmq",
+          "redis-pubsub",
+          "redis-streams",
+          "valkey-streams"
+        ],
+        "supported_protocols": [
+          "w3c-trace-context"
+        ],
+        "documentation": {
+          "readme": "adapters/service/README.md",
+          "api": "adapters/service/docs/reference.md",
+          "adoption": "adapters/service/docs/reference.md",
+          "security": "adapters/service/docs/reference.md",
+          "compatibility": "docs/migration.md",
+          "performance": "adapters/service/docs/reference.md",
+          "examples": "adapters/service/example_test.go",
+          "faq": "adapters/service/docs/reference.md",
+          "changelog": "adapters/service/CHANGELOG.md",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service",
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.5.3/docs/ecosystem/README.md"
+        },
+        "known_good_compatibility_sets": [],
+        "delivery": {
+          "implementation": "in-progress",
+          "hardening": "in-progress",
           "release": "not-started"
         }
       },

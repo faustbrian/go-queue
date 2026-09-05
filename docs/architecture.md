@@ -73,9 +73,11 @@ injection, and optional structured observation. See [migration.md](migration.md)
 
 ## Dependency boundary
 
-All backends live in this module and share one version. Transport clients remain
-external protocol implementations, but consumers no longer select separately
-released `golang-queue` adapter modules.
+The in-memory, Redis, Redis Streams, Valkey Streams, NATS, and NSQ backends live
+in the root module and share one version. RabbitMQ is an independently
+versioned nested adapter module. Transport clients remain external protocol
+implementations; consumers no longer select separately released
+`golang-queue` adapter modules.
 
 Valkey topology is deliberately standalone-only. A generic client interface
 combining Redis and Valkey command sets is prohibited because it would obscure

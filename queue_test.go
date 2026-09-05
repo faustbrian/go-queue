@@ -205,8 +205,10 @@ func TestMockWorkerAndMessage(t *testing.T) {
 	w := mocks.NewMockWorker(controller)
 	w.EXPECT().Shutdown().Return(nil)
 	requested := make(chan struct{}, 1)
+	requestMayReturn := make(chan struct{})
 	w.EXPECT().Request().DoAndReturn(func() (core.TaskMessage, error) {
 		requested <- struct{}{}
+		<-requestMayReturn
 		return m, errors.New("nil")
 	})
 
@@ -218,5 +220,7 @@ func TestMockWorkerAndMessage(t *testing.T) {
 	assert.NotNil(t, q)
 	q.Start()
 	<-requested
+	q.Shutdown()
+	close(requestMayReturn)
 	q.Release()
 }

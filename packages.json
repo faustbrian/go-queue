@@ -207,10 +207,34 @@
       "build_tags": []
     },
     {
+      "module_directory": "adapters/rabbitmq",
+      "directory": ".",
+      "name": "rabbitmq",
+      "import_path": "github.com/faustbrian/go-queue/adapters/rabbitmq",
+      "kind": "public",
+      "production": true,
+      "executable": true,
+      "coverage_required": true,
+      "build_required": true,
+      "build_tags": []
+    },
+    {
       "module_directory": ".",
       "directory": "adapters/redisstream",
       "name": "redisstream",
       "import_path": "github.com/faustbrian/go-queue/adapters/redisstream",
+      "kind": "public",
+      "production": true,
+      "executable": true,
+      "coverage_required": true,
+      "build_required": true,
+      "build_tags": []
+    },
+    {
+      "module_directory": "adapters/service",
+      "directory": ".",
+      "name": "queueservice",
+      "import_path": "github.com/faustbrian/go-queue/adapters/service",
       "kind": "public",
       "production": true,
       "executable": true,

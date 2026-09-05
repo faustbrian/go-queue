@@ -37,7 +37,9 @@ Use this index to evaluate backend guarantees before deploying workers.
 
 ## Optional modules
 
-- [Service lifecycle adapter](../queueservice/docs/README.md)
+- [Redis Streams adapter](../adapters/redisstream/README.md)
+- [RabbitMQ adapter](../adapters/rabbitmq/README.md)
+- [Service lifecycle adapter](../adapters/service/docs/README.md)
 
 ## Maintainers
 
