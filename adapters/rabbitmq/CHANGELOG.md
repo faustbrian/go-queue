@@ -9,6 +9,11 @@
 - Add the target-oriented RabbitMQ adapter as the semantic owner of the
   existing queue compatibility behavior.
 
+### Changed
+
+- Adopt exact-module release rehearsal support so this independently
+  releasable successor can be published without colliding with existing tags.
+
 ### Migration
 
 - Replace imports of `github.com/faustbrian/go-queue/rabbitmq` with
