@@ -1,6 +1,6 @@
 # RabbitMQ adapter
 
-RabbitMQ support is provided by the independently versioned nested
+RabbitMQ support is released from the nested
 `github.com/faustbrian/go-queue/adapters/rabbitmq` module. It preserves the backend-
 neutral worker contract while delegating connections, TLS, publishing,
 consumption, recovery, and broker settlement to `go-rabbitmq-queues`. New

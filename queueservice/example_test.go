@@ -30,16 +30,14 @@ func ExampleNewWorker() {
 		TracePropagator: propagation.TraceContext{},
 		Handler: func(_ context.Context, task core.TaskMessage) error {
 			handled <- string(task.Payload())
-
 			return nil
 		},
 	})
 	if err != nil {
 		return
 	}
-	ring := queue.NewRing(queue.WithFn(handler))
 	concrete, err := queue.NewQueue(
-		queue.WithWorker(ring),
+		queue.WithWorker(queue.NewRing(queue.WithFn(handler))),
 		queue.WithWorkerCount(1),
 	)
 	if err != nil {
@@ -116,7 +114,6 @@ func ExampleNewLifecycleWorker() {
 			Correlation: factory,
 			Handler: func(_ context.Context, task core.TaskMessage) error {
 				fmt.Println(string(task.Payload()))
-
 				return nil
 			},
 			Run: func(

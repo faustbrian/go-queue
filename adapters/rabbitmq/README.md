@@ -39,9 +39,8 @@ and caller-controlled routing identifiers are sensitive.
 
 Use this module when an existing `go-queue` job workflow must use RabbitMQ.
 Use `go-rabbitmq-queues` directly for RabbitMQ-native APIs. The former
-`github.com/faustbrian/go-queue/rabbitmq` path remains available during
-successor publication and becomes a deprecated compatibility facade in its
-following patch release.
+`github.com/faustbrian/go-queue/rabbitmq` path remains available as a deprecated
+compatibility facade.
 
 See the [RabbitMQ guide](../../docs/backends/rabbitmq.md),
 [migration guide](../../docs/migration.md), [changelog](CHANGELOG.md),

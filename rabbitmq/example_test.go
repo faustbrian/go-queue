@@ -2,17 +2,27 @@ package rabbitmq_test
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
+	queue "github.com/faustbrian/go-queue"
 	"github.com/faustbrian/go-queue/core"
 	rabbitmq "github.com/faustbrian/go-queue/rabbitmq"
 	rabbitmqqueue "github.com/faustbrian/go-rabbitmq-queues"
 )
 
 func ExampleNewWorkerE() {
+	worker, err := rabbitmq.NewWorkerE()
+	fmt.Println(worker == nil, errors.Is(err, queue.ErrInvalidConfiguration))
+
+	// Output: true true
+}
+
+func ExampleNativeConfig() {
 	credentials := rabbitmqqueue.CredentialProviderFunc(
 		func(context.Context) (rabbitmqqueue.Credentials, error) {
-			return rabbitmqqueue.Credentials{Username: "worker", Password: []byte("owned-secret")}, nil
+			return rabbitmqqueue.Credentials{Username: "worker", Password: []byte("example-only")}, nil
 		},
 	)
 	_, _ = rabbitmq.NewWorkerE(

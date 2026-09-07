@@ -12,7 +12,7 @@
 
 `queue` is a consolidated worker queue with root-module implementations for
 in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ.
-Independently versioned target-oriented adapters provide
+Independently released target-oriented adapters provide
 [RabbitMQ](adapters/rabbitmq/) and [service lifecycle](adapters/service/)
 integration. The RabbitMQ adapter delegates AMQP policy to
 [`go-rabbitmq-queues`](https://github.com/faustbrian/go-rabbitmq-queues).
@@ -37,8 +37,8 @@ go get github.com/faustbrian/go-queue
 Root backend packages, including `adapters/redisstream`, ship in the same
 module and are imported explicitly. Install the independently versioned
 `github.com/faustbrian/go-queue/adapters/rabbitmq` or
-`github.com/faustbrian/go-queue/adapters/service` module when needed. Existing
-v1 paths remain available during the successor-first release sequence.
+`github.com/faustbrian/go-queue/adapters/service` module when needed. Former
+v1 paths remain deprecated compatibility facades.
 
 ## Quickstart
 
