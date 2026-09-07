@@ -4,6 +4,14 @@ All notable changes to the RabbitMQ compatibility module are documented here.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-07
+
+### Deprecated
+
+- Delegate the released RabbitMQ module to
+  `github.com/faustbrian/go-queue/adapters/rabbitmq`; existing APIs remain
+  source-compatible during the v1 support interval.
+
 ### Changed
 
 - Publish schema-v2 cohesion metadata for the RabbitMQ compatibility module
@@ -17,6 +25,8 @@ All notable changes to the RabbitMQ compatibility module are documented here.
   package-family selection contract.
 - Advance module guidance links to the immutable v1.4.0 Golib ecosystem index
   and package-family selection contract.
+- Restore facade-owned examples and direct support, security, and license
+  navigation.
 
 ## [1.0.0] - 2026-08-28
 
@@ -42,5 +52,6 @@ All notable changes to the RabbitMQ compatibility module are documented here.
   settlement, and repeated shutdown outcomes without exposing broker details.
 - Reject invalid exchange policy without logging caller-controlled identities.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/rabbitmq/v1.0.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/rabbitmq%2Fv1.0.1...HEAD
+[1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/rabbitmq%2Fv1.0.1
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/rabbitmq/v1.0.0

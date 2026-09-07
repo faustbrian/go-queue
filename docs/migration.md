@@ -2,9 +2,7 @@
 
 ## Target-oriented adapter paths
 
-Three integration paths have additive successors. The root-module Redis
-Streams pair is already released; RabbitMQ and service lifecycle publish their
-successors before converting the existing v1 paths into deprecated facades:
+Three released integration paths now have additive successors:
 
 | Compatibility path | Successor path | Package identifier |
 | --- | --- | --- |
@@ -12,13 +10,13 @@ successors before converting the existing v1 paths into deprecated facades:
 | `github.com/faustbrian/go-queue/rabbitmq` | `github.com/faustbrian/go-queue/adapters/rabbitmq` | `rabbitmq` |
 | `github.com/faustbrian/go-queue/queueservice` | `github.com/faustbrian/go-queue/adapters/service` | `queueservice` |
 
-For RabbitMQ and service integration, change only the import path. The existing
-v1 implementations remain source-compatible during successor publication and
-become delegating facades in their following patch releases. Redis Streams also
-requires callers that relied on the implicit package identifier to rename
-`redisdb` references to `redisstream`, or to retain an explicit `redisdb`
-import alias. Do not deploy both paths as separate workers: they implement the
-same delivery and ownership rules.
+For RabbitMQ and service integration, change only the import path; the
+compatibility surface remains source-compatible and delegates runtime behavior
+to the successor. Redis Streams also requires callers that relied on the
+implicit package identifier to rename `redisdb` references to `redisstream`, or
+to retain an explicit `redisdb` import alias. Do not deploy both paths as
+separate workers: they construct the same implementation and therefore share
+the same delivery and ownership rules.
 
 Release order is mandatory. Root `v1.1.0` publishes the Redis Streams successor
 and compatibility facade atomically. Publish `adapters/service/v1.0.0` after
@@ -68,8 +66,7 @@ the upstream Go package name `redisdb`; the successor package identifier is
     verified TLS, infrastructure-owned topology, manual settlement, and a
     distinct configured terminal route. Upgrade the parent module first, then
     install the independently tagged `adapters/rabbitmq` module. The former
-    `rabbitmq` module becomes a deprecated compatibility facade in its following
-    patch release.
+    `rabbitmq` module remains only as a deprecated compatibility facade.
 13. NSQ now publishes bounded terminal envelopes before `FIN`; configure the
     terminal topic and update operations that previously expected malformed
     work to disappear.

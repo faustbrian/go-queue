@@ -3,7 +3,15 @@
 All notable changes follow Keep a Changelog. This module uses semantic
 versioning once released.
 
-## Unreleased
+## [Unreleased]
+
+## [1.0.1] - 2026-09-07
+
+### Deprecated
+
+- Delegate the released queue-service module to
+  `github.com/faustbrian/go-queue/adapters/service`; existing APIs remain
+  source-compatible during the v1 support interval.
 
 ### Changed
 
@@ -13,8 +21,10 @@ versioning once released.
   cohesion gates.
 - Resolve the CLI, correlation, identifier, and service dependencies through
   their canonical public v1.0.0 module identities.
-- Align the parent queue dependency with `v1.0.1`, the archive required by the
-  independently released RabbitMQ compatibility adapter.
+- Align the parent queue dependency with root `v1.1.0`, which publishes the
+  Redis Streams successor and compatibility facade atomically.
+- Preserve the released `OptionsError` diagnostic when applications reassign
+  the exported `ErrInvalidOptions` compatibility sentinel.
 
 ### Documentation
 
@@ -23,6 +33,8 @@ versioning once released.
 - Advance module guidance links to the immutable v1.4.0 Golib ecosystem index
   and package-family selection contract.
 - Move detailed module guidance behind a concise README and documentation index.
+- Restore facade-owned executable examples and direct support, security, and
+  license navigation.
 ## 1.0.0 - 2026-08-25
 
 ### Documentation
@@ -89,3 +101,7 @@ versioning once released.
 - An isolated Kind end-to-end gate that force-deletes Redis- and Valkey-backed
   worker pods at each effect/settlement boundary and verifies competing pod
   recovery against durable backend state.
+
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/queueservice%2Fv1.0.1...HEAD
+[1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/queueservice%2Fv1.0.1
+[1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/queueservice/v1.0.0

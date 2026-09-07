@@ -43,9 +43,8 @@ from unknown outcomes. Callback errors preserve causes without disclosing
 payloads, endpoints, trace baggage, or credentials.
 
 Use this module only to connect queue resources to `go-service`. The former
-`github.com/faustbrian/go-queue/queueservice` path remains available during
-successor publication and becomes a deprecated compatibility facade in its
-following patch release.
+`github.com/faustbrian/go-queue/queueservice` path remains available as a
+deprecated compatibility facade.
 
 See the [technical guide](docs/reference.md), [documentation index](docs/README.md),
 [migration guide](../../docs/migration.md), [changelog](CHANGELOG.md),

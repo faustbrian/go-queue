@@ -785,7 +785,7 @@
           "build_tags": []
         }
       ],
-      "purpose": "`rabbitmq` is the independently versioned compatibility adapter between the backend-neutral `go-queue` worker contract and the RabbitMQ-native policy in `go-rabbitmq-queues`. It preserves bounded job submission, request, settlement, retry, dead-letter, and shutdown behavior without re-owning AMQP connections or topology.",
+      "purpose": "Deprecated v1 compatibility facade for the target-oriented RabbitMQ adapter.",
       "lifecycle": "stable",
       "kind": "public library",
       "releasable": true,
@@ -793,17 +793,15 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tag_prefix": "rabbitmq/v",
       "owned_dependencies": [
         "github.com/faustbrian/go-queue",
+        "github.com/faustbrian/go-queue/adapters/rabbitmq",
         "github.com/faustbrian/go-rabbitmq-queues"
       ],
       "reverse_owned_dependencies": [],
-      "external_runtime_dependencies": [
-        "github.com/stretchr/testify",
-        "go.uber.org/goleak"
-      ],
+      "external_runtime_dependencies": [],
       "required_services": [],
       "build_tags": [],
       "test_tags": [],
@@ -822,10 +820,9 @@
           "resilience-and-admission",
           "transport-and-networking"
         ],
-        "responsibility": "Adapt the backend-neutral go-queue worker contract to RabbitMQ AMQP 0-9-1 publishing, consumption, recovery, settlement, retry, dead-letter, and shutdown policy owned by go-rabbitmq-queues.",
+        "responsibility": "Preserve the released RabbitMQ import path while delegating every public type and operation to adapters/rabbitmq.",
         "non_goals": [
-          "Own RabbitMQ topology, credentials, application schemas, business idempotency, service lifecycle, or exactly-once processing.",
-          "Project native event distribution, RPC, independent fan-out, or advanced RabbitMQ policy through the compatibility worker surface."
+          "Own runtime state, broker policy, topology, or new adapter behavior."
         ],
         "public_package_identifier": "rabbitmq",
         "primary_entry_packages": [
@@ -834,7 +831,7 @@
         "package_selection": {
           "github.com/faustbrian/go-queue/rabbitmq": "Use only when an existing go-queue job workflow must preserve its worker surface over RabbitMQ; use go-rabbitmq-queues directly for RabbitMQ-native messaging."
         },
-        "lifecycle_status": "active",
+        "lifecycle_status": "deprecated",
         "maturity": "stable",
         "construction_styles": [
           "functional-options",
@@ -887,7 +884,7 @@
         },
         "known_good_compatibility_sets": [],
         "delivery": {
-          "implementation": "not-started",
+          "implementation": "in-progress",
           "hardening": "not-started",
           "release": "not-started"
         }
@@ -924,7 +921,7 @@
           "build_tags": []
         }
       ],
-      "purpose": "`queueservice` is the independently versioned lifecycle integration between [`github.com/faustbrian/go-queue`](..) and `github.com/faustbrian/go-service`. It connects caller-owned producers and workers to service startup, readiness, supervision, drain, and shutdown without choosing a backend or moving retry, scheduling, acknowledgement, redelivery, or dead-letter policy out of `queue`.",
+      "purpose": "Deprecated v1 compatibility facade for the target-oriented queue service lifecycle adapter.",
       "lifecycle": "stable",
       "kind": "public library",
       "releasable": true,
@@ -932,34 +929,23 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tag_prefix": "queueservice/v",
       "owned_dependencies": [
-        "github.com/faustbrian/go-cli",
         "github.com/faustbrian/go-correlation",
-        "github.com/faustbrian/go-identifier",
         "github.com/faustbrian/go-queue",
+        "github.com/faustbrian/go-queue/adapters/service",
         "github.com/faustbrian/go-service"
       ],
       "reverse_owned_dependencies": [
         "github.com/faustbrian/go-service/integration/adoption"
       ],
       "external_runtime_dependencies": [
-        "github.com/redis/go-redis/v9",
-        "go.opentelemetry.io/otel",
-        "go.opentelemetry.io/otel/trace"
+        "go.opentelemetry.io/otel"
       ],
-      "required_services": [
-        "nats",
-        "nsq",
-        "rabbitmq",
-        "redis",
-        "valkey"
-      ],
+      "required_services": [],
       "build_tags": [],
-      "test_tags": [
-        "integration"
-      ],
+      "test_tags": [],
       "interoperability_tools": [],
       "specifications": [],
       "conformance_corpora": [],
@@ -975,19 +961,18 @@
           "observability",
           "scheduling-and-orchestration"
         ],
-        "responsibility": "Integrate caller-selected queue producers and workers with go-service startup, readiness, supervision, admission closure, drain, and shutdown while preserving backend-owned delivery semantics.",
+        "responsibility": "Preserve the released queueservice import path while delegating every public type and operation to adapters/service.",
         "non_goals": [
-          "Choose a queue backend or own retry, scheduling, acknowledgement, redelivery, dead-letter, topology, or application idempotency policy.",
-          "Own telemetry infrastructure, process signals, service construction, or caller resources that were not explicitly transferred for shutdown."
+          "Own runtime state, service lifecycle behavior, queue policy, or new adapter behavior."
         ],
         "public_package_identifier": "queueservice",
         "primary_entry_packages": [
           "github.com/faustbrian/go-queue/queueservice"
         ],
         "package_selection": {
-          "github.com/faustbrian/go-queue/queueservice": "Use to attach concrete queue producers or workers to go-service lifecycle, readiness, supervision, drain, correlation, and optional trace propagation."
+          "github.com/faustbrian/go-queue/queueservice": "Use only to preserve existing imports during migration; new adopters should use github.com/faustbrian/go-queue/adapters/service."
         },
-        "lifecycle_status": "active",
+        "lifecycle_status": "deprecated",
         "maturity": "stable",
         "construction_styles": [
           "new-options"
@@ -1035,20 +1020,20 @@
         ],
         "documentation": {
           "readme": "queueservice/README.md",
-          "api": "queueservice/docs/reference.md",
-          "adoption": "queueservice/docs/reference.md",
-          "security": "queueservice/docs/reference.md",
-          "compatibility": "queueservice/docs/reference.md",
-          "performance": "queueservice/docs/reference.md",
-          "examples": "queueservice/example_test.go",
-          "faq": "queueservice/docs/reference.md",
+          "api": "queueservice/README.md",
+          "adoption": "docs/migration.md",
+          "security": "queueservice/README.md",
+          "compatibility": "docs/migration.md",
+          "performance": null,
+          "examples": "queueservice/README.md",
+          "faq": "queueservice/README.md",
           "changelog": "queueservice/CHANGELOG.md",
           "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/queueservice",
-          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md"
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.5.3/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
         "delivery": {
-          "implementation": "not-started",
+          "implementation": "in-progress",
           "hardening": "not-started",
           "release": "not-started"
         }

@@ -15,9 +15,6 @@ mutation:
     - module: .
       archive: .verification/mutation/bootstrap/root.zip
       ledger: .verification/mutation/migration-ledger.json
-    - module: queueservice
-      archive: .verification/mutation/bootstrap/queueservice.zip
-      ledger: .verification/mutation/migration-ledger.json
 
 api:
   baselines:
@@ -125,7 +122,7 @@ operations:
     steps:
       - type: go-test
         packages: [.]
-        fuzz: '^FuzzAdapterDeliveryAttempt$'
+        fuzz: '^FuzzLegacyOptionValuesReachSuccessor$'
         budget: 10000x
         timeout: 20m
   - module: rabbitmq
@@ -141,7 +138,7 @@ operations:
     steps:
       - type: go-test
         packages: [.]
-        fuzz: '^FuzzTransportMetadataIsolation$'
+        fuzz: '^FuzzLegacyStructuredErrorTranslation$'
         budget: 10000x
         timeout: 20m
   - module: queueservice

@@ -10,11 +10,9 @@ integration:
 		status="$$1"; \
 		trap - EXIT HUP INT TERM; \
 		if task_root="$$(jq -er '.task_root' "$$state" 2>/dev/null)"; then \
-			if ! RABBITMQ_ADAPTER_TASK_ROOT="$$task_root" ../.verification/fixtures/rabbitmq-adapter.sh stop; then \
-				status=1; \
-			fi; \
+			RABBITMQ_ADAPTER_TASK_ROOT="$$task_root" ../.verification/fixtures/rabbitmq-adapter.sh stop || status=1; \
 		fi; \
-		rm -f "$$state"; \
+		find "$$state" -type f -delete; \
 		exit "$$status"; \
 	}; \
 	trap 'cleanup $$?' EXIT; \

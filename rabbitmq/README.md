@@ -1,9 +1,18 @@
-# go-queue RabbitMQ compatibility adapter
+# go-queue RabbitMQ compatibility facade
+
+> Deprecated: use
+> `github.com/faustbrian/go-queue/adapters/rabbitmq`. This released v1 path
+> delegates to that semantic owner without copying mutable runtime state.
 
 This module preserves the backend-neutral `go-queue` worker contract while
 delegating RabbitMQ connections, publishing, consumption, recovery, and broker
 settlement to [`go-rabbitmq-queues`](https://github.com/faustbrian/go-rabbitmq-queues).
 New RabbitMQ-native applications should use that package directly.
+
+## Status and requirements
+
+This is a deprecated stable-v1 compatibility module at `rabbitmq/v1.0.1`. It
+requires Go 1.27.0 or later.
 
 ## Install
 
@@ -57,6 +66,10 @@ worker, err := rabbitmq.NewWorkerE(
     rabbitmq.WithRoutingKey("orders.created"),
 )
 ```
+
+The [facade-owned examples](example_test.go) provide complete imports and
+setup. This module's documentation gate compiles them and executes their
+observable validation example.
 
 The producer opens during construction. The consumer opens lazily on the first
 `Request`, so publishing never creates a consumer.
@@ -158,3 +171,9 @@ has an explicit duplicate window.
 
 See [CHANGELOG.md](CHANGELOG.md) for module-specific behavior and migration
 changes. This module uses directory-prefixed tags such as `rabbitmq/v1.0.0`.
+
+## Support and repository policies
+
+- [Support policy](../SUPPORT.md)
+- [Security policy](../SECURITY.md)
+- [MIT license](LICENSE)

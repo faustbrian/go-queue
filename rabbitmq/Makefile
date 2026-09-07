@@ -23,10 +23,10 @@ coverage:
 		awk '/^total:/ { print $$3 }')" = "100.0%"
 
 mutation:
-	cd .. && $(GOLIB) mutation --module queueservice
+	cd .. && $(GOLIB) mutation --module rabbitmq
 
 fuzz:
-	$(GO) test . -run '^$$' -fuzz '^FuzzLegacyStructuredErrorTranslation$$' \
+	$(GO) test . -run '^$$' -fuzz '^FuzzLegacyOptionValuesReachSuccessor$$' \
 		-fuzztime="$(FUZZ_TIME)"
 
 benchmark:
