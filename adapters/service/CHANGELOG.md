@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-12
+
+### Changed
+
+- Require Go 1.27.0 for the service lifecycle adapter without changing its
+  public API or runtime behavior.
+
 ## [1.0.0] - 2026-09-05
 
 ### Added
@@ -20,5 +27,6 @@
   `github.com/faustbrian/go-queue/adapters/service`; public types and behavior
   remain compatible.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/adapters%2Fservice%2Fv1.0.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/adapters%2Fservice%2Fv1.0.1...HEAD
+[1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/adapters%2Fservice%2Fv1.0.1
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/adapters%2Fservice%2Fv1.0.0
