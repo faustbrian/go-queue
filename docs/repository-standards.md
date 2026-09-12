@@ -31,7 +31,7 @@ concepts.
 ## Mandatory Automation
 
 Every repository provides pinned-SHA workflows for CI, benchmarks, scheduled
-fuzzing, security, and tagged releases. CI tests Go 1.26.6 as the supported
+fuzzing, security, and tagged releases. CI tests Go 1.27.0 as the supported
 minimum line and Go 1.27.0 for RabbitMQ modules that require that toolchain.
 Dependency review runs on pull requests; reachable dependency scanning uses
 `govulncheck`.

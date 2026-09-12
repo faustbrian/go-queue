@@ -6,7 +6,7 @@
     {
       "directory": ".",
       "module_path": "github.com/faustbrian/go-queue",
-      "go_version": "1.26.6",
+      "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": ".",
@@ -402,9 +402,8 @@
           "github.com/faustbrian/go-transactional-outbox/adapters/queue"
         ],
         "supported_go": {
-          "minimum": "1.26.6",
+          "minimum": "1.27.0",
           "tested": [
-            "1.26.6",
             "1.27.0"
           ]
         },
@@ -606,7 +605,7 @@
     {
       "directory": "adapters/service",
       "module_path": "github.com/faustbrian/go-queue/adapters/service",
-      "go_version": "1.26.6",
+      "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": "adapters/service",
@@ -712,9 +711,8 @@
           "github.com/faustbrian/go-queue/queueservice"
         ],
         "supported_go": {
-          "minimum": "1.26.6",
+          "minimum": "1.27.0",
           "tested": [
-            "1.26.6",
             "1.27.0"
           ]
         },
@@ -906,7 +904,7 @@
     {
       "directory": "queueservice",
       "module_path": "github.com/faustbrian/go-queue/queueservice",
-      "go_version": "1.26.6",
+      "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": "queueservice",
@@ -997,9 +995,8 @@
         "adapters": [],
         "companions": [],
         "supported_go": {
-          "minimum": "1.26.6",
+          "minimum": "1.27.0",
           "tested": [
-            "1.26.6",
             "1.27.0"
           ]
         },
