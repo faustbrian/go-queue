@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/appleboy/com v1.2.1 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/rabbitmq/amqp091-go v1.14.0 // indirect
 )
