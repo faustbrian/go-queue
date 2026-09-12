@@ -11,6 +11,13 @@ versioning and Keep a Changelog structure.
   modules while preserving the released v1 paths as deprecated compatibility
   facades.
 
+## [1.1.1] - 2026-09-12
+
+### Changed
+
+- Require Go 1.27.0 across the root queue module without changing its public
+  API or runtime behavior.
+
 ## [1.1.0] - 2026-09-05
 
 ### Added
@@ -452,7 +459,8 @@ versioning and Keep a Changelog structure.
   results do not depend on scheduler selection between simultaneously ready
   channels.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/faustbrian/go-queue/releases/tag/v1.1.1
 [1.1.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.1.0
 [1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.1
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.0
