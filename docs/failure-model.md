@@ -1,5 +1,9 @@
 # Threat and failure model
 
+**Model version:** 1.1
+
+**Reviewed:** 2026-10-01
+
 The trust boundary begins at every enqueue caller and broker delivery. Broker
 availability, network continuity, handler correctness, and observer code are
 not assumed.
@@ -27,6 +31,25 @@ not assumed.
 There is no compression layer, so decompression bombs do not apply. JSON base64
 decoding of `Body` remains within the encoded-message limit. No backend or core
 API promises exactly-once execution.
+
+## Trust boundaries and accepted risks
+
+Callers own handlers, observers, metrics, loggers, HTTP transports, and
+application authorization. Brokers and deployment controls are not owned by
+the root queue. Returned error graphs are for programmatic diagnosis, not
+unrestricted logging.
+
+| Risk | Owner | Rationale and mitigation | Review condition |
+| --- | --- | --- | --- |
+| Management requests lack tenant-level authorization and rate limiting | Deployment operator | The shared bearer token authenticates callers only; authorize commands upstream and use a bounded server on a private boundary. | Revisit before directly exposing management endpoints or changing authentication ownership. |
+| Plain HTTP management endpoints are accepted | Deployment operator | Local or service-mesh deployments may terminate TLS outside the client; use verified TLS or an equivalent trusted private transport boundary. | Revisit if transport policy becomes package-owned. |
+| Caller handlers and HTTP transports may ignore cancellation | Application implementer and operator | Arbitrary collaborators cannot be forcibly stopped; require context-aware implementations, finite downstream timeouts, and supervision. | Revisit if callback or transport execution ownership changes. |
+| Explicit zero queue capacity permits unbounded admission | Application implementer | Compatibility mode is opt-in; use the bounded default for untrusted admission and monitor queue memory. | Revisit at an intentional queue-option compatibility change. |
+| Broker depth, retention, and duplicate effects remain deployment-owned | Application implementer and operator | Durable protocols retain acknowledgement uncertainty; configure quotas, retention and dead letters, and use stable identities with idempotent effects. | Revisit when backend admission or settlement protocols change. |
+
+This model records source-level boundaries and retained risks. It does not
+certify current scanners, backend integrations, releases, or public consumers;
+those require applicable execution and delivery evidence.
 
 ## Failure classification
 

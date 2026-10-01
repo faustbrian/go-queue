@@ -11,6 +11,15 @@ versioning and Keep a Changelog structure.
   modules while preserving the released v1 paths as deprecated compatibility
   facades.
 
+## [1.1.2] - 2026-10-01
+
+### Security
+
+- Enforce the documented no-redirect policy for authenticated management
+  clients, including fleet requests, without mutating caller-owned clients.
+- Keep queue-owned shutdown and recovered callback logs limited to stable
+  operation text; preserve programmatic error causes and worker accounting.
+
 ## [1.1.0] - 2026-09-05
 
 ### Added
@@ -452,7 +461,8 @@ versioning and Keep a Changelog structure.
   results do not depend on scheduler selection between simultaneously ready
   channels.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/faustbrian/go-queue/compare/v1.1.1...v1.1.2
 [1.1.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.1.0
 [1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.1
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.0
