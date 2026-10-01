@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -50,6 +51,61 @@ func TestClientReadsAuthenticatedBoundedStatus(t *testing.T) {
 	}
 	if source.workerRequest != request || source.queueRequest != request {
 		t.Fatalf("source requests = (%+v, %+v)", source.workerRequest, source.queueRequest)
+	}
+}
+
+func TestClientAndFleetRejectRedirectsWithoutMutatingCallerClient(t *testing.T) {
+	t.Parallel()
+
+	for _, fleet := range []bool{false, true} {
+		t.Run(map[bool]string{false: "direct", true: "fleet"}[fleet], func(t *testing.T) {
+			t.Parallel()
+			var targetCalls, redirectCalls atomic.Int32
+			target := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+				targetCalls.Add(1)
+				_, _ = writer.Write([]byte(`{"items":[]}`))
+			}))
+			t.Cleanup(target.Close)
+			origin := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				http.Redirect(writer, request, target.URL, http.StatusTemporaryRedirect)
+			}))
+			t.Cleanup(origin.Close)
+			provided := origin.Client()
+			provided.CheckRedirect = func(*http.Request, []*http.Request) error {
+				redirectCalls.Add(1)
+				return nil
+			}
+			originalRedirect := reflect.ValueOf(provided.CheckRedirect).Pointer()
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			var err error
+			if fleet {
+				client, constructErr := NewFleetClient(FleetClientConfig{
+					Resolver: EndpointResolverFunc(func(context.Context) ([]Endpoint, error) {
+						return []Endpoint{{ID: "worker", BaseURL: origin.URL}}, nil
+					}),
+					Token: "test-token", HTTPClient: provided,
+				})
+				if constructErr != nil {
+					t.Fatalf("NewFleetClient() error = %v", constructErr)
+				}
+				_, err = client.ListQueues(ctx, management.StatusPageRequest{Limit: 1})
+			} else {
+				client, constructErr := NewClient(ClientConfig{
+					BaseURL: origin.URL, Token: "test-token", HTTPClient: provided,
+				})
+				if constructErr != nil {
+					t.Fatalf("NewClient() error = %v", constructErr)
+				}
+				_, err = client.ListQueues(ctx, management.StatusPageRequest{Limit: 1})
+			}
+			if err == nil || targetCalls.Load() != 0 || redirectCalls.Load() != 0 {
+				t.Fatalf("redirect outcome: error=%v target calls=%d caller callback calls=%d", err, targetCalls.Load(), redirectCalls.Load())
+			}
+			if reflect.ValueOf(provided.CheckRedirect).Pointer() != originalRedirect {
+				t.Fatal("management client mutated caller redirect policy")
+			}
+		})
 	}
 }
 

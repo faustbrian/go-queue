@@ -72,6 +72,10 @@ and storage calls. Callback, metric, logger, and settlement panics are isolated,
 but repeated hostile failures can still consume log, broker, and retry capacity.
 Rate-limit admission and alert on decode, retry, pending, redelivery, and
 settlement-error signals.
+Queue-owned shutdown and recovered collaborator-panic logs use stable
+operation text rather than arbitrary error or panic values. Returned shutdown
+causes remain available for programmatic diagnosis and must not be logged
+separately without an application-owned redaction policy.
 Observer exporters may aggregate only the stable event kind, classification,
 and safe failure code. Never turn `Event.Err`, payloads, record IDs, tenant data,
 or arbitrary backend/queue names into metric labels.
