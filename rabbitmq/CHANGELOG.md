@@ -4,6 +4,13 @@ All notable changes to the RabbitMQ compatibility module are documented here.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-05
+
+### Changed
+
+- Refresh indirect dependency selection while retaining the released
+  RabbitMQ compatibility facade.
+
 ## [1.0.1] - 2026-09-07
 
 ### Deprecated
@@ -52,6 +59,7 @@ All notable changes to the RabbitMQ compatibility module are documented here.
   settlement, and repeated shutdown outcomes without exposing broker details.
 - Reject invalid exchange policy without logging caller-controlled identities.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/rabbitmq%2Fv1.0.1...HEAD
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/rabbitmq%2Fv1.0.2...HEAD
 [1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/rabbitmq%2Fv1.0.1
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/rabbitmq/v1.0.0
+[1.0.2]: https://github.com/faustbrian/go-queue/releases/tag/rabbitmq%2Fv1.0.2

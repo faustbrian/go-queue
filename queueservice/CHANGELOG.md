@@ -5,6 +5,13 @@ versioning once released.
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-10-05
+
+### Changed
+
+- Refresh dependency selection while retaining the released service
+  compatibility facade and lifecycle behavior.
+
 ## [1.0.1] - 2026-09-07
 
 ### Deprecated
@@ -102,6 +109,7 @@ versioning once released.
   worker pods at each effect/settlement boundary and verifies competing pod
   recovery against durable backend state.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/queueservice%2Fv1.0.1...HEAD
+[Unreleased]: https://github.com/faustbrian/go-queue/compare/queueservice%2Fv1.0.3...HEAD
 [1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/queueservice%2Fv1.0.1
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/queueservice/v1.0.0
+[1.0.3]: https://github.com/faustbrian/go-queue/releases/tag/queueservice%2Fv1.0.3
