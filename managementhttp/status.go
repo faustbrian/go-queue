@@ -167,13 +167,17 @@ func NewClient(config ClientConfig) (*Client, error) {
 	if config.HTTPClient == nil {
 		config.HTTPClient = &http.Client{Timeout: 30 * time.Second}
 	}
+	httpClient := *config.HTTPClient
+	httpClient.CheckRedirect = func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
 	if config.MaxResponseBytes == 0 {
 		config.MaxResponseBytes = defaultMaxResponseBytes
 	}
 	baseURL.Path = ""
 
 	return &Client{
-		baseURL: baseURL, token: config.Token, httpClient: config.HTTPClient,
+		baseURL: baseURL, token: config.Token, httpClient: &httpClient,
 		maxResponseBytes: config.MaxResponseBytes,
 	}, nil
 }
