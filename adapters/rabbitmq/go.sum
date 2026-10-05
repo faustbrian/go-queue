@@ -1,5 +1,5 @@
-github.com/appleboy/com v1.2.0 h1:3jyA+yVofe/uzPHHa7Xrsj7rnDy1sZn/8pYHdzHB3GQ=
-github.com/appleboy/com v1.2.0/go.mod h1:XK2kV+JWz/gkzsDPotNJL+aS6XCy5GNlbiTWGvIhqIU=
+github.com/appleboy/com v1.2.2 h1:eLoAqD305sRVkudcQfsKOdqhIcd+PFCbXnLsGgO/K3E=
+github.com/appleboy/com v1.2.2/go.mod h1:RrVtZRIoYKWM2FD9TmURrytp0NUy/8OZq8SMXpQZQI8=
 github.com/faustbrian/go-queue v1.0.1 h1:V+pqmPZST9JyYczGYvPyS1+6N7YAqvYnbyu0ebJskok=
 github.com/faustbrian/go-queue v1.0.1/go.mod h1:CvcBqytHzhV6CD3hmshmrNEB07DhM5KhU5VsL9CB0tY=
 github.com/faustbrian/go-rabbitmq-queues v1.0.0 h1:FYxYlz2X1rzdGH2U1BLtzaT8lwlliCawB55jGVKNQEk=

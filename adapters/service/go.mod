@@ -13,7 +13,7 @@ require (
 
 require (
 	github.com/alicebob/miniredis/v2 v2.39.0 // indirect
-	github.com/appleboy/com v1.2.0 // indirect
+	github.com/appleboy/com v1.2.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/faustbrian/go-cli v1.0.0 // indirect
 	github.com/faustbrian/go-identifier v1.0.0 // indirect

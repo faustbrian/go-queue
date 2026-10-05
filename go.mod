@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/alicebob/miniredis/v2 v2.39.0
-	github.com/appleboy/com v1.2.0
+	github.com/appleboy/com v1.2.2
 	github.com/jpillora/backoff v1.0.0
 	github.com/moby/moby/api v1.54.2
 	github.com/moby/moby/client v0.4.0
