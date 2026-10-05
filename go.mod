@@ -6,7 +6,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.39.0
 	github.com/appleboy/com v1.2.2
 	github.com/jpillora/backoff v1.0.0
-	github.com/moby/moby/api v1.54.2
+	github.com/moby/moby/api v1.56.1
 	github.com/moby/moby/client v0.4.0
 	github.com/nats-io/nats-server/v2 v2.11.15
 	github.com/nats-io/nats.go v1.52.0
