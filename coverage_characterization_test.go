@@ -100,7 +100,8 @@ func TestStartWithUpdatedZeroWorkersDoesNotRequestTasks(t *testing.T) {
 
 func TestRepeatedShutdownIsIdempotentAndLogsWorkerError(t *testing.T) {
 	var output bytes.Buffer
-	worker := &controlledWorker{shutdownErr: errors.New("shutdown failed")}
+	const diagnostic = "worker collaborator diagnostic"
+	worker := &controlledWorker{shutdownErr: errors.New(diagnostic)}
 	q, err := NewQueue(
 		WithWorker(worker),
 		WithLogger(defaultLogger{
@@ -114,7 +115,9 @@ func TestRepeatedShutdownIsIdempotentAndLogsWorkerError(t *testing.T) {
 	q.Shutdown()
 	q.Shutdown()
 
-	assert.Contains(t, output.String(), "shutdown failed")
+	assert.Contains(t, output.String(), "worker shutdown failed")
+	assert.NotContains(t, output.String(), diagnostic)
+	assert.ErrorIs(t, q.shutdownErr, worker.shutdownErr)
 }
 
 func TestShutdownLogsOnlyPositiveBusyWorkerCounts(t *testing.T) {

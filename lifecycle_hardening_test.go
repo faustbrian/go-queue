@@ -129,9 +129,10 @@ func (panickingMetric) CompletedTasks() uint64 {
 
 func TestObserverPanicDoesNotCorruptWorkerAccounting(t *testing.T) {
 	var output bytes.Buffer
+	const diagnostic = "observer collaborator diagnostic"
 	q, err := NewQueue(
 		WithWorker(NewRing()),
-		WithObserver(ObserverFunc(func(Event) { panic("observer") })),
+		WithObserver(ObserverFunc(func(Event) { panic(diagnostic) })),
 		WithLogger(defaultLogger{
 			infoLogger:  log.New(&output, "", 0),
 			errorLogger: log.New(&output, "", 0),
@@ -147,14 +148,16 @@ func TestObserverPanicDoesNotCorruptWorkerAccounting(t *testing.T) {
 	assert.Equal(t, int64(0), q.BusyWorkers())
 	assert.Equal(t, uint64(1), q.SuccessTasks())
 	assert.Contains(t, output.String(), "observer panic")
+	assert.NotContains(t, output.String(), diagnostic)
 	q.Release()
 }
 
 func TestAfterCallbackPanicIsReportedAndContained(t *testing.T) {
 	var output bytes.Buffer
+	const diagnostic = "after collaborator diagnostic"
 	q, err := NewQueue(
 		WithWorker(NewRing()),
-		WithAfterFn(func() { panic("after") }),
+		WithAfterFn(func() { panic(diagnostic) }),
 		WithLogger(defaultLogger{
 			infoLogger:  log.New(&output, "", 0),
 			errorLogger: log.New(&output, "", 0),
@@ -168,6 +171,7 @@ func TestAfterCallbackPanicIsReportedAndContained(t *testing.T) {
 
 	assert.NotPanics(t, func() { q.work(&message) })
 	assert.Contains(t, output.String(), "after callback panic")
+	assert.NotContains(t, output.String(), diagnostic)
 }
 
 func TestLoggerAndAfterCallbackPanicsDoNotEscape(t *testing.T) {
@@ -215,6 +219,7 @@ func TestMetricPanicsDoNotEscapeQueueLifecycle(t *testing.T) {
 
 func TestMetricPanicsAreReportedAtUpdateAndReadBoundaries(t *testing.T) {
 	var output bytes.Buffer
+	const diagnostic = "metric collaborator diagnostic"
 	q, err := NewQueue(
 		WithWorker(&controlledWorker{}),
 		WithLogger(defaultLogger{
@@ -225,11 +230,13 @@ func TestMetricPanicsAreReportedAtUpdateAndReadBoundaries(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	q.safeMetricUpdate("update boundary", func() { panic("update") })
+	q.safeMetricUpdate("update boundary", func() { panic(diagnostic) })
 	assert.Contains(t, output.String(), "metric panic during update boundary")
+	assert.NotContains(t, output.String(), diagnostic)
 	output.Reset()
-	value := q.safeMetricValue("read boundary", func() uint64 { panic("read") })
+	value := q.safeMetricValue("read boundary", func() uint64 { panic(diagnostic) })
 	assert.Zero(t, value)
 	assert.Contains(t, output.String(), "metric panic during read boundary")
+	assert.NotContains(t, output.String(), diagnostic)
 	q.Shutdown()
 }

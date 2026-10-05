@@ -135,7 +135,7 @@ func (q *Queue) Shutdown() {
 			q.shutdownErr = q.shutdownWorker()
 		}
 		if q.shutdownErr != nil {
-			q.safeLogError(q.shutdownErr)
+			q.safeLogError("worker shutdown failed")
 		}
 		close(q.quit)
 		q.observe(Event{Kind: EventShutdownCompleted})
@@ -312,7 +312,7 @@ func (q *Queue) work(task core.TaskMessage) {
 		}
 		if q.afterFn != nil {
 			if panicValue := invokeSafely(q.afterFn); panicValue != nil {
-				q.safeLogErrorf("after callback panic: %v", panicValue)
+				q.safeLogError("after callback panic")
 			}
 		}
 	}()
@@ -533,7 +533,7 @@ func (q *Queue) observe(event Event) {
 		q.observer.Observe(event)
 	})
 	if panicValue != nil {
-		q.safeLogErrorf("observer panic: %v", panicValue)
+		q.safeLogError("observer panic")
 	}
 }
 
@@ -550,14 +550,14 @@ func valueSafely[T any](fn func() T) (value T, panicValue any) {
 
 func (q *Queue) safeMetricUpdate(operation string, update func()) {
 	if panicValue := invokeSafely(update); panicValue != nil {
-		q.safeLogErrorf("metric panic during %s: %v", operation, panicValue)
+		q.safeLogErrorf("metric panic during %s", operation)
 	}
 }
 
 func (q *Queue) safeMetricValue(operation string, read func() uint64) uint64 {
 	value, panicValue := valueSafely(read)
 	if panicValue != nil {
-		q.safeLogErrorf("metric panic during %s: %v", operation, panicValue)
+		q.safeLogErrorf("metric panic during %s", operation)
 	}
 	return value
 }
