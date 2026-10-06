@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   ci:
-    uses: faustbrian/go-library-tools/.github/workflows/library-ci.yml@13d685e06cd4f01990eb95a4590ea67953a0c753 # v1.5.6 exact module release selection
+    uses: faustbrian/go-library-tools/.github/workflows/library-ci.yml@be0fd7d09b02c9dff29e6b00a5245ceac3cdfdfb # v1.5.6 exact module release selection
     with:
       tooling_sha: 4ca33664cfb03659129ab42b22cdcdcc69c0dd09
       release_dry_run: ${{ inputs.release_dry_run || false }}
