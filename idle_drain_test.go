@@ -6,21 +6,24 @@ import (
 	"testing/synctest"
 
 	"errors"
+	"github.com/faustbrian/go-queue/core"
 	"github.com/faustbrian/go-queue/job"
 	"github.com/faustbrian/go-queue/management"
 	"time"
 )
 
 func TestIdleDrainDoesNotWaitForRetryInterval(t *testing.T) {
-	for _, kind := range []string{"ring", "external", "managed-external"} {
-		t.Run(kind, func(t *testing.T) {
+	// Check bounded external pacing first: a broken scheduler must fail
+	// before the real Ring variant can prevent synctest quiescence.
+	for _, kind := range []string{"external", "managed-external", "ring"} {
+		if !t.Run(kind, func(t *testing.T) {
 			synctest.Test(t, func(t *testing.T) {
 				var q *Queue
 				var worker *idleDrainWorker
 				if kind == "ring" {
 					q = NewPool(1, WithRetryInterval(time.Hour))
 				} else {
-					worker = &idleDrainWorker{}
+					worker = &idleDrainWorker{shutdown: make(chan struct{})}
 					var err error
 					opts := []Option{WithWorker(worker), WithWorkerCount(1), WithRetryInterval(time.Hour)}
 					if kind == "managed-external" {
@@ -72,17 +75,36 @@ func TestIdleDrainDoesNotWaitForRetryInterval(t *testing.T) {
 					t.Fatal("drain requested new external work after admission closed")
 				}
 			})
-		})
+		}) {
+			return
+		}
 	}
 }
 
 // The fake supplies a returned empty Request, not a blocked backend request.
 type idleDrainWorker struct {
 	controlledWorker
-	closed bool
+	closed   bool
+	shutdown chan struct{}
 }
 
-func (w *idleDrainWorker) Shutdown() error { w.closed = true; return nil }
+func (w *idleDrainWorker) Request() (core.TaskMessage, error) {
+	if w.requests.Add(1) == 1 {
+		return nil, ErrNoTaskInQueue
+	}
+	// An unexpected repeated request parks instead of starving the test;
+	// the caller can assert its count and still join the scheduler.
+	<-w.shutdown
+	return nil, errors.New("idle drain fixture closed")
+}
+
+func (w *idleDrainWorker) Shutdown() error {
+	if !w.closed {
+		w.closed = true
+		close(w.shutdown)
+	}
+	return nil
+}
 
 func TestDrainRetainsTaskAlreadyWaitingAfterRequestError(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
