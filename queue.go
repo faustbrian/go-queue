@@ -177,6 +177,11 @@ func (q *Queue) CloseAdmission() error {
 		q.admissionMu.Unlock()
 		if ring, inMemory := q.worker.(*Ring); inMemory {
 			_ = ring.stopIntake()
+			// Wake an idle request while retaining queued Ring work.
+			select {
+			case q.notify <- struct{}{}:
+			default:
+			}
 		} else {
 			close(q.drain)
 			q.releaseReadyAdmission()
@@ -682,6 +687,7 @@ func (q *Queue) start() {
 						case <-q.quit:
 						case <-ticker.C:
 						case <-q.notify:
+						case <-q.drain:
 						}
 					}
 					tasks <- admittedTask{task: t, tracked: tracked}
@@ -696,7 +702,16 @@ func (q *Queue) start() {
 					case <-q.quit:
 					case <-ticker.C:
 					case <-q.notify:
+					case <-q.drain:
 					}
+				}
+				// A notification may race with closure; external intake still
+				// stops before requesting another task. Ring backlog is owned.
+				select {
+				case <-q.drain:
+					tasks <- admittedTask{}
+					return
+				default:
 				}
 				if q.lifecycle != nil {
 					if !q.lifecycle.BeginAdmission() {

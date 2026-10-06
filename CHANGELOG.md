@@ -5,6 +5,12 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+### Fixed
+
+- Wake graceful queue draining from idle retry waits without waiting for
+  the polling interval. Preserve accepted Ring backlog and tasks already
+  returned with a request error, and stop new external intake after closure.
+
 ### Added
 
 - Add independently releasable `adapters/rabbitmq` and `adapters/service`
