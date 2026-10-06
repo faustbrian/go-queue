@@ -2,14 +2,14 @@ package queue
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"testing/synctest"
+	"time"
 
-	"errors"
 	"github.com/faustbrian/go-queue/core"
 	"github.com/faustbrian/go-queue/job"
 	"github.com/faustbrian/go-queue/management"
-	"time"
 )
 
 func TestIdleDrainDoesNotWaitForRetryInterval(t *testing.T) {
