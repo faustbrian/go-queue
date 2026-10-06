@@ -156,16 +156,22 @@ func TestQueueReturnsPublishError(t *testing.T) {
 }
 
 func TestShutdownWithoutSubscription(t *testing.T) {
-	client, err := natsgo.Connect(runNATSServer(t))
+	closed := make(chan struct{})
+	client, err := natsgo.Connect(runNATSServer(t), natsgo.ClosedHandler(func(*natsgo.Conn) {
+		close(closed)
+	}))
 	require.NoError(t, err)
 	worker := &Worker{
 		client: client,
+		closed: closed,
 		stop:   make(chan struct{}),
 		exit:   make(chan struct{}),
 		tasks:  make(chan *natsgo.Msg),
 	}
 
 	require.NoError(t, shutdownWithin(t, worker))
+	assert.True(t, client.IsClosed())
+	assert.ErrorIs(t, worker.Shutdown(), queue.ErrQueueShutdown)
 }
 
 func TestShutdownClosesReconnectInProgress(t *testing.T) {
