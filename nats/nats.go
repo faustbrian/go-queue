@@ -124,11 +124,8 @@ func (w *Worker) Shutdown() error {
 				// documented errors, so an additional Close is redundant.
 				_ = w.client.Drain()
 			}
-			if w.closed != nil {
-				<-w.closed
-			} else {
-				w.client.Close()
-			}
+			// Constructors install the close signal before connecting.
+			<-w.closed
 		}
 		close(w.tasks)
 	})
