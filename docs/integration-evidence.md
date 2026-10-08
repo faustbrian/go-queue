@@ -9,7 +9,7 @@ evidence environment.
 | Redis Pub/Sub and Streams | Redis 6.2.22, `sha256:3b477d...0bce` | `go-redis/v9` 9.19.0 |
 | Redis Cluster | Single-node, all-slot Redis 6.2.22 cluster with host-reachable discovery | `go-redis/v9` 9.19.0 |
 | Valkey Streams | Valkey 9.1.0, `sha256:8e8d64...e09411`, standalone | `valkey-go` 1.0.76 |
-| NATS | NATS Server 2.10.29, `sha256:5498ba...6e2f`; hermetic server 2.11.15 | `nats.go` 1.52.0 |
+| NATS | NATS Server 2.10.29, `sha256:5498ba...6e2f`; hermetic server 2.15.0 | `nats.go` 1.52.0 |
 | NSQ | nsqd 1.3.0, `sha256:1a369c...c78a` | `go-nsq` 1.1.0 |
 | RabbitMQ adapter | RabbitMQ 4.3.5 management-alpine, `sha256:722416...511dc`, TLS 1.2/1.3 | `go-rabbitmq-queues` at `26f7f42`; `amqp091-go` 1.14.0 |
 

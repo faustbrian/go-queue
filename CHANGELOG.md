@@ -5,6 +5,12 @@ versioning and Keep a Changelog structure.
 
 ## [Unreleased]
 
+### Changed
+
+- Upgrade the hermetic NATS Server dependency to 2.15.0 and reconcile
+  supporting dependency selections without changing the Core NATS worker
+  API or message formats. Container integration remains pinned to 2.10.29.
+
 ### Fixed
 
 - Wake graceful queue draining from idle retry waits without waiting for
