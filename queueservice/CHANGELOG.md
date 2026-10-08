@@ -5,6 +5,11 @@ versioning once released.
 
 ## [Unreleased]
 
+### Changed
+
+- Reconcile indirect Go support dependencies selected with the parent queue
+  update while preserving the released compatibility facade.
+
 ## [1.0.3] - 2026-10-05
 
 ### Changed

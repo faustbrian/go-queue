@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Refresh indirect compression and Go support dependencies selected with
+  the parent queue update while preserving service lifecycle and admission
+  behavior.
+
 ## [1.0.2] - 2026-10-05
 
 ### Changed
