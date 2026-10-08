@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/faustbrian/go-queue v1.0.1
-	github.com/faustbrian/go-rabbitmq-queues v1.0.0
+	github.com/faustbrian/go-rabbitmq-queues v1.1.1
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/goleak v1.3.0
 )

@@ -485,7 +485,7 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tag_prefix": "adapters/rabbitmq/v",
       "owned_dependencies": [
         "github.com/faustbrian/go-queue",
@@ -791,7 +791,7 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tag_prefix": "rabbitmq/v",
       "owned_dependencies": [
         "github.com/faustbrian/go-queue",

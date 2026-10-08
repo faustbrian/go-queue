@@ -5,7 +5,7 @@ go 1.27.0
 require (
 	github.com/faustbrian/go-queue v1.0.1
 	github.com/faustbrian/go-queue/adapters/rabbitmq v1.0.0
-	github.com/faustbrian/go-rabbitmq-queues v1.0.0
+	github.com/faustbrian/go-rabbitmq-queues v1.1.1
 )
 
 require (
