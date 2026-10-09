@@ -7,6 +7,10 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Adopt NATS client 1.54.0, including its subscription-race fix, while
+  retaining Core NATS transient delivery, reconnect, and bounded shutdown
+  semantics.
+
 - Adopt Redis client 9.23.0 while retaining queue APIs, message formats,
   explicit command retry policy, and caller-configured request and connect
   deadlines. Inherited socket read/write defaults change from three to five
