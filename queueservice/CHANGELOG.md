@@ -7,6 +7,10 @@ versioning once released.
 
 ### Changed
 
+- Align Redis client selection at 9.23.0 with the service adapter graph,
+  including its five-second socket defaults, while retaining the released
+  facade's types and lifecycle delegation.
+
 - Reconcile indirect Go support dependencies selected with the parent queue
   update while preserving the released compatibility facade.
 

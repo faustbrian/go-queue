@@ -17,8 +17,8 @@ require (
 	github.com/faustbrian/go-identifier v1.0.0 // indirect
 	github.com/jackc/pgx/v5 v5.10.0 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
+	github.com/redis/go-redis/v9 v9.23.0 // indirect
 	github.com/stretchr/testify v1.12.1 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 )

@@ -954,6 +954,25 @@ func TestProducerRejectsPublishBeforeStart(t *testing.T) {
 	}
 }
 
+func TestCloneMetadataCopiesCallerTags(t *testing.T) {
+	t.Parallel()
+
+	metadata := &job.Metadata{Tags: map[string]string{"source": "caller"}}
+	clone := cloneMetadata(metadata)
+	if clone == nil || clone.Tags["source"] != "caller" {
+		t.Fatalf("cloned tags = %#v, want caller values", clone)
+	}
+	clone.Tags["source"] = "backend"
+	clone.Tags["added"] = "backend"
+	if len(metadata.Tags) != 1 || metadata.Tags["source"] != "caller" {
+		t.Fatalf("cloned tag mutation escaped into caller tags = %v", metadata.Tags)
+	}
+	metadata.Tags["after-clone"] = "caller"
+	if _, exists := clone.Tags["after-clone"]; exists {
+		t.Fatalf("caller tag mutation escaped into cloned tags = %v", clone.Tags)
+	}
+}
+
 func TestCloneMetadataPreservesAbsentTraceContext(t *testing.T) {
 	t.Parallel()
 

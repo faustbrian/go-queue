@@ -4,6 +4,10 @@
 
 ### Changed
 
+- Align Redis client selection at 9.23.0 with the parent queue graph.
+  Native clients inherit the driver's five-second socket defaults; the
+  service adapter retains its lifecycle, admission, and resource ownership.
+
 - Refresh indirect compression and Go support dependencies selected with
   the parent queue update while preserving service lifecycle and admission
   behavior.
