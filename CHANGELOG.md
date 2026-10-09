@@ -7,6 +7,9 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Use qualified immutable source tooling in CI to keep mandatory analyzers
+  compatible with patched Go. The checksum-pinned local release is unchanged.
+
 - Select Go 1.27.2 for CI and the development workspace to include the
   crypto/tls fix for GO-2026-6607. Module language minimums stay at Go 1.27.0;
   applications must be rebuilt with a patched toolchain to receive the fix.
