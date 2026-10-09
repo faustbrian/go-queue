@@ -7,6 +7,16 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Adopt Redis client 9.23.0 while retaining queue APIs, message formats,
+  explicit command retry policy, and caller-configured request and connect
+  deadlines. Inherited socket read/write defaults change from three to five
+  seconds; stalled Pub/Sub publishes can therefore wait longer. Pub/Sub
+  health checks and reconnects use the driver's new bounded contexts.
+  Inherited connection-pool waits change from four to six seconds and
+  cluster state refreshes from ten to sixty seconds. Default TCP keepalive
+  changes from five minutes to thirty seconds idle, with five-second probes
+  and three failed probes before declaring a connection dead.
+
 - Use qualified immutable source tooling in CI to keep mandatory analyzers
   compatible with patched Go. The checksum-pinned local release is unchanged.
 
