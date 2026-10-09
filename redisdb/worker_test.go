@@ -471,6 +471,59 @@ func TestRequestReturnsDecodeAndClosedChannelErrors(t *testing.T) {
 	})
 }
 
+func TestDefaultRequestWaitsForDelayedMessage(t *testing.T) {
+	messages := make(chan *redis.Message)
+	worker := &Worker{channel: messages, opts: newOptions()}
+	type result struct {
+		message core.TaskMessage
+		err     error
+	}
+	results := make(chan result, 1)
+	done := make(chan struct{})
+	t.Cleanup(func() {
+		close(messages)
+		joined := time.NewTimer(time.Second)
+		defer joined.Stop()
+		select {
+		case <-done:
+		case <-joined.C:
+			t.Error("request did not finish after its input channel closed")
+		}
+	})
+	go func() {
+		defer close(done)
+		message, err := worker.Request()
+		results <- result{message: message, err: err}
+	}()
+
+	delay := time.NewTimer(25 * time.Millisecond)
+	defer delay.Stop()
+	select {
+	case early := <-results:
+		t.Fatalf("default request returned before delayed delivery: %v", early.err)
+	case <-delay.C:
+	}
+
+	message := job.NewMessage(rawMessage("delayed payload"))
+	deadline := time.NewTimer(time.Second)
+	defer deadline.Stop()
+	select {
+	case messages <- &redis.Message{Payload: string(message.Bytes())}:
+	case <-done:
+		t.Fatal("default request stopped before accepting the delayed message")
+	case <-deadline.C:
+		t.Fatal("default request did not accept the delayed message")
+	}
+	select {
+	case received := <-results:
+		require.NoError(t, received.err)
+		require.NotNil(t, received.message)
+		assert.Equal(t, []byte("delayed payload"), received.message.Payload())
+	case <-deadline.C:
+		t.Fatal("default request did not return the delayed message")
+	}
+}
+
 func TestRequestUsesConfiguredTimeout(t *testing.T) {
 	worker := &Worker{
 		channel: make(chan *redis.Message),
