@@ -28,6 +28,10 @@ integration evidence.
 - Go 1.27.0 or later
 - a supported broker for non-memory backends
 
+CI and the development workspace use Go 1.27.2. Build applications with
+a patched Go release; this CI selection does not raise module language
+minimums or patch the runtime of already-built applications.
+
 ## Installation
 
 ```sh

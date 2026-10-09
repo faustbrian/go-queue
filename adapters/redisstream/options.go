@@ -253,7 +253,7 @@ func WithSkipTLSVerify() Option {
 	return func(w *options) {
 		if w.tls == nil {
 			w.tls = &tls.Config{
-				InsecureSkipVerify: true, //nolint: gosec
+				InsecureSkipVerify: true, // #nosec G402 -- Explicit caller opt-out; default TLS verification remains enabled.
 
 			}
 			return

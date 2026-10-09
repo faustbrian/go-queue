@@ -326,24 +326,62 @@ func TestRedisPubSubRecoversAfterBrokerRestart(t *testing.T) {
 	redisC, endpoint := setupRedisContainer(ctx, t)
 	defer testcontainers.CleanupContainer(t, redisC)
 
+	handled := make(chan string, 2)
 	worker := NewWorker(
 		WithAddr(endpoint),
 		WithChannel("restart"),
+		WithRunFunc(func(ctx context.Context, message core.TaskMessage) error {
+			select {
+			case handled <- string(message.Payload()):
+				return nil
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}),
 	)
 	q, err := queue.NewQueue(queue.WithWorker(worker), queue.WithWorkerCount(1))
 	require.NoError(t, err)
+	t.Cleanup(q.Release)
 	q.Start()
+
+	assertHandled := func(want string) {
+		t.Helper()
+		select {
+		case got := <-handled:
+			require.Equal(t, want, got)
+		case <-time.After(5 * time.Second):
+			t.Fatalf("handler did not receive %q", want)
+		}
+	}
 	require.NoError(t, q.Queue(mockMessage{Message: "before-restart"}))
+	assertHandled("before-restart")
 	waitForCompleted(t, q, 1)
 
 	stopRedisServer(ctx, t, redisC)
 	assert.Error(t, q.Queue(mockMessage{Message: "during-outage"}))
 	startRedisServer(ctx, t, redisC)
+
+	probe := redis.NewClient(&redis.Options{
+		Addr:                  endpoint,
+		DialTimeout:           250 * time.Millisecond,
+		ReadTimeout:           250 * time.Millisecond,
+		WriteTimeout:          250 * time.Millisecond,
+		MaxRetries:            -1,
+		ContextTimeoutEnabled: true,
+	})
+	t.Cleanup(func() { require.NoError(t, probe.Close()) })
+	// PUBLISH can succeed with zero recipients; Pub/Sub does not replay that
+	// message when the worker's subscription reconnects later.
 	require.Eventually(t, func() bool {
-		return q.Queue(mockMessage{Message: "after-restart"}) == nil
-	}, 10*time.Second, 50*time.Millisecond)
+		probeCtx, cancel := context.WithTimeout(ctx, 250*time.Millisecond)
+		defer cancel()
+		subscribers, probeErr := probe.PubSubNumSub(probeCtx, "restart").Result()
+		return probeErr == nil && subscribers["restart"] == 1
+	}, 10*time.Second, 50*time.Millisecond, "worker did not restore its Redis subscription")
+
+	require.NoError(t, q.Queue(mockMessage{Message: "after-restart"}))
+	assertHandled("after-restart")
 	waitForCompleted(t, q, 2)
-	q.Release()
 }
 
 func TestRedisShutdown(t *testing.T) {
