@@ -16,5 +16,5 @@ connect timeout as the NATS drain bound and waits for the closed callback.
 Credential-bearing client URL failures return sanitized constructor text.
 
 Integration uses NATS Server 2.10.29; hermetic fault tests also use 2.15.0 with
-`nats.go` 1.52.0. The package limit of one mebibyte matches the common Core NATS
+`nats.go` 1.54.0. The package limit of one mebibyte matches the common Core NATS
 default, but deployment server limits remain authoritative.
