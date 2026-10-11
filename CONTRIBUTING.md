@@ -44,8 +44,9 @@ GOWORK=off go test ./... -count=1 -timeout=3m
 Run the same command from an affected nested module to test that module. This
 untagged route does not run the configured live-backend integration tests.
 `make check` and `make ci` use the checksum-pinned public CLI and bounded
-`--local --all` route, which also uses deterministic tests, fuzz seeds, and a
-short active smoke for affected fuzz targets. The manifest still requires
+`--local --all` route, which runs deterministic tests, fuzz seeds and the named
+local risk check, without active fuzz exploration. Committed-range CI supplies
+`--base-sha` to select active smoke for affected fuzz targets. The manifest still requires
 NATS, NSQ, Redis and Valkey with the `integration` tag for the root; the service
 adapter additionally requires RabbitMQ. Have Docker and these fixtures available
 for the manifest-driven route. The other three nested modules declare no services
