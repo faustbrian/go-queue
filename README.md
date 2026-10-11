@@ -3,7 +3,7 @@
 [![CI](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
-[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-full_qualification-blue)](CONTRIBUTING.md#verification)
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-queue.svg)](https://pkg.go.dev/github.com/faustbrian/go-queue)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-queue?sort=semver)](https://github.com/faustbrian/go-queue/releases)
@@ -143,9 +143,11 @@ and [Persistence and durability family guidance](https://github.com/faustbrian/g
 
 ## Development
 
-Run `make check` before submitting a change. Backend changes must also pass
-`make integration` with the services documented in
-[CONTRIBUTING.md](CONTRIBUTING.md).
+Use `GOWORK=off go test ./... -count=1 -timeout=3m` for standalone untagged
+tests. `make check` and `make ci` are bounded, public-verifier routes with the
+manifest's real service and integration-tag requirements; `make check-full`
+retains explicit full qualification. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+focused active fuzzing, lifecycle races, and backend fixtures.
 
 ## Contributing
 

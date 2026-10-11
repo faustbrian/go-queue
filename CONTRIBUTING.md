@@ -2,8 +2,8 @@
 
 ## Before Editing
 
-1. Read [`AGENTS.md`](AGENTS.md) and the affected module's goals and docs.
-2. Run `make inventory` and the narrow baseline gate for the module.
+1. Read [`AGENTS.md`](AGENTS.md) and the affected module's docs.
+2. Run the focused Go tests for the affected package.
 3. Identify owned dependencies and reverse dependants in `modules.json`.
 4. Preserve unrelated work and generated/corpus provenance.
 
@@ -24,7 +24,8 @@ the affected stable decision entries, and complete the Specification Decisions
 section of the pull request template. An unresolved interpretation or stale
 source pin is release-blocking; peer behavior cannot silently select policy.
 
-Required mutation gates must finish with zero surviving viable mutants.
+Explicit full mutation qualification must finish with zero surviving viable
+mutants; it is not a prerequisite for every ordinary edit.
 
 Do not add package-local workflows, permanent replacements, machine-specific
 paths, bypass flags, broad mutation exclusions, or aggregate quality metrics
@@ -32,21 +33,55 @@ that hide a failing package.
 
 ## Verification
 
-Run during development:
+Use Go 1.27.2 for verification; the modules' minimum remains Go 1.27.0.
+From the root, ordinary standalone tests need neither sibling repositories nor
+building the verifier release from source:
 
 ```bash
-make inventory
-make check
+GOWORK=off go test ./... -count=1 -timeout=3m
 ```
 
-Before submitting a repository-wide change:
+Run the same command from an affected nested module to test that module. This
+untagged route does not run the configured live-backend integration tests.
+`make check` and `make ci` use the checksum-pinned public CLI and bounded
+`--local --all` route, which also uses deterministic tests, fuzz seeds, and a
+short active smoke for affected fuzz targets. The manifest still requires
+NATS, NSQ, Redis and Valkey with the `integration` tag for the root; the service
+adapter additionally requires RabbitMQ. Have Docker and these fixtures available
+for the manifest-driven route. The other three nested modules declare no services
+or test tags. No sibling checkout or goal ledger is a contributor prerequisite.
+
+The selected root race checks atomic ring admission and release admission/drain
+ownership, once within two minutes:
 
 ```bash
-make ci
+GOWORK=off go test -race . -run '^Test(RingCapacityIsAtomicUnderConcurrentEnqueue|ReleaseContextStopsAdmissionAndDrainsHandlersBeforeShutdown)$' -count=1 -timeout=2m
 ```
 
-The full scheduled and release gate is `make ci`. Report every unavailable or
-failing command; do not describe partial results as release-ready.
+Normal tests execute saved fuzz seeds, not active exploration. For a changed
+codec, select one target and package for active exploration:
+
+```bash
+GOWORK=off go test ./job -run '^$' -fuzz '^FuzzDecodeE$' -fuzztime=2s -timeout=2m
+golib mutation --module . --package ./job
+```
+
+The second command is optional focused local mutation, not full qualification.
+Agent-run Go commands must use a task-owned disposable `GOCACHE` and remove it
+after the bounded run.
+
+Shared PR, main and scheduled CI use the bounded route. `make check-full` and
+the explicit `release_dry_run` workflow input retain full qualification: all 17
+native fuzz targets at 10,000 iterations/20-minute limits, full race, coverage,
+mutation, API compatibility, security, benchmarks, and selected RabbitMQ
+integration operations. `make specification-check` is offline;
+`make specification-check-online` retains explicit online source authority.
+Full RabbitMQ fixtures require Docker and jq; service pod-integration exercises
+its separate Kind fixture, not ordinary standalone Go tests. Nested module
+Make `check` targets retain their existing full contracts. Use the
+[release guide](docs/releasing.md) for deliberate release qualification and
+publication. Report unavailable or failing commands without claiming release
+readiness from the bounded gate.
 
 ## Adding A Module
 

@@ -283,6 +283,8 @@ for a safe error-rendering policy outside the adapter boundary.
 
 ## Development
 
+From `adapters/service`, the existing full module contract is:
+
 ```sh
 make check
 ```
@@ -290,8 +292,12 @@ make check
 The module contract includes formatting, vet, unit tests, race detection,
 exact statement coverage, fuzzing, allocation-reporting benchmarks,
 documentation examples, and package-scoped backend integration. Repository
-gates add API compatibility, mutation, static analysis, vulnerability, secret,
-license, and SBOM checks without changing this module's local test scope.
+full qualification adds API compatibility, mutation, static analysis,
+vulnerability, secret, license, and SBOM checks without changing this module's
+test scope. From the repository root, `golib check --local --module adapters/service`
+selects bounded verification; its manifest still requires NATS, NSQ, RabbitMQ,
+Redis and Valkey with the integration tag. Untagged standalone Go tests from
+this module are separate from those service-backed routes.
 
 `BenchmarkProducerPublish` and `BenchmarkHandlerDelivery` isolate adapter hot
 path overhead. `BenchmarkProducerDrain` and `BenchmarkLifecycleWorkerDrain`

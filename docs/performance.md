@@ -1,8 +1,11 @@
 # Performance and capacity
 
-Benchmarks are diagnostic measurements, not correctness gates. `make benchmark`
-uses a bounded iteration count (`BENCH_TIME=100x`) so broker-backed harnesses do
-not amplify load unpredictably.
+Benchmarks are explicit performance qualification, not ordinary local CI.
+`make -f verification/package.mk benchmark BENCH_TIME=100ms` runs the root
+campaign with bounded measurement time; Redis shutdown uses its separate `1x`
+budget. `make check-full` retains this campaign and the nested module benchmarks.
+The direct benchmark target does not provision brokers; provide the documented
+NATS, NSQ, Redis and Valkey fixtures before running broker-backed workloads.
 
 The suite measures root enqueue/consume/shutdown paths, job encoding, Redis
 Pub/Sub enqueue and consume, Redis Streams queue/stat operations, and Valkey
@@ -30,6 +33,7 @@ Pub/Sub and Core NATS cannot report durable depth because the
 protocols do not retain a work queue. RabbitMQ depth belongs to the management
 API and NSQ exposes consumer statistics through its client.
 
-Before a deployment scale change, run `make benchmark`, a representative
-broker load test, `go test -race ./...`, and a bounded shutdown test with the
-real handler and persistence policy.
+Before a deployment scale change, run the explicit benchmark target, a
+representative broker load test, the affected module's race tests, and a bounded
+shutdown test with the real handler and persistence policy. Select integration
+tags and real fixtures where those assertions depend on a broker.

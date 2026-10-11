@@ -30,17 +30,20 @@ concepts.
 
 ## Mandatory Automation
 
-Every repository provides pinned-SHA workflows for CI, benchmarks, scheduled
-fuzzing, security, and tagged releases. CI tests Go 1.27.0 as the supported
-minimum line and Go 1.27.0 for RabbitMQ modules that require that toolchain.
-Dependency review runs on pull requests; reachable dependency scanning uses
-`govulncheck`.
+This repository's `ci.yml` consumes immutable shared CI and checksum-qualified
+public Tools. PR, main and scheduled runs use bounded local verification with
+fail-closed Required and security checks; explicit `release_dry_run` selects
+full release rehearsal. Verification uses Go 1.27.2 while all module minima
+remain Go 1.27.0. Reachable dependency scanning uses `govulncheck` in the
+applicable security/full route.
 
-The common Make interface is `format`, `format-check`, `test`,
-`test-race`, `coverage`, `vet`, `lint`, `fuzz`, `benchmark`,
-`safety`, `docs`, `vuln`, `check`, and semantic release targets.
-`queue` additionally exposes `api-compat` because its native Streams
-backends have separately frozen public surfaces.
+The root Make interface provides `config`, `inventory`, `cohesion`,
+`repository-check`, `specification-check`, `workflows`, `check`, `ci`,
+`specification-check-online`, and `check-full`. The first specification route
+is offline; full qualification preserves online authority and all configured
+API, mutation, fuzz, integration and benchmark operations. Nested module Make
+targets retain their distinct full contracts. Publication is a separate,
+explicitly authorized operation, not a root semantic-release Make target.
 
 The package family shares the `GO-SAFETY-1` baseline. It forbids `unsafe`,
 cgo, and `go:linkname` in production code and standardizes ownership,
@@ -52,7 +55,7 @@ goroutine lifecycle, race, fuzz, resource-bound, leak, and benchmark evidence.
   recommendation, and threat-model documentation.
 - `jsonrpc` carries protocol conformance and middleware documentation.
 - `queue` carries backend, delivery, lifecycle, failure, and integration
-  documentation plus a live-backend integration workflow. Its fork provenance
+  documentation plus explicit live-backend integration operations. Its fork provenance
   requires detailed third-party notices.
 - `wire` carries format, dependency, and audit-evidence documentation.
 - `tabular` carries format and ingest-limit documentation. It uses
