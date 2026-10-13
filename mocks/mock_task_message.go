@@ -19,6 +19,7 @@ import (
 type MockTaskMessage struct {
 	ctrl     *gomock.Controller
 	recorder *MockTaskMessageMockRecorder
+	isgomock struct{}
 }
 
 // MockTaskMessageMockRecorder is the mock recorder for MockTaskMessage.

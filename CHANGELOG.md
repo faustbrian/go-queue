@@ -3,6 +3,47 @@
 All notable changes are documented here. The project follows semantic
 versioning and Keep a Changelog structure.
 
+## [1.1.4] - 2026-10-13
+
+This entry records a prepared root patch; publication is separate. Adopt
+`github.com/faustbrian/go-queue@v1.1.4` after its public tag and module are
+available. Independently versioned adapters retain their existing releases.
+
+### Changed
+
+- Migrate the three public core-interface mock outputs to authenticated,
+  explicitly selected MockGen v0.6.0 with reproducible directives and inputs.
+  The inherited producer remains unknown. Interface and successful expectation
+  behavior are preserved; mock arguments in GoMock unexpected-call and matcher
+  diagnostics may now be formatted by type rather than struct contents.
+
+### Source accountability
+
+This root source includes the following 17 non-merge repository commits after
+public root v1.1.3 (`376b2ea5c2bd25ace6af4374e464852203df1f8c`) through
+`46f159c15cd1a86b53c925544d6c99cecf323e87`. They include earlier lifecycle,
+dependency, adapter and tooling changes, not new mock-generator guarantees.
+The current producer migration is outside this frozen range; other pending
+Unreleased entries and prior release notes are retained.
+
+- [e3c5c15171](https://github.com/faustbrian/go-queue/commit/e3c5c15171ff24b4bc3b818d332e5da283e76e80),
+  [dc5bb3fde1](https://github.com/faustbrian/go-queue/commit/dc5bb3fde1353f45ed984537faf2d24764a930cf),
+  [23f187cbb5](https://github.com/faustbrian/go-queue/commit/23f187cbb52289712f0aea5664bdf1a2a514f8f9).
+- [0d0ecad6db](https://github.com/faustbrian/go-queue/commit/0d0ecad6db21a363f04d13c53e4ddf846492ecb8),
+  [f7e5572851](https://github.com/faustbrian/go-queue/commit/f7e5572851aea5c3503b34dd822681fc346ad77b),
+  [b1be10756a](https://github.com/faustbrian/go-queue/commit/b1be10756a7fece10b9d64bf0fabcd66874204c4).
+- [8b304f2af9](https://github.com/faustbrian/go-queue/commit/8b304f2af938f028cdcf23abdc7c7d3011547f17),
+  [466a9cb3f7](https://github.com/faustbrian/go-queue/commit/466a9cb3f7b1e8c840c1769f108dc0bc11eb4682),
+  [9ecf0cbf75](https://github.com/faustbrian/go-queue/commit/9ecf0cbf75f8e396f49d384859089a3b62d3b7a7).
+- [6671024a8f](https://github.com/faustbrian/go-queue/commit/6671024a8f22c5a5745f716aed832e1210e36369),
+  [6c46a8298f](https://github.com/faustbrian/go-queue/commit/6c46a8298f5cb9037c43b441d9a4d3c57553bf0c),
+  [4ee601dba4](https://github.com/faustbrian/go-queue/commit/4ee601dba449d60b0df99e071a90890ab0a6fd2e).
+- [e37c6e1a72](https://github.com/faustbrian/go-queue/commit/e37c6e1a72512c4dacf5aabb29a8b86eaa4d2d7e),
+  [2b3b8e44bb](https://github.com/faustbrian/go-queue/commit/2b3b8e44bbed087179ca53f0ede1276c63c25f1d),
+  [6cf3b6d495](https://github.com/faustbrian/go-queue/commit/6cf3b6d495316533bb1461c4a769d19750312df1).
+- [4a2d19f628](https://github.com/faustbrian/go-queue/commit/4a2d19f62886cf17d81e2e4d9ff537ed88ef6be7),
+  [46f159c15c](https://github.com/faustbrian/go-queue/commit/46f159c15cd1a86b53c925544d6c99cecf323e87).
+
 ## [Unreleased]
 
 ### Changed

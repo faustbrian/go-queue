@@ -21,6 +21,7 @@ import (
 type MockWorker struct {
 	ctrl     *gomock.Controller
 	recorder *MockWorkerMockRecorder
+	isgomock struct{}
 }
 
 // MockWorkerMockRecorder is the mock recorder for MockWorker.
@@ -41,17 +42,17 @@ func (m *MockWorker) EXPECT() *MockWorkerMockRecorder {
 }
 
 // Queue mocks base method.
-func (m *MockWorker) Queue(arg0 core.TaskMessage) error {
+func (m *MockWorker) Queue(task core.TaskMessage) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Queue", arg0)
+	ret := m.ctrl.Call(m, "Queue", task)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Queue indicates an expected call of Queue.
-func (mr *MockWorkerMockRecorder) Queue(arg0 any) *gomock.Call {
+func (mr *MockWorkerMockRecorder) Queue(task any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Queue", reflect.TypeOf((*MockWorker)(nil).Queue), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Queue", reflect.TypeOf((*MockWorker)(nil).Queue), task)
 }
 
 // Request mocks base method.
@@ -70,17 +71,17 @@ func (mr *MockWorkerMockRecorder) Request() *gomock.Call {
 }
 
 // Run mocks base method.
-func (m *MockWorker) Run(arg0 context.Context, arg1 core.TaskMessage) error {
+func (m *MockWorker) Run(ctx context.Context, task core.TaskMessage) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Run", arg0, arg1)
+	ret := m.ctrl.Call(m, "Run", ctx, task)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Run indicates an expected call of Run.
-func (mr *MockWorkerMockRecorder) Run(arg0, arg1 any) *gomock.Call {
+func (mr *MockWorkerMockRecorder) Run(ctx, task any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockWorker)(nil).Run), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockWorker)(nil).Run), ctx, task)
 }
 
 // Shutdown mocks base method.
