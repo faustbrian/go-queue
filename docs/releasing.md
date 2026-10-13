@@ -1,5 +1,7 @@
 # Versioning and release guide
 
+[Documentation index](README.md)
+
 Releases follow semantic versioning and are created from annotated `vX.Y.Z`
 tags on a clean `main` commit synchronized with `origin/main`.
 

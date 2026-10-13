@@ -11,7 +11,7 @@ New RabbitMQ-native applications should use that package directly.
 
 ## Status and requirements
 
-This is a deprecated stable-v1 compatibility module at `rabbitmq/v1.0.1`. It
+This is a deprecated stable-v1 compatibility module at `rabbitmq/v1.0.3`. It
 requires Go 1.27.0 or later.
 
 ## Install
@@ -89,8 +89,8 @@ The complete exported API is available on
 [`pkg.go.dev`](https://pkg.go.dev/github.com/faustbrian/go-queue/rabbitmq).
 
 For ecosystem-wide selection and ownership guidance, see the versioned
-[Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
-and [Persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection).
+[Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md)
+and [Persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/design-language.md#package-families-and-selection).
 
 ## Topology ownership
 

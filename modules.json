@@ -436,7 +436,7 @@
           "faq": "docs/faq.md",
           "changelog": "CHANGELOG.md",
           "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue",
-          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md"
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
         "delivery": {
@@ -579,7 +579,7 @@
           "faq": "adapters/rabbitmq/README.md",
           "changelog": "adapters/rabbitmq/CHANGELOG.md",
           "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/rabbitmq",
-          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.5.3/docs/ecosystem/README.md"
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
         "delivery": {
@@ -742,7 +742,7 @@
           "faq": "adapters/service/docs/reference.md",
           "changelog": "adapters/service/CHANGELOG.md",
           "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service",
-          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.5.3/docs/ecosystem/README.md"
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
         "delivery": {
@@ -878,7 +878,7 @@
           "faq": "rabbitmq/README.md",
           "changelog": "rabbitmq/CHANGELOG.md",
           "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/rabbitmq",
-          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md"
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
         "delivery": {
@@ -1026,7 +1026,7 @@
           "faq": "queueservice/README.md",
           "changelog": "queueservice/CHANGELOG.md",
           "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/queueservice",
-          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.5.3/docs/ecosystem/README.md"
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
         "delivery": {

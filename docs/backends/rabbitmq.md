@@ -1,5 +1,7 @@
 # RabbitMQ adapter
 
+[Documentation index](../README.md) · [Backend selection](../backend-support.md)
+
 RabbitMQ support is released from the nested
 `github.com/faustbrian/go-queue/adapters/rabbitmq` module. It preserves the backend-
 neutral worker contract while delegating connections, TLS, publishing,

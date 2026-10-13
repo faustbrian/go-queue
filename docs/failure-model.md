@@ -1,5 +1,7 @@
 # Threat and failure model
 
+[Documentation index](README.md)
+
 **Model version:** 1.1
 
 **Reviewed:** 2026-10-01

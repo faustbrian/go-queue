@@ -1,5 +1,7 @@
 # Scenario cookbook
 
+[Documentation index](README.md)
+
 ## Fixed-delay retries
 
 Set `RetryCount` and `RetryDelay` on `job.AllowOption`. The total timeout covers

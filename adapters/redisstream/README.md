@@ -7,13 +7,13 @@ own Redis deployment, application idempotency, or service lifecycle.
 
 ## Status and requirements
 
-This preview successor ships in root module v1.1.0 and requires Go 1.26.6 or
-later.
+This stable v1 package ships in the root module and requires Go 1.27.0 or
+later. It is not an independently released module.
 
 ## Install
 
 ```sh
-go get github.com/faustbrian/go-queue/adapters/redisstream@v1
+go get github.com/faustbrian/go-queue@v1
 ```
 
 ## Quick start
@@ -49,3 +49,9 @@ See the [Redis Streams guide](../../docs/backends/redis-streams.md),
 [security policy](../../SECURITY.md), [support policy](../../SUPPORT.md), and
 [MIT license](LICENSE). API documentation is published at
 [`pkg.go.dev`](https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/redisstream).
+
+## Navigation
+
+Continue with the [parent documentation index](../../docs/README.md) or the
+[versioned Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md)
+for cross-package selection and ownership.

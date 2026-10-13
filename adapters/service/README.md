@@ -8,7 +8,7 @@ dead-letter policy.
 
 ## Status and requirements
 
-This is the stable, supported service lifecycle adapter. It requires Go 1.26.6
+This is the stable, supported service lifecycle adapter. It requires Go 1.27.0
 or later.
 
 ## Install
@@ -51,3 +51,9 @@ See the [technical guide](docs/reference.md), [documentation index](docs/README.
 [security policy](../../SECURITY.md), [support policy](../../SUPPORT.md), and
 [MIT license](LICENSE). API documentation is published at
 [`pkg.go.dev`](https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service).
+
+## Navigation
+
+Continue with the [parent documentation index](../../docs/README.md) or the
+[versioned Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md)
+for cross-package selection and ownership.

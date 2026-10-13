@@ -1,5 +1,7 @@
 # Queue service lifecycle adapter technical guide
 
+[Adapter documentation index](README.md) · [Parent documentation](../../../docs/README.md)
+
 This guide contains the complete behavioral and operational reference. Start
 with the [package overview](../README.md).
 

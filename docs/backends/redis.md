@@ -1,5 +1,7 @@
 # Redis Pub/Sub setup
 
+[Documentation index](../README.md) · [Backend selection](../backend-support.md)
+
 Use package `redisdb`. Configure `WithAddr`, `WithUsername`, `WithPassword`,
 `WithDB`, `WithChannel`, and optional TLS. Cluster and Sentinel modes are
 explicit options. `WithConnectTimeout` bounds startup validation and

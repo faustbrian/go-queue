@@ -1,5 +1,7 @@
 # Integration evidence
 
+[Documentation index](README.md)
+
 Integration tests use the `integration` build tag and Testcontainers 0.42.0.
 Images are pinned by version and digest so a tag cannot silently change the
 evidence environment.

@@ -12,7 +12,7 @@ without choosing a backend or moving retry, scheduling, acknowledgement,
 redelivery, or dead-letter policy out of `queue`.
 
 The module is a deprecated stable-v1 compatibility facade at
-`queueservice/v1.0.1`. It requires Go 1.26.6 or later, and consumers should pin
+`queueservice/v1.0.3`. It requires Go 1.27.0 or later, and consumers should pin
 an exact released version.
 
 ## Install
@@ -63,8 +63,8 @@ additional guarantees beyond the documented module boundary.
 ## Documentation
 
 For ecosystem-wide selection and ownership guidance, see the versioned
-[Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
-and [Persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection).
+[Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md)
+and [Persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/design-language.md#package-families-and-selection).
 
 - [Successor documentation index](../adapters/service/docs/README.md)
 - [Complete technical guide](../adapters/service/docs/reference.md)

@@ -1,5 +1,7 @@
 # Valkey Streams setup
 
+[Documentation index](../README.md) · [Backend selection](../backend-support.md)
+
 `valkeystream` is a first-class standalone Valkey 9 backend implemented with
 `github.com/valkey-io/valkey-go`. It does not alias Redis Streams, import
 `go-redis`, or expose native client types through its public API. Redis Streams

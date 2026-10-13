@@ -1,5 +1,7 @@
 # Migration from golang-queue
 
+[Documentation index](README.md)
+
 ## Target-oriented adapter paths
 
 Three released integration paths now have additive successors:

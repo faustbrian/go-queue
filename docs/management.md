@@ -1,5 +1,7 @@
 # Management protocol
 
+[Documentation index](README.md)
+
 The `management` package is the stable boundary between `queue` workers and
 an external control plane. It defines protocol and capability values only. It
 does not connect to Redis, Valkey, Kubernetes, or any other backend, and it does

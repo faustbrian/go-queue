@@ -1,5 +1,7 @@
 # Architecture
 
+[Documentation index](README.md)
+
 The module has a small coordinator at its root and explicit backend packages.
 It deliberately avoids a universal transport API that would erase correctness
 differences.
@@ -26,11 +28,12 @@ differences.
   queue identity without importing backend packages into the coordinator.
 - `core.DeliveryValidator` optionally validates one decoded delivery before the
   coordinator enters handler timeout and retry execution.
-- `queueservice` adapts concrete producers and `*Queue` workers to the public
-  service lifecycle. It imports `service`; the root queue package does not.
+- `adapters/service` (package `queueservice`) adapts concrete producers and
+  `*Queue` workers to the public service lifecycle. It imports `service`; the
+  root queue package does not.
 - Correlation-aware producers store a bounded carrier in `job.Metadata`.
-  `queueservice.NewHandler` applies the existing correlation queue receive
-  semantics at the application-handler boundary.
+  `queueservice.NewHandler` in that adapter applies the existing correlation
+  queue receive semantics at the application-handler boundary.
 - Trace-aware producers store a separate bounded W3C carrier in `job.Metadata`.
   The adapter uses only the caller-provided OpenTelemetry propagator; it does
   not read or mutate global telemetry state. Correlation and tracing remain

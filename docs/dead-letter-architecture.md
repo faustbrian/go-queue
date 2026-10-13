@@ -1,5 +1,7 @@
 # Dead-letter data-plane architecture
 
+[Documentation index](README.md)
+
 This document is the reconciliation baseline for first-version dead-letter
 support. It describes behavior verified in the implementation, identifies
 unsupported operations explicitly, and separates the package data plane from

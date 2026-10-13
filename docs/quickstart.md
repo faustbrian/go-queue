@@ -1,9 +1,11 @@
 # Quickstart
 
+[Documentation index](README.md)
+
 ## Install
 
 ```sh
-go get github.com/faustbrian/go-queue
+go get github.com/faustbrian/go-queue@v1
 ```
 
 ## Choose A Backend

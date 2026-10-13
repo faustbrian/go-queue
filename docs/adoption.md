@@ -1,5 +1,7 @@
 # Adoption guide
 
+[Documentation index](README.md)
+
 1. Choose semantics before choosing a client. Use Redis Streams or Valkey
    Streams for durable grouped work and Pub/Sub only for disposable notifications.
 2. Make the handler idempotent. At-least-once transports can repeat completed

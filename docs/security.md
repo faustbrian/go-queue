@@ -1,5 +1,7 @@
 # Security and abuse resistance
 
+[Documentation index](README.md)
+
 Every enqueue caller and broker delivery is untrusted. The library validates
 message envelopes before handler execution, but deployment authentication,
 authorization, network isolation, and broker retention limits remain operator

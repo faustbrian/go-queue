@@ -1,5 +1,7 @@
 # Examples
 
+[Documentation index](README.md)
+
 ## In-Memory Development
 
 The [in-memory example](../examples/inmemory) demonstrates worker lifecycle

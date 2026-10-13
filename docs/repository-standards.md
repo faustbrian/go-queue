@@ -1,5 +1,7 @@
 # Repository Standards
 
+[Documentation index](README.md)
+
 This repository follows the shared maintenance baseline used by the
 `faustbrian/go-*` OSS packages.
 

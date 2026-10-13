@@ -1,5 +1,7 @@
 # Lifecycle and state ownership
 
+[Documentation index](README.md)
+
 `Queue` owns scheduling and handler execution; each backend worker owns its
 transport connection, delivery channel, and settlement callbacks. A queue moves
 through `constructed -> started -> shutting down -> stopped` and never returns

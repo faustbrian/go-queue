@@ -1,5 +1,7 @@
 # Delivery semantics
 
+[Documentation index](README.md)
+
 No backend in this module promises exactly-once processing. Handlers must be
 idempotent whenever a transport can redeliver.
 

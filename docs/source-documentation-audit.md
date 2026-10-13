@@ -1,5 +1,7 @@
 # Source documentation audit
 
+[Documentation index](README.md)
+
 ## Initial scope and bounded plan
 
 Tier A source comments and directly related current contract prose from

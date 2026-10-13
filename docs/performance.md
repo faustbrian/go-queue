@@ -1,5 +1,7 @@
 # Performance and capacity
 
+[Documentation index](README.md)
+
 Benchmarks are explicit performance qualification, not ordinary local CI.
 `make -f verification/package.mk benchmark BENCH_TIME=100ms` runs the root
 campaign with bounded measurement time; Redis shutdown uses its separate `1x`

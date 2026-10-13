@@ -1,5 +1,7 @@
 # Go Safety And Concurrency
 
+[Documentation index](README.md)
+
 Baseline: `GO-SAFETY-1`
 
 This document defines the shared safety engineering standard for the

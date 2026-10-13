@@ -1,5 +1,7 @@
 # FAQ
 
+[Documentation index](README.md)
+
 ## Is this exactly-once?
 
 No. Durable backends target at-least-once processing. Applications must handle

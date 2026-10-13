@@ -1,5 +1,7 @@
 # Backend support
 
+[Documentation index](README.md)
+
 | Capability | Ring | Redis Pub/Sub | Redis Streams | Valkey Streams | Core NATS | NSQ | RabbitMQ adapter |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Persistent broker storage | No | No | Yes | Yes | No | Yes | Yes |

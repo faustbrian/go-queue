@@ -1,5 +1,7 @@
 # Dead-letter operations and recovery
 
+[Documentation index](README.md)
+
 This runbook applies to package-managed durable dead letters. It does not turn
 Ring, Redis Pub/Sub, or Core NATS into durable transports. Operators must first
 confirm the backend and advertised capabilities rather than inferring support

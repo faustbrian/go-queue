@@ -1,5 +1,7 @@
 # Laravel Horizon failed-job migration
 
+[Documentation index](README.md)
+
 `queue` provides Horizon-like failed-job operations without reproducing
 Laravel internals or promising cross-runtime wire compatibility. Migrate the
 operator workflow and semantics, not Horizon's database schema or serialized

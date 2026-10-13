@@ -1,5 +1,7 @@
 # NSQ setup
 
+[Documentation index](../README.md) · [Backend selection](../backend-support.md)
+
 Configure the nsqd address, topic, channel, maximum in-flight messages, and log
 level. Each received message disables NSQ automatic response; the queue sends
 `FIN` after successful handling.

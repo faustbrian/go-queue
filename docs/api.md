@@ -1,5 +1,7 @@
 # Public API reference
 
+[Documentation index](README.md)
+
 Go package documentation remains authoritative for exact signatures. This page
 maps the stable concepts new adopters need.
 

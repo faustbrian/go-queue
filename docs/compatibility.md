@@ -1,5 +1,7 @@
 # Compatibility policy
 
+[Documentation index](README.md)
+
 The project uses semantic versioning.
 
 - Breaking API changes require a new major release, and release notes identify every

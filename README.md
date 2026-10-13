@@ -2,9 +2,7 @@
 
 [![CI](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
-[![Mutation](https://img.shields.io/badge/mutation-full_qualification-blue)](CONTRIBUTING.md#verification)
-[![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
+[![Documentation](https://img.shields.io/badge/docs-structural_checks_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-queue.svg)](https://pkg.go.dev/github.com/faustbrian/go-queue)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-queue?sort=semver)](https://github.com/faustbrian/go-queue/releases)
 [![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
@@ -19,9 +17,10 @@ integration. The RabbitMQ adapter delegates AMQP policy to
 
 ## Status
 
-The package has a stable v1 API. Production code is held to
-meaningful 100% coverage; durable delivery claims require backend-specific
-integration evidence.
+The root module and independently released adapters have stable v1 APIs.
+The former `redisstream`, `rabbitmq`, and `queueservice` paths are deprecated
+compatibility facades, not separate worker implementations. Durable delivery
+claims require [backend-specific integration evidence](docs/integration-evidence.md).
 
 ## Requirements
 
@@ -35,7 +34,7 @@ minimums or patch the runtime of already-built applications.
 ## Installation
 
 ```sh
-go get github.com/faustbrian/go-queue
+go get github.com/faustbrian/go-queue@v1
 ```
 
 Root backend packages, including `adapters/redisstream`, ship in the same
@@ -43,6 +42,38 @@ module and are imported explicitly. Install the independently versioned
 `github.com/faustbrian/go-queue/adapters/rabbitmq` or
 `github.com/faustbrian/go-queue/adapters/service` module when needed. Former
 v1 paths remain deprecated compatibility facades.
+
+## Choosing this package
+
+Use `queue` for bounded worker coordination with explicit backend delivery,
+retry, settlement, and shutdown semantics. Use the in-memory backend for local
+work, Pub/Sub or Core NATS for disposable delivery, and a durable backend only
+after checking the [backend matrix](docs/backend-support.md).
+
+Applications own handlers, idempotency, configuration, broker deployment,
+and scheduling. The separate
+[`go-queue-control-plane`](https://github.com/faustbrian/go-queue-control-plane)
+owns administrative authorization, audit, and policy; this library exposes
+worker management contracts, not an operator dashboard. For RabbitMQ-native
+messaging use [`go-rabbitmq-queues`](https://github.com/faustbrian/go-rabbitmq-queues);
+RabbitMQ Streams use the separate
+[`go-rabbitmq-streams`](https://github.com/faustbrian/go-rabbitmq-streams), not
+this AMQP job adapter. No backend provides exactly-once application effects.
+
+## Package and module map
+
+| Import below `github.com/faustbrian/go-queue` | Responsibility | Release ownership |
+| --- | --- | --- |
+| root, `core`, `job` | Coordination, worker contracts, job envelopes | Root module |
+| `redisdb`, `adapters/redisstream`, `valkeystream`, `nats`, `nsq` | Explicit native backends | Root module |
+| `management`, `managementhttp` | Capability-negotiated worker status and control | Root module |
+| [`adapters/rabbitmq`](adapters/rabbitmq/README.md) | AMQP job integration over `go-rabbitmq-queues` | Independent nested module |
+| [`adapters/service`](adapters/service/README.md) | `go-service` admission, drain, and shutdown integration | Independent nested module |
+| [`redisstream`](redisstream/README.md), [`rabbitmq`](rabbitmq/README.md), [`queueservice`](queueservice/README.md) | Deprecated compatibility facades | Redis facade in root; others independently tagged |
+
+Select and install only the modules needed. See the
+[release guide](docs/releasing.md) for nested-module tags and
+[compatibility guidance](docs/compatibility.md) before an upgrade.
 
 ## Quickstart
 
@@ -138,8 +169,8 @@ RabbitMQ migrations should use the [target-oriented adapter guide](adapters/rabb
 Release history is maintained in [CHANGELOG.md](CHANGELOG.md).
 
 For ecosystem-wide selection and ownership guidance, see the versioned
-[Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
-and [Persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection).
+[Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md)
+and [Persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/design-language.md#package-families-and-selection).
 
 ## Development
 

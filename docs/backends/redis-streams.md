@@ -1,5 +1,7 @@
 # Redis Streams setup
 
+[Documentation index](../README.md) · [Backend selection](../backend-support.md)
+
 Import `github.com/faustbrian/go-queue/adapters/redisstream` as `redisstream`.
 The former `/redisstream` path and its historical `redisdb` identifier remain
 a deprecated compatibility facade. Configure a stream, group, and unique

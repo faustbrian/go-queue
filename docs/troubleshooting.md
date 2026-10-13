@@ -1,5 +1,7 @@
 # Troubleshooting
 
+[Documentation index](README.md)
+
 ## Startup returns a connection error
 
 Check the backend address format, credentials, TLS mode, and broker listener.
