@@ -69,7 +69,7 @@ func (o options) validateDeadLetter() error {
 	return nil
 }
 
-// WithRecordRetention deliberately enables approximate maximum-count
+// WithRecordRetention deliberately enables exact maximum-count
 // retention for failure and dead-letter streams. It is disabled by default.
 func WithRecordRetention(maxRecords int64) Option {
 	return func(w *options) {
@@ -163,7 +163,7 @@ func WithBlockTime(m time.Duration) Option {
 	}
 }
 
-// WithPassword redis password
+// WithDB selects the logical database for a standalone client.
 func WithDB(db int) Option {
 	return func(w *options) {
 		w.db = db

@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// MaxLifecycleCommandResults bounds process-local retained command entries without eviction.
 const MaxLifecycleCommandResults = 10_000
 
 var (
@@ -27,18 +28,27 @@ var (
 // WorkerLifecycleConfig identifies the queue admission scope controlled by one
 // Queue instance and bounds its in-memory duplicate-command protection.
 type WorkerLifecycleConfig struct {
-	Metadata          StatusMetadata
-	WorkerGroup       string
-	Queue             string
+	// Metadata identifies the worker/protocol/concurrency scope.
+	Metadata StatusMetadata
+	// WorkerGroup identifies the permitted group target.
+	WorkerGroup string
+	// Queue identifies the permitted queue target.
+	Queue string
+	// MaxCommandResults bounds retained command entries in [1, MaxLifecycleCommandResults]; no entries are evicted.
 	MaxCommandResults int
-	Now               func() time.Time
+	// Now is a required borrowed clock callback; it must return meaningful times and not reenter locked operations.
+	Now func() time.Time
 }
 
 // WorkerLifecycleSnapshot is one synchronized admission and drain view.
 type WorkerLifecycleSnapshot struct {
-	State       WorkerState
+	// State presents the local admission state.
+	State WorkerState
+	// DrainStatus presents admissions/jobs completion or timeout, not backend connectivity.
 	DrainStatus DrainState
+	// CurrentJobs counts promoted work wrappers still awaiting EndJob.
 	CurrentJobs uint32
+	// Terminating marks the irreversible terminating state.
 	Terminating bool
 }
 
@@ -71,6 +81,9 @@ type WorkerLifecycle struct {
 
 // NewWorkerLifecycle creates an active queue lifecycle with bounded command
 // history. Command history is never evicted; capacity exhaustion fails closed.
+// Metadata is copied, Now is borrowed, and all state is process-local. Admission
+// and job counters are uint32 with unchecked overflow; callers must balance them
+// and keep actual concurrency within the configured operational limits.
 func NewWorkerLifecycle(config WorkerLifecycleConfig) (*WorkerLifecycle, error) {
 	if config.Metadata.Validate() != nil || invalidIdentity(config.WorkerGroup) ||
 		invalidIdentity(config.Queue) || config.MaxCommandResults < 1 ||
@@ -149,7 +162,9 @@ func (l *WorkerLifecycle) Snapshot() WorkerLifecycleSnapshot {
 }
 
 // ApplyDesiredState applies one durable revision and waits for the requested
-// safe admission boundary. A canceled wait leaves the state active for retry.
+// safe admission boundary. Cancellation leaves the requested state applied but
+// does not record the revision; retry can finish the wait. applyMu serializes
+// transitions, and waiting for that mutex itself is not context-aware.
 func (l *WorkerLifecycle) ApplyDesiredState(
 	ctx context.Context,
 	record DesiredRecord,
@@ -191,7 +206,10 @@ func (l *WorkerLifecycle) ApplyDesiredState(
 }
 
 // Execute enforces lifecycle commands and returns a bounded correlated result.
-// Failure/dead-letter and backend mutation actions remain unsupported.
+// Failure/dead-letter and backend mutation actions remain unsupported. Command
+// Selection/Replay pointers are retained for equality checks; do not mutate them
+// after submission. Duplicate waits can report unknown on cancellation while
+// the first caller continues. Waiting for applyMu is not context-aware.
 func (l *WorkerLifecycle) Execute(
 	ctx context.Context,
 	command Command,

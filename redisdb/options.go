@@ -38,7 +38,7 @@ func WithAddr(addr string) Option {
 	}
 }
 
-// WithPassword redis password
+// WithDB selects the logical database for a standalone client.
 func WithDB(db int) Option {
 	return func(w *options) {
 		w.db = db

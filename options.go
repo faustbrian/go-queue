@@ -51,7 +51,8 @@ func WithWorkerCount(num int64) Option {
 }
 
 // WithQueueSize sets the maximum capacity of the queue.
-// When set to 0 (default), the queue has unlimited capacity and will grow dynamically.
+// The Ring defaults to 10,000 pending jobs; zero explicitly makes it unbounded.
+// This does not configure capacity for external workers or count running jobs.
 // When set to a positive value, Queue() will return ErrMaxCapacity when the limit is reached.
 // Use this to prevent memory exhaustion under high load.
 //
@@ -123,7 +124,7 @@ func WithWorkerLifecycle(lifecycle *management.WorkerLifecycle) Option {
 }
 
 // WithFn sets a custom handler function that will be called to process tasks.
-// This function is used by the worker's Run method when processing job messages.
+// It configures Ring.Run; custom/network workers own their own handler options.
 // The context allows cancellation and timeout control during task execution.
 // If not set, defaults to a no-op function that returns nil.
 //
@@ -142,7 +143,9 @@ func WithFn(fn func(context.Context, core.TaskMessage) error) Option {
 
 // WithAfterFn sets a callback function that will be executed after each job completes.
 // This callback runs regardless of whether the job succeeded or failed.
-// It executes after metrics are updated but before the worker picks up the next task.
+// It runs synchronously after metrics/observation. Scheduling is already
+// released, so another task can start first. Calls may overlap, and a blocking
+// callback delays its work wrapper; panics are contained by Root Queue.
 // Useful for cleanup, logging, or triggering post-processing workflows.
 //
 // Example:
@@ -157,7 +160,8 @@ func WithAfterFn(afterFn func()) Option {
 }
 
 // WithRetryInterval sets the interval at which the queue polls for new tasks when the queue is empty.
-// This determines how often Request() is retried after receiving ErrNoTaskInQueue.
+// This delays polling after Request errors, including but not limited to empty
+// intake. Notifications/admission closure can wake the wait earlier.
 // Lower values provide faster response to new tasks but increase CPU usage.
 // Defaults to 1 second.
 //
@@ -189,7 +193,7 @@ type Options struct {
 // NewOptions creates an Options struct with default values and applies any provided options.
 // Default values:
 //   - workerCount: runtime.NumCPU()
-//   - queueSize: 0 (unlimited)
+//   - queueSize: 10,000 pending Ring jobs (zero explicitly disables the bound)
 //   - logger: stderr logger with timestamps
 //   - worker: nil (must be provided via WithWorker or use NewPool which sets Ring)
 //   - fn: no-op function returning nil

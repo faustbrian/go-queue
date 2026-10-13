@@ -1,7 +1,13 @@
+// Package queue schedules in-process tasks and backend deliveries with bounded
+// worker concurrency and per-delivery retries. Backend acceptance, settlement and
+// durability are distinct from handler completion; none promises exactly-once
+// application effects. Handlers must cooperate with their contexts.
+//
+// Construct queues with NewQueue or NewPool. CloseAdmission stops new submissions
+// without closing the worker; ReleaseContext drains tracked scheduling/work
+// wrappers before worker shutdown. A timed-out handler can outlive those wrappers
+// when it ignores cancellation. Message payload bytes are not copied on admission.
 package queue
-
-// Package queue provides a high-performance, extensible message queue implementation
-// supporting multiple workers, job retries, dynamic scaling, and graceful shutdown.
 
 import (
 	"context"
@@ -61,12 +67,14 @@ ErrMissingWorker is returned when a queue is created without a worker implementa
 */
 var ErrMissingWorker = errors.New("missing worker module")
 
-// NewQueue creates and returns a new Queue instance with the provided options.
-// Returns an error if no worker is specified.
+// NewQueue validates scheduler options and retains the supplied worker, logger,
+// metric, observer and lifecycle. It does not start the scheduler or assume a
+// worker has no constructor-owned background work. Use Start and release the
+// queue when finished. A typed-nil Worker is not detected by the interface check.
 func NewQueue(opts ...Option) (*Queue, error) {
 	o := NewOptions(opts...)
 	q := &Queue{
-		routineGroup:  newRoutineGroup(),      // Manages all goroutines spawned by the queue
+		routineGroup:  newRoutineGroup(),      // Tracks the scheduler and work wrappers, not the inner handler goroutine
 		quit:          make(chan struct{}),    // Signals shutdown to all goroutines
 		drain:         make(chan struct{}),    // Signals graceful intake withdrawal
 		ready:         make(chan struct{}, 1), // Signals when a worker is ready to process a job
@@ -97,8 +105,9 @@ func NewQueue(opts ...Option) (*Queue, error) {
 	return q, nil
 }
 
-// Start launches all worker goroutines and begins processing jobs.
-// If workerCount is zero, Start is a no-op.
+// Start launches the intake scheduler once. Work goroutines are created as
+// capacity becomes available. It does nothing after shutdown or when the current
+// worker count is zero; constructor options normally select runtime.NumCPU.
 func (q *Queue) Start() {
 	if atomic.LoadInt32(&q.stopFlag) == 1 {
 		return
@@ -117,9 +126,10 @@ func (q *Queue) Start() {
 	})
 }
 
-// Shutdown initiates a graceful shutdown of the queue.
-// It signals all goroutines to stop, shuts down the worker, and closes the quit channel.
-// Shutdown is idempotent and safe to call multiple times.
+// Shutdown rejects submissions, calls the concrete worker's synchronous
+// Shutdown, then signals tracked work to cancel. It is idempotent but does not
+// join work or bound Worker.Shutdown. Ring shutdown waits for buffer dequeue.
+// Use ReleaseContext for the separate drain-before-close path.
 func (q *Queue) Shutdown() {
 	q.stopOnce.Do(func() {
 		q.admissionMu.Lock()
@@ -152,7 +162,9 @@ func (q *Queue) shutdownWorker() (err error) {
 	return q.worker.Shutdown()
 }
 
-// Release performs a graceful shutdown and waits for all goroutines to finish.
+// Release starts an unstarted Ring-backed queue, calls Shutdown and waits for
+// the scheduler/work wrappers without a caller deadline. Timeout-ignoring handler
+// goroutines are not joined; this is not a graceful drain-before-close guarantee.
 func (q *Queue) Release() {
 	if _, isRing := q.worker.(*Ring); isRing &&
 		atomic.LoadInt32(&q.started) == 0 {
@@ -163,9 +175,9 @@ func (q *Queue) Release() {
 }
 
 // CloseAdmission synchronously and idempotently rejects new queue submissions
-// and stops taking new backend work. Already accepted submissions and active
-// handlers retain queue ownership until ReleaseContext drains and releases
-// them.
+// and withdraws new backend intake. An already accepted submission/request or
+// work wrapper can remain active. It does not cancel handlers, close transports
+// or join a handler that ignores its own timeout.
 func (q *Queue) CloseAdmission() error {
 	q.drainOnce.Do(func() {
 		q.admissionMu.Lock()
@@ -191,9 +203,12 @@ func (q *Queue) CloseAdmission() error {
 	return nil
 }
 
-// ReleaseContext stops admission, lets already admitted handlers finish, then
-// releases the concrete worker. If ctx expires, the worker remains open so a
-// later call can resume safe release.
+// ReleaseContext closes admission, waits for accepted publishes and tracked
+// scheduler/work wrappers, then shuts down the worker. The context bounds drain
+// waits, not synchronous Worker.Shutdown or noncooperative callbacks. Expiration
+// before shutdown leaves the worker open for a later release attempt. A handler
+// that ignores its own timeout can continue after its tracked wrapper completes.
+// A nil context returns context.Canceled; shutdown errors remain cached.
 func (q *Queue) ReleaseContext(ctx context.Context) error {
 	if ctx == nil {
 		return context.Canceled
@@ -206,7 +221,8 @@ func (q *Queue) ReleaseContext(ctx context.Context) error {
 	return errors.Join(q.shutdownErr, q.WaitContext(ctx))
 }
 
-// BusyWorkers returns the number of workers currently processing jobs.
+// BusyWorkers returns the internal active work-wrapper count, independent of
+// custom metrics. Timed-out handlers still running are not counted.
 func (q *Queue) BusyWorkers() int64 {
 	return atomic.LoadInt64(&q.activeWorkers)
 }
@@ -231,26 +247,32 @@ func (q *Queue) CompletedTasks() uint64 {
 	return q.safeMetricValue("read completed task count", q.metric.CompletedTasks)
 }
 
-// Wait blocks until all goroutines in the routine group have finished.
+// Wait joins the current scheduler/work-wrapper group; it does not close intake,
+// join canceled inner handler goroutines or prevent later work from being added.
 func (q *Queue) Wait() {
 	q.routineGroup.Wait()
 }
 
-// WaitContext waits for all queue-owned routines within ctx.
+// WaitContext bounds the current scheduler/work-wrapper wait. It does not cancel
+// work or join timeout-ignoring handlers; a nil context returns context.Canceled.
 func (q *Queue) WaitContext(ctx context.Context) error {
 	return q.routineGroup.WaitContext(ctx)
 }
 
-// Queue enqueues a single job (core.QueuedMessage) into the queue.
-// Accepts job options for customization.
+// Queue borrows message.Bytes(), applies only the first job option, validates
+// execution metadata and synchronously invokes Worker.Queue. Success is backend
+// admission, not completed execution. There is no caller context; a blocked
+// backend publish also holds an admission until it returns.
 func (q *Queue) Queue(message core.QueuedMessage, opts ...job.AllowOption) error {
 	data := job.NewMessage(message, opts...)
 
 	return q.queue(&data)
 }
 
-// QueueTask enqueues a single task function into the queue.
-// Accepts job options for customization.
+// QueueTask admits an in-process callback using only the first job option.
+// Task functions are not serialized, so use a Ring for actual local execution.
+// The callback must honor the message's total timeout; admission does not copy
+// application-owned state captured by it.
 func (q *Queue) QueueTask(task job.TaskFunc, opts ...job.AllowOption) error {
 	data := job.NewTask(task, opts...)
 	return q.queue(&data)
@@ -398,8 +420,10 @@ func (q *Queue) run(task core.TaskMessage) error {
 	}
 }
 
-// handle executes a job.Message, supporting retries, timeouts, and panic recovery.
-// Returns an error if the job fails or times out.
+// handle isolates one handler/retry loop behind buffered completion channels.
+// One context budget covers every attempt and delay. Timeout returns without
+// joining the inner goroutine, so accounting/settlement can finish while caller
+// code still runs; cooperative cancellation is required, not enforced.
 func (q *Queue) handle(m *job.Message) error {
 	// done: receives the result of the job execution
 	// panicChan: receives any panic that occurs in the job goroutine
@@ -579,8 +603,9 @@ func (q *Queue) safeLogError(args ...any) {
 	_ = invokeSafely(func() { q.logger.Error(args...) })
 }
 
-// UpdateWorkerCount dynamically updates the number of worker goroutines.
-// Triggers scheduling to adjust to the new worker count.
+// UpdateWorkerCount changes the admission concurrency threshold and schedules
+// work. It does not stop existing handlers. Unlike WithWorkerCount, zero/negative
+// values are stored as-is and prevent new work from being scheduled.
 func (q *Queue) UpdateWorkerCount(num int64) {
 	q.Lock()
 	q.workerCount = num

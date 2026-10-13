@@ -12,10 +12,13 @@
 // shutdown callbacks into one service plan. Worker retains the smaller
 // *queue.Queue convenience boundary. Both paths stop intake, join admitted work
 // within the service context, and release the concrete transport only after
-// the drain. NewHandler creates a new request ID for every delivery.
+// the drain. The smaller Worker delegates to Queue.ReleaseContext, which joins
+// scheduling/work wrappers, not a handler still ignoring its timeout context.
+// NewHandler creates a new request ID for every delivery.
 // TrustedMetadata must be enabled only after authenticating the immediate queue
-// boundary. Callback failures preserve their causes without formatting their
-// text, and callback panics are returned without retaining their values.
+// boundary. Callbacks run synchronously and must honor supplied contexts;
+// cancellation cannot preempt a callback. Callback failures preserve their causes
+// without formatting their text, and callback panics are returned without retaining their values.
 package queueservice
 
 import (

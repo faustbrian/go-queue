@@ -1,3 +1,6 @@
+// Package semver checks v-prefixed release tag syntax and computes stable
+// version successors for the release command. NextStable uses machine int
+// arithmetic; it is not an arbitrary-precision version calculator.
 package semver
 
 import (
@@ -18,6 +21,8 @@ var stableTagPattern = regexp.MustCompile(
 	`^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$`,
 )
 
+// ValidateTag accepts v-prefixed SemVer syntax, including prerelease/build
+// metadata, but does not check component arithmetic range or existing Git tags.
 func ValidateTag(tag string) error {
 	if !tagPattern.MatchString(tag) {
 		return errors.New("tag must be a v-prefixed semantic version")
@@ -25,6 +30,10 @@ func ValidateTag(tag string) error {
 	return nil
 }
 
+// NextStable accepts stable v-prefixed tags and increments patch, minor or major,
+// resetting subordinate components. Parsed components use strconv.Atoi with
+// ignored range errors and unchecked machine-int increment; use representable
+// components with room for the selected increment. No Git state is consulted.
 func NextStable(tag, part string) (string, error) {
 	matches := stableTagPattern.FindStringSubmatch(tag)
 	if matches == nil {

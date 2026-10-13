@@ -25,9 +25,12 @@ const (
 // ReconnectConfig is retained for source compatibility. NativeConfig.Connection.Recovery
 // owns runtime recovery for compatibility-adapter workers.
 type ReconnectConfig struct {
-	MaxRetries   int
+	// MaxRetries is retained for source compatibility; native recovery owns runtime behavior.
+	MaxRetries int
+	// InitialDelay is retained for source compatibility; native recovery owns runtime behavior.
 	InitialDelay time.Duration
-	MaxDelay     time.Duration
+	// MaxDelay is retained for source compatibility; native recovery owns runtime behavior.
+	MaxDelay time.Duration
 }
 
 // Worker preserves the go-queue worker contract while delegating RabbitMQ

@@ -12,6 +12,7 @@ import (
 
 const defaultControlCapacity = 1_024
 
+// ErrManagementControlDisabled reports missing management metadata or mutation transport.
 var ErrManagementControlDisabled = errors.New("valkeystream: management control disabled")
 
 var _ management.Controller = (*Worker)(nil)
@@ -71,8 +72,11 @@ type nativeControlEntry struct {
 	once    sync.Once
 }
 
-// Execute applies one bounded native Valkey record mutation. Replay and queue
-// purge remain unsupported until their durable backend semantics are proven.
+// Execute applies a native record mutation and caches its result by idempotency
+// key in this worker process (1,024 entries, no eviction). Replay requires an
+// allowlisted destination; queue purge is unsupported. Results may be partial or
+// unknown; they do not imply exactly-once effects. ctx must be non-nil.
+// Commands retain Selection and Replay pointers; do not mutate them after use.
 func (w *Worker) Execute(
 	ctx context.Context, command management.Command,
 ) (management.CommandResult, error) {

@@ -16,17 +16,26 @@ import (
 )
 
 const (
+	// ExchangeDirect retains the legacy direct exchange name.
+	//
 	// Deprecated: use successor.ExchangeDirect.
 	ExchangeDirect = successor.ExchangeDirect
+	// ExchangeFanout retains the legacy constant; the native adapter rejects it.
+	//
 	// Deprecated: use successor.ExchangeFanout.
 	ExchangeFanout = successor.ExchangeFanout
+	// ExchangeTopic retains the legacy topic exchange name.
+	//
 	// Deprecated: use successor.ExchangeTopic.
 	ExchangeTopic = successor.ExchangeTopic
+	// ExchangeHeaders retains the legacy constant; the native adapter rejects it.
+	//
 	// Deprecated: use successor.ExchangeHeaders.
 	ExchangeHeaders = successor.ExchangeHeaders
 )
 
 // DeadLetterConfig preserves the released terminal-route configuration.
+//
 // Deprecated: use successor.DeadLetterConfig.
 type DeadLetterConfig struct {
 	// Exchange is the terminal exchange.
@@ -40,6 +49,7 @@ type DeadLetterConfig struct {
 }
 
 // NativeConfig preserves the released explicit RabbitMQ policy boundary.
+//
 // Deprecated: use successor.NativeConfig.
 type NativeConfig struct {
 	// Connection configures the caller-approved native connection.
@@ -56,6 +66,7 @@ type NativeConfig struct {
 
 // ReconnectConfig preserves the released source-compatible recovery options.
 // NativeConfig.Connection.Recovery owns runtime recovery.
+//
 // Deprecated: use successor.ReconnectConfig.
 type ReconnectConfig struct {
 	// MaxRetries is retained for source compatibility.
@@ -67,6 +78,7 @@ type ReconnectConfig struct {
 }
 
 // Option preserves the released worker configuration surface.
+//
 // Deprecated: use successor.Option.
 type Option func(*options)
 type options struct{ successor []successor.Option }
@@ -88,6 +100,7 @@ func successorOption(option successor.Option) Option {
 
 // Worker preserves the released queue worker API while delegating all runtime
 // ownership and behavior to the target-oriented successor.
+//
 // Deprecated: use successor.Worker.
 type Worker struct {
 	successor workerDelegate
@@ -103,6 +116,8 @@ func (worker *Worker) delegate() workerDelegate {
 	return worker.successor
 }
 
+// NewWorker constructs the successor worker and panics on error.
+//
 // Deprecated: use successor.NewWorker.
 func NewWorker(options ...Option) *Worker {
 	return mustWorker(NewWorkerE(options...))
@@ -115,6 +130,8 @@ func mustWorker(worker *Worker, err error) *Worker {
 	return worker
 }
 
+// NewWorkerE constructs the successor worker and returns its construction error.
+//
 // Deprecated: use successor.NewWorkerE.
 func NewWorkerE(optionValues ...Option) (*Worker, error) {
 	return newWorkerE(func(options ...successor.Option) (workerDelegate, error) {
@@ -134,57 +151,85 @@ func newWorkerE(factory workerFactory, optionValues ...Option) (*Worker, error) 
 	return &Worker{successor: worker}, nil
 }
 
+// WithAddr retains the legacy address option; native RabbitMQ connections use NativeConfig.
+//
 // Deprecated: use successor.WithAddr.
 func WithAddr(value string) Option { return successorOption(successor.WithAddr(value)) }
 
+// WithAutoAck forwards acknowledgement policy; the native adapter rejects automatic acknowledgement.
+//
 // Deprecated: use successor.WithAutoAck.
 func WithAutoAck(value bool) Option { return successorOption(successor.WithAutoAck(value)) }
 
+// WithDeadLetter forwards terminal destination and delivery-attempt policy.
+//
 // Deprecated: use successor.WithDeadLetter.
 func WithDeadLetter(value DeadLetterConfig) Option {
 	return successorOption(successor.WithDeadLetter(successor.DeadLetterConfig(value)))
 }
 
+// WithExchangeName forwards the infrastructure-owned exchange name.
+//
 // Deprecated: use successor.WithExchangeName.
 func WithExchangeName(value string) Option { return successorOption(successor.WithExchangeName(value)) }
 
+// WithExchangeType forwards exchange kind; the native adapter accepts direct or topic.
+//
 // Deprecated: use successor.WithExchangeType.
 func WithExchangeType(value string) Option { return successorOption(successor.WithExchangeType(value)) }
 
+// WithLogger forwards the borrowed logging implementation.
+//
 // Deprecated: use successor.WithLogger.
 func WithLogger(value queue.Logger) Option { return successorOption(successor.WithLogger(value)) }
 
+// WithNativeConfig forwards explicit native connection and resource policy.
+//
 // Deprecated: use successor.WithNativeConfig.
 func WithNativeConfig(value NativeConfig) Option {
 	return successorOption(successor.WithNativeConfig(successor.NativeConfig(value)))
 }
 
+// WithPublishTimeout forwards the per-publish time bound.
+//
 // Deprecated: use successor.WithPublishTimeout.
 func WithPublishTimeout(value time.Duration) Option {
 	return successorOption(successor.WithPublishTimeout(value))
 }
 
+// WithQueue forwards the logical queue name.
+//
 // Deprecated: use successor.WithQueue.
 func WithQueue(value string) Option { return successorOption(successor.WithQueue(value)) }
 
+// WithReconnectConfig retains legacy configuration; NativeConfig owns runtime recovery.
+//
 // Deprecated: use successor.WithReconnectConfig.
 func WithReconnectConfig(value ReconnectConfig) Option {
 	return successorOption(successor.WithReconnectConfig(successor.ReconnectConfig(value)))
 }
 
+// WithRequestTimeout forwards the request wait duration.
+//
 // Deprecated: use successor.WithRequestTimeout.
 func WithRequestTimeout(value time.Duration) Option {
 	return successorOption(successor.WithRequestTimeout(value))
 }
 
+// WithRoutingKey forwards the exchange route.
+//
 // Deprecated: use successor.WithRoutingKey.
 func WithRoutingKey(value string) Option { return successorOption(successor.WithRoutingKey(value)) }
 
+// WithRunFunc forwards synchronous handler code that must honor its context.
+//
 // Deprecated: use successor.WithRunFunc.
 func WithRunFunc(value func(context.Context, core.TaskMessage) error) Option {
 	return successorOption(successor.WithRunFunc(value))
 }
 
+// WithTag forwards the consumer name.
+//
 // Deprecated: use successor.WithTag.
 func WithTag(value string) Option { return successorOption(successor.WithTag(value)) }
 

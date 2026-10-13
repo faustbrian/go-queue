@@ -20,8 +20,9 @@ check in a separately declared component. During stop, the adapter:
 2. waits for calls already accepted by the adapter;
 3. invokes the owned shutdown callback only after those calls return.
 
-The service stop context bounds the drain and shutdown callback. A canceled
-drain does not close the transport underneath an active publish; a later stop
+The service stop context bounds the drain and is passed to the synchronous
+shutdown callback; it cannot preempt a callback that ignores cancellation.
+A canceled drain does not close the transport underneath an active publish; a later stop
 call may resume cleanup. Publish and shutdown retry policy belongs to the
 concrete client and callbacks.
 
@@ -47,8 +48,9 @@ owned telemetry propagation policy when accepting baggage.
 `Start` and transfers release ownership to the service plan. Service drain
 calls `Queue.CloseAdmission`, which rejects late submissions and stops new
 delivery requests without releasing the worker. On stop, `Queue.ReleaseContext`
-lets an accepted publish return, joins active handlers, and only then releases
-the concrete worker.
+lets an accepted publish return, joins tracked scheduler/work wrappers, and then
+releases the concrete worker. A handler ignoring its own timeout can outlive
+those wrappers; synchronous concrete worker shutdown has no caller context.
 
 Backend request and transport operations retain their own configured timeout
 bounds. The service stop context bounds coordinator drain and join work.

@@ -15,11 +15,13 @@ type Metric interface {
 	DecBusyWorker()
 
 	// BusyWorkers returns the current number of workers actively processing tasks.
-	// This value can range from 0 to the configured workerCount.
+	// Root Queue counts work wrappers, not canceled handlers still running.
+	// Direct collector calls are not range-checked.
 	BusyWorkers() int64
 
 	// SuccessTasks returns the total number of tasks that completed successfully.
-	// A task is considered successful if it returns no error and doesn't panic.
+	// Root Queue records success only after handler and any required settlement
+	// return without error. This is process-local accounting, not broker history.
 	SuccessTasks() uint64
 
 	// FailureTasks returns the total number of tasks that failed.
@@ -51,7 +53,8 @@ var _ Metric = (*metric)(nil)
 
 // metric is the default implementation of the Metric interface.
 // It uses atomic operations to ensure thread-safe updates and reads.
-// All counters start at zero and are never decremented (except busyWorkers).
+// All counters start at zero; unsigned totals wrap at uint64 overflow.
+// Direct decrement calls are not balanced or range-checked.
 type metric struct {
 	busyWorkers    int64  // Current number of active workers (can go up and down)
 	successTasks   uint64 // Cumulative count of successful tasks (monotonically increasing)

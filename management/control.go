@@ -17,31 +17,47 @@ const (
 type CommandAction string
 
 const (
-	CommandPause     CommandAction = "pause"
-	CommandResume    CommandAction = "resume"
-	CommandDrain     CommandAction = "drain"
+	// CommandPause requests intake suspension without ending already running work.
+	CommandPause CommandAction = "pause"
+	// CommandResume requests active intake after a supported paused/draining state.
+	CommandResume CommandAction = "resume"
+	// CommandDrain requests intake closure and in-flight completion.
+	CommandDrain CommandAction = "drain"
+	// CommandTerminate requests irreversible terminating state and drain.
 	CommandTerminate CommandAction = "terminate"
-	CommandRetry     CommandAction = "retry"
+	// CommandRetry requests one failure/dead-letter retry under backend policy.
+	CommandRetry CommandAction = "retry"
+	// CommandBulkRetry requests a confirmed bounded backend-owned selection.
 	CommandBulkRetry CommandAction = "bulk_retry"
-	CommandDelete    CommandAction = "delete"
-	CommandPurge     CommandAction = "purge"
-	CommandReplay    CommandAction = "replay"
+	// CommandDelete requests removal of one administrative record.
+	CommandDelete CommandAction = "delete"
+	// CommandPurge requests confirmed removal of a supported target; queue support is provider-specific.
+	CommandPurge CommandAction = "purge"
+	// CommandReplay requests confirmed allowlisted replay with explicit duplicate policy.
+	CommandReplay CommandAction = "replay"
 )
 
 // TargetKind identifies the data-plane resource affected by a command.
 type TargetKind string
 
 const (
-	TargetQueue       TargetKind = "queue"
-	TargetWorker      TargetKind = "worker"
+	// TargetQueue scopes an operation to a logical queue.
+	TargetQueue TargetKind = "queue"
+	// TargetWorker scopes an operation to one worker identity.
+	TargetWorker TargetKind = "worker"
+	// TargetWorkerGroup scopes an operation to one worker group.
 	TargetWorkerGroup TargetKind = "worker_group"
-	TargetFailure     TargetKind = "failure"
-	TargetDeadLetter  TargetKind = "dead_letter"
+	// TargetFailure selects failed-attempt records.
+	TargetFailure TargetKind = "failure"
+	// TargetDeadLetter selects terminal records.
+	TargetDeadLetter TargetKind = "dead_letter"
 )
 
 // Target identifies a resource without exposing backend addressing.
 type Target struct {
+	// Kind selects the supported resource or record category.
 	Kind TargetKind
+	// Name is the logical target identity, bounded by MaxIdentityBytes.
 	Name string
 }
 
@@ -50,36 +66,53 @@ type Target struct {
 type ReplayPolicy string
 
 const (
-	ReplayRejectDuplicate  ReplayPolicy = "reject_duplicate"
+	// ReplayRejectDuplicate rejects a previously registered replay within backend retention.
+	ReplayRejectDuplicate ReplayPolicy = "reject_duplicate"
+	// ReplayReplaceDuplicate replaces a registered queued replay, not prior application effects.
 	ReplayReplaceDuplicate ReplayPolicy = "replace_duplicate"
 )
 
 // ReplayOptions contains the mandatory data-plane replay safeguards.
 type ReplayOptions struct {
-	Destination       string
+	// Destination must identify an explicitly allowed logical queue/stream.
+	Destination string
+	// IdempotencyPolicy selects replacement or rejection within the backend's retention/window semantics.
 	IdempotencyPolicy ReplayPolicy
 }
 
 // Selection bounds a backend-owned bulk administrative operation. Adapters
 // must apply their own deterministic selection semantics within this limit.
 type Selection struct {
+	// Limit is the positive requested item ceiling, checked against the applicable limit.
 	Limit uint32
 }
 
 // Command is the stable envelope enforced by a queue management adapter.
 type Command struct {
-	ID             string
+	// ID correlates one command and its returned result.
+	ID string
+	// IdempotencyKey selects provider-owned duplicate handling; shape validation supplies no durable deduplication.
 	IdempotencyKey string
-	Actor          string
-	Reason         string
-	Protocol       ProtocolVersion
-	Action         CommandAction
-	Target         Target
-	RequestedAt    time.Time
-	Deadline       time.Time
-	Confirmed      bool
-	Selection      *Selection
-	Replay         *ReplayOptions
+	// Actor is a caller assertion; authenticate it outside this envelope.
+	Actor string
+	// Reason is required bounded operator text, not automatically redacted.
+	Reason string
+	// Protocol is the management protocol version; zero is unknown or invalid.
+	Protocol ProtocolVersion
+	// Action selects the requested management operation.
+	Action CommandAction
+	// Target scopes the operation to one logical resource.
+	Target Target
+	// RequestedAt is the nonzero caller request time.
+	RequestedAt time.Time
+	// Deadline must follow RequestedAt; Validate does not compare it with the current clock.
+	Deadline time.Time
+	// Confirmed is required for purge, bulk retry and replay; it is not an access credential.
+	Confirmed bool
+	// Selection is retained mutable bulk selection; do not change it while a command is in use.
+	Selection *Selection
+	// Replay is retained mutable replay configuration; providers may retain it for deduplication.
+	Replay *ReplayOptions
 }
 
 // Validate rejects malformed, unsupported, or unsafe control commands.
@@ -206,29 +239,45 @@ func (p ReplayPolicy) valid() bool {
 type CommandResultStatus string
 
 const (
+	// CommandAcknowledged reports provider-confirmed command completion, not handler execution.
 	CommandAcknowledged CommandResultStatus = "acknowledged"
-	CommandRejected     CommandResultStatus = "rejected"
-	CommandFailed       CommandResultStatus = "failed"
-	CommandUnsupported  CommandResultStatus = "unsupported"
-	CommandTimedOut     CommandResultStatus = "timed_out"
-	CommandPartial      CommandResultStatus = "partial"
-	CommandUnknown      CommandResultStatus = "unknown"
+	// CommandRejected reports a policy or input refusal.
+	CommandRejected CommandResultStatus = "rejected"
+	// CommandFailed reports a known operation failure.
+	CommandFailed CommandResultStatus = "failed"
+	// CommandUnsupported reports absent protocol/action capability.
+	CommandUnsupported CommandResultStatus = "unsupported"
+	// CommandTimedOut reports an expired operation budget; applied effects may remain.
+	CommandTimedOut CommandResultStatus = "timed_out"
+	// CommandPartial reports mixed or incompletely reconciled effects.
+	CommandPartial CommandResultStatus = "partial"
+	// CommandUnknown reports an outcome the provider cannot determine.
+	CommandUnknown CommandResultStatus = "unknown"
 )
 
 // CommandResult is the redacted data-plane acknowledgement for one command.
 // FailureCode must be a stable code and must never contain payloads,
 // credentials, tokens, or backend endpoints.
 type CommandResult struct {
-	CommandID      string
+	// CommandID echoes the command identity.
+	CommandID string
+	// IdempotencyKey echoes the duplicate-operation key.
 	IdempotencyKey string
-	WorkerID       string
-	Protocol       ProtocolVersion
-	Status         CommandResultStatus
-	FailureCode    string
-	CompletedAt    time.Time
+	// WorkerID identifies the reporting worker or aggregate.
+	WorkerID string
+	// Protocol is the management protocol version; zero is unknown or invalid.
+	Protocol ProtocolVersion
+	// Status distinguishes acknowledged, rejected, partial and unknown outcomes.
+	Status CommandResultStatus
+	// FailureCode is an operational failure label, not arbitrary error text.
+	FailureCode string
+	// CompletedAt is the nonzero reporting time, not proof of durable handler completion.
+	CompletedAt time.Time
 }
 
-// Validate rejects incomplete or disclosure-prone command results.
+// Validate checks result identity, protocol, status and nonzero completion time.
+// FailureCode is shape-checked only for statuses requiring it; no content
+// redaction or durable effect reconciliation is performed.
 func (r CommandResult) Validate() error {
 	if invalidIdentity(r.CommandID) {
 		return invalid("command_id", "is required and must be bounded")
@@ -285,5 +334,7 @@ func (s CommandResultStatus) requiresFailureCode() bool {
 // management commands. A control plane depends on this interface rather than
 // issuing backend commands directly.
 type Controller interface {
+	// Execute applies a command under provider-owned deduplication/outcome rules.
+	// Authorization remains caller-owned.
 	Execute(context.Context, Command) (CommandResult, error)
 }

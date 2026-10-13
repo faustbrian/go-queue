@@ -1,3 +1,8 @@
+// Package job defines mutable execution envelopes encoded with encoding/json.
+// Local task functions and settlement callbacks are not serialized. Admission
+// borrows payload bytes, while encoding and decoding allocate wire values.
+// Validation bounds retry count and metadata; it is not authentication or a
+// general payload-size limit.
 package job
 
 import (
@@ -11,7 +16,8 @@ import (
 	"github.com/faustbrian/go-queue/core"
 )
 
-// TaskFunc is the task function
+// TaskFunc executes local work within one delivery timeout shared by all retries.
+// It must honor cancellation; the scheduler cannot forcibly stop it.
 type TaskFunc func(context.Context) error
 
 var marshalJSON = json.Marshal
@@ -19,7 +25,8 @@ var marshalJSON = json.Marshal
 // DefaultMaxMessageBytes bounds encoded messages to one mebibyte.
 const DefaultMaxMessageBytes = 1024 * 1024
 
-// MaxRetryCount bounds attempts scheduled from one delivered message.
+// MaxRetryCount bounds additional handler retries per delivery; the first
+// attempt and broker redelivery are separate.
 const MaxRetryCount int64 = 100
 
 var (
@@ -31,27 +38,28 @@ var (
 	ErrInvalidMessage = errors.New("invalid message execution metadata")
 )
 
-// Message describes a task and its metadata.
+// Message is a mutable execution envelope. Do not modify it concurrently with
+// encoding or execution: Queue consumes RetryCount during retries, Payload aliases
+// Body, and settlement setters do not synchronize or enforce callback idempotency.
 type Message struct {
+	// Task is an in-process callback omitted from the wire envelope.
 	Task        TaskFunc `json:"-" msgpack:"-"`
 	ack         func() error
 	nack        func() error
 	nackFailure func(error) error
 
-	// Timeout is the duration the task can be processed by Handler.
-	// zero if not specified
-	// default is 60 time.Minute
+	// Timeout is the positive total handler/retry budget; constructors default
+	// to 60 minutes. Timeout signals cancellation, not forced completion.
 	Timeout time.Duration `json:"timeout" msgpack:"timeout"`
 
-	// Payload is the payload data of the task.
+	// Body is borrowed application payload, base64-encoded in JSON.
 	Body []byte `json:"body" msgpack:"body"`
 
-	// RetryCount set count of retry
-	// default is 0, no retry.
+	// RetryCount is remaining additional handler attempts, from zero to 100.
+	// The scheduler decrements it; broker redelivery counts are separate.
 	RetryCount int64 `json:"retry_count" msgpack:"retry_count"`
 
-	// RetryDelay set delay between retry
-	// default is 100ms
+	// RetryDelay is a nonnegative fixed retry delay; default zero selects backoff.
 	RetryDelay time.Duration `json:"retry_delay" msgpack:"retry_delay"`
 
 	// RetryFactor is the multiplying factor for each increment step.
@@ -59,12 +67,12 @@ type Message struct {
 	// Defaults to 2.
 	RetryFactor float64 `json:"retry_factor" msgpack:"retry_factor"`
 
-	// Minimum value of the counter.
+	// RetryMin is the initial backoff duration when RetryDelay is zero.
 	//
 	// Defaults to 100 milliseconds.
 	RetryMin time.Duration `json:"retry_min" msgpack:"retry_min"`
 
-	// Maximum value of the counter.
+	// RetryMax caps backoff durations when RetryDelay is zero.
 	//
 	// Defaults to 10 seconds.
 	RetryMax time.Duration `json:"retry_max" msgpack:"retry_max"`
@@ -128,7 +136,10 @@ func (m *Message) NackFailure(err error) error {
 	return m.nackFailure(err)
 }
 
-// Validate checks that message execution metadata is finite and bounded.
+// Validate checks positive Timeout, RetryCount in [0, MaxRetryCount],
+// nonnegative RetryDelay and bounded metadata. Backoff factor/min/max are checked
+// only when retries are enabled without a fixed delay. Body size and the maximum
+// timeout are not checked. The receiver must be non-nil.
 func (m *Message) Validate() error {
 	if m.Metadata != nil {
 		if err := m.Metadata.Validate(); err != nil {
@@ -164,11 +175,8 @@ func (m *Message) Validate() error {
 	return nil
 }
 
-// Payload returns the payload data of the Message.
-// It returns the byte slice of the payload.
-//
-// Returns:
-//   - A byte slice containing the payload data.
+// Payload returns Body without copying. The caller must coordinate any mutation
+// with the owner of the message and its backing array.
 func (m *Message) Payload() []byte {
 	return m.Body
 }
@@ -201,12 +209,8 @@ func (m *Message) TraceContextMetadata() map[string]string {
 	return metadata
 }
 
-// Bytes returns the byte slice of the Message struct.
-// If the marshalling process encounters an error, the function will panic.
-// It returns the marshalled byte slice.
-//
-// Returns:
-//   - A byte slice containing the msgpack-encoded data.
+// Bytes returns a newly allocated JSON envelope and panics on marshal failure.
+// It does not call Validate or apply a byte limit. Task and callbacks are omitted.
 func (m *Message) Bytes() []byte {
 	b, err := marshalJSON(m)
 	if err != nil {
@@ -216,7 +220,9 @@ func (m *Message) Bytes() []byte {
 	return b
 }
 
-// NewMessage create new message
+// NewMessage uses only the first AllowOption and borrows m.Bytes() as Body
+// without another copy. Metadata maps and time are cloned by NewOptions. It does
+// not validate options; it uses m.Bytes() verbatim and m must be non-nil.
 func NewMessage(m core.QueuedMessage, opts ...AllowOption) Message {
 	o := NewOptions(opts...)
 
@@ -233,6 +239,8 @@ func NewMessage(m core.QueuedMessage, opts ...AllowOption) Message {
 	}
 }
 
+// NewTask creates a local, unserialized callback with defaults and only the
+// first AllowOption. It does not validate options or start work.
 func NewTask(task TaskFunc, opts ...AllowOption) Message {
 	o := NewOptions(opts...)
 
@@ -249,15 +257,8 @@ func NewTask(task TaskFunc, opts ...AllowOption) Message {
 	}
 }
 
-// Encode takes a Message struct and marshals it into a byte slice using msgpack.
-// If the marshalling process encounters an error, the function will panic.
-// It returns the marshalled byte slice.
-//
-// Parameters:
-//   - m: A pointer to the Message struct to be encoded.
-//
-// Returns:
-//   - A byte slice containing the msgpack-encoded data.
+// Encode returns a newly allocated JSON envelope, without validation or a size
+// limit, and panics on marshal failure. A nil message encodes as JSON null.
 func Encode(m *Message) []byte {
 	b, err := marshalJSON(m)
 	if err != nil {
@@ -267,15 +268,8 @@ func Encode(m *Message) []byte {
 	return b
 }
 
-// Decode takes a byte slice and unmarshals it into a Message struct using msgpack.
-// If the unmarshalling process encounters an error, the function will panic.
-// It returns a pointer to the unmarshalled Message.
-//
-// Parameters:
-//   - b: A byte slice containing the msgpack-encoded data.
-//
-// Returns:
-//   - A pointer to the decoded Message struct.
+// Decode decodes a JSON envelope with DefaultMaxMessageBytes and panics on error.
+// Use DecodeE for an error-returning boundary.
 func Decode(b []byte) *Message {
 	msg, err := DecodeE(b, DefaultMaxMessageBytes)
 	if err != nil {
@@ -285,7 +279,10 @@ func Decode(b []byte) *Message {
 	return msg
 }
 
-// DecodeE decodes a message while enforcing a positive encoded-message limit.
+// DecodeE rejects a nonpositive byte limit or oversized input before JSON
+// unmarshaling, then validates execution metadata. Unknown fields and duplicate
+// keys follow encoding/json behavior; no package-specific nesting limit is added.
+// Decoded payload bytes are owned by the returned message.
 func DecodeE(b []byte, maxBytes int) (*Message, error) {
 	if maxBytes <= 0 {
 		return nil, ErrInvalidMessageLimit

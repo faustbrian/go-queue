@@ -1,4 +1,8 @@
-// Package valkeystream provides a Valkey Streams queue backend.
+// Package valkeystream owns standalone Valkey Streams producer/consumer clients
+// with bounded admission and stale pending-entry reclaim. Reclaim idle time is
+// not an execution lease: slow handlers can overlap with recovered delivery.
+// Source settlement and terminal append are separate commands and may duplicate
+// effects. Management replay deduplication has a count-evicted retention window.
 package valkeystream
 
 import (

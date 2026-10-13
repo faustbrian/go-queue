@@ -1,3 +1,7 @@
+// Package nsq adapts NSQ topic/channel delivery with manual FIN/REQ settlement.
+// Terminal handling publishes to a separate topic before FIN; a failure or crash
+// between those operations can duplicate terminal records. Construction prepares
+// a producer and Request opens the consumer; Shutdown releases both.
 package nsq
 
 import (
@@ -26,7 +30,7 @@ func (*Worker) BackendName() string { return "nsq" }
 // QueueName returns the configured NSQ topic.
 func (w *Worker) QueueName() string { return w.opts.topic }
 
-// Worker for NSQ
+// Worker owns an NSQ producer and lazily opened manual-settlement consumer.
 type Worker struct {
 	q               *nsq.Consumer
 	p               *nsq.Producer
@@ -43,7 +47,7 @@ type Worker struct {
 	stopProducer    func()
 }
 
-// NewWorker for struc
+// NewWorker constructs the worker and panics on an error from NewWorkerE.
 func NewWorker(opts ...Option) *Worker {
 	w, err := NewWorkerE(opts...)
 	if err != nil {
@@ -140,7 +144,7 @@ func (w *Worker) handleMessage(msg *nsq.Message) error {
 	}
 }
 
-// Run start the worker
+// Run synchronously invokes the configured handler; it must honor ctx.
 func (w *Worker) Run(ctx context.Context, task core.TaskMessage) error {
 	return w.opts.runFunc(ctx, task)
 }
@@ -171,7 +175,8 @@ func (w *Worker) Shutdown() error {
 	return nil
 }
 
-// Queue send notification to queue
+// Queue publishes encoded bytes to the configured NSQ topic through the producer.
+// It does not wait for a handler or FIN; closed workers reject publication.
 func (w *Worker) Queue(job core.TaskMessage) error {
 	if atomic.LoadInt32(&w.stopFlag) == 1 {
 		return queue.ErrQueueShutdown
@@ -215,7 +220,8 @@ func (w *Worker) Request() (core.TaskMessage, error) {
 	}
 }
 
-// Stats retrieves the current connection and message statistics for a Consumer
+// Stats returns native consumer counters, or nil before consumer startup.
+// These are transport statistics, not a transactional application-work snapshot.
 func (w *Worker) Stats() *nsq.ConsumerStats {
 	w.lifecycleMu.Lock()
 	defer w.lifecycleMu.Unlock()

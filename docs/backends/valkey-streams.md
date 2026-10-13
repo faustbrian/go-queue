@@ -127,7 +127,7 @@ When messages sharing one stream require different broker-delivery ceilings,
 configure `WithDeliveryAttemptLimitResolver`. The resolver runs exactly once
 after bounded job decoding and before settlement callbacks are attached.
 It must inspect only immutable decoded message metadata, return a value from
-two through 100, and remain deterministic, side-effect-free, and non-blocking.
+one through 100, and remain deterministic, side-effect-free, and non-blocking.
 `WithDeadLetter` supplies the fallback for workers without a resolver. An
 unsafe result or resolver panic returns `ErrInvalidDeliveryAttemptLimit`
 without acknowledging or dead-lettering the source delivery, so operators can
@@ -150,8 +150,10 @@ worker, err := valkeystream.NewWorkerE(
 )
 ```
 
-The config is cloned, so later caller mutation does not change live transport
-policy. Certificate verification remains enabled. Authentication, TLS, and
+The config is cloned, with a minimum protocol of TLS1.2. Nested certificate
+pools and callback state retain normal `tls.Config.Clone` sharing semantics.
+Verification flags remain caller-owned; the adapter does not reject a supplied
+`InsecureSkipVerify` setting. Authentication, TLS, and
 dial failures return fixed safe text while preserving the native cause for
 `errors.Is` and `errors.As`; do not separately log the unwrapped cause.
 

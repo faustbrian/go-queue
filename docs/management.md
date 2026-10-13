@@ -211,9 +211,11 @@ native Redis, Valkey, or other backend client to emulate the operation.
 When a root `Queue` has `WithWorkerLifecycle`, it keeps pause, resume, drain,
 and terminate enforcement and delegates record mutations to a worker that also
 implements `Controller`. Valkey Streams supports retry, bounded bulk retry,
-delete, and failure/dead-letter collection purge. Queue purge and replay remain
-explicitly unsupported until their native safety and destination idempotency
-semantics are proven.
+delete, failure/dead-letter collection purge, and replay to explicitly allowlisted
+destinations. Queue purge remains unsupported. Command result caching is
+process-local and bounded; it does not survive restart. Valkey replay identity
+registration is count-evicted, while Redis registration fails closed at its
+capacity. Neither supplies unlimited durable duplicate suppression.
 
 ## Command results
 

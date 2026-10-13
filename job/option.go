@@ -48,27 +48,27 @@ func newDefaultOptions() Options {
 //	}
 //	q.QueueTask(myTask, opts)
 type AllowOption struct {
-	RetryCount  *int64         // Maximum retry attempts (nil uses default: 0)
-	RetryDelay  *time.Duration // Fixed delay between retries (nil uses exponential backoff)
-	RetryFactor *float64       // Backoff multiplier (nil uses default: 2)
-	RetryMin    *time.Duration // Minimum backoff delay (nil uses default: 100ms)
-	RetryMax    *time.Duration // Maximum backoff delay (nil uses default: 10s)
-	Jitter      *bool          // Enable backoff jitter (nil uses default: false)
-	Timeout     *time.Duration // Job execution timeout (nil uses default: 60 minutes)
-	Metadata    *Metadata      // Optional bounded identity propagated to operational records
+	// RetryCount is additional attempts; nil selects zero.
+	RetryCount *int64 // Maximum retry attempts (nil uses default: 0)
+	// RetryDelay is fixed delay; nil/zero selects exponential backoff.
+	RetryDelay *time.Duration // Fixed delay between retries (nil uses exponential backoff)
+	// RetryFactor is backoff multiplier; nil selects two.
+	RetryFactor *float64 // Backoff multiplier (nil uses default: 2)
+	// RetryMin is initial backoff duration; nil selects 100ms.
+	RetryMin *time.Duration // Minimum backoff delay (nil uses default: 100ms)
+	// RetryMax is backoff cap; nil selects 10s.
+	RetryMax *time.Duration // Maximum backoff delay (nil uses default: 10s)
+	// Jitter enables randomized backoff; nil selects false.
+	Jitter *bool // Enable backoff jitter (nil uses default: false)
+	// Timeout is the total cooperative execution budget; nil selects 60 minutes.
+	Timeout *time.Duration // Job execution timeout (nil uses default: 60 minutes)
+	// Metadata is cloned from the first option; nil means no operational identity.
+	Metadata *Metadata // Optional bounded identity propagated to operational records
 }
 
-// NewOptions creates a job Options struct by merging defaults with provided AllowOption values.
-// Only non-nil fields in AllowOption will override the defaults.
-// This allows partial configuration where unspecified options retain their default values.
-//
-// Example:
-//
-//	// Only override retry count and timeout, keep other defaults
-//	opts := job.NewOptions(job.AllowOption{
-//	    RetryCount: job.Int64(5),
-//	    Timeout:    job.Time(10 * time.Minute),
-//	})
+// NewOptions overlays defaults with only the first AllowOption; later values
+// are ignored. Pointer fields are read immediately, and metadata maps/time are
+// cloned. Validation is deferred to Message.Validate or queue admission.
 func NewOptions(opts ...AllowOption) Options {
 	o := newDefaultOptions()
 

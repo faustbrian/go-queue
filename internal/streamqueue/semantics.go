@@ -26,9 +26,12 @@ var (
 // RequestError identifies an invalid semantic field without including its
 // potentially sensitive value.
 type RequestError struct {
+	// Command identifies the rejected operation without its input values.
 	Command string
-	Field   string
-	Cause   error
+	// Field identifies the rejected field; caller construction controls label disclosure.
+	Field string
+	// Cause retains the validation cause for programmatic inspection.
+	Cause error
 }
 
 // Error returns value-free request validation text.
@@ -43,31 +46,44 @@ func (e *RequestError) Unwrap() []error {
 
 // Delivery is the transport-neutral representation of one stream entry.
 type Delivery struct {
-	ID                   string
-	Body                 []byte
-	Attempts             int64
-	Reclaimed            bool
+	// ID is backend entry identity, not application identity.
+	ID string
+	// Body contains mutable payload bytes without copying the backing array.
+	Body []byte
+	// Attempts counts backend deliveries, separately from local handler retries.
+	Attempts int64
+	// Reclaimed marks a stale pending entry recovered by this transport.
+	Reclaimed bool
+	// OriginalDeadLetterID identifies the first terminal record in replay lineage.
 	OriginalDeadLetterID string
-	PriorDeadLetterID    string
-	ReplayGeneration     uint32
+	// PriorDeadLetterID identifies the immediately preceding terminal record.
+	PriorDeadLetterID string
+	// ReplayGeneration is positive only with complete lineage; zero means no replay metadata.
+	ReplayGeneration uint32
 }
 
 // FailureMetadata is the bounded disposition persisted with a failure record.
 type FailureMetadata struct {
+	// Classification selects backend-neutral disposition.
 	Classification management.Classification
-	Code           string
+	// Code is a bounded caller-controlled failure label; keep its content non-sensitive.
+	Code string
 }
 
-// Validate rejects unknown classifications and unsafe codes.
+// Validate rejects unknown classifications and blank/oversized codes. It does
+// not inspect or redact code content.
 func (m FailureMetadata) Validate() error {
 	return management.NewFailure(m.Classification, m.Code, nil).Validate()
 }
 
 // AddRequest describes a bounded stream append.
 type AddRequest struct {
-	Stream    string
+	// Stream is the logical stream key.
+	Stream string
+	// MaxLength is positive append capacity/count policy interpreted by the transport.
 	MaxLength int64
-	Body      []byte
+	// Body contains mutable payload bytes without copying the backing array.
+	Body []byte
 }
 
 // Validate checks append ownership and resource bounds.
@@ -88,11 +104,16 @@ func (r AddRequest) Validate(maxPayloadBytes int) error {
 
 // ReadRequest describes one cancellation-aware consumer-group read.
 type ReadRequest struct {
-	Stream   string
-	Group    string
+	// Stream is the logical stream key.
+	Stream string
+	// Group is consumer-group identity.
+	Group string
+	// Consumer is read/reclaim owner identity.
 	Consumer string
-	Count    int64
-	Block    time.Duration
+	// Count is the positive batch ceiling, at most MaxBatchSize.
+	Count int64
+	// Block is positive blocking duration; millisecond command encoding truncates fractions.
+	Block time.Duration
 }
 
 // Validate checks consumer identity and command bounds.
@@ -111,12 +132,18 @@ func (r ReadRequest) Validate() error {
 
 // ClaimRequest describes one bounded stale-delivery reclaim scan.
 type ClaimRequest struct {
-	Stream   string
-	Group    string
+	// Stream is the logical stream key.
+	Stream string
+	// Group is consumer-group identity.
+	Group string
+	// Consumer is read/reclaim owner identity.
 	Consumer string
-	MinIdle  time.Duration
-	Start    string
-	Count    int64
+	// MinIdle is positive idle eligibility, not exclusive handler execution fencing.
+	MinIdle time.Duration
+	// Start is the opaque server reclaim scan cursor.
+	Start string
+	// Count bounds returned entries, not all server scan work.
+	Count int64
 }
 
 // Validate checks reclaim ownership and scan bounds.
@@ -138,15 +165,20 @@ func (r ClaimRequest) Validate() error {
 
 // ClaimResult contains reclaimed entries and the next bounded scan cursor.
 type ClaimResult struct {
-	Next       string
+	// Next is the next server scan cursor, not a snapshot identity.
+	Next string
+	// Deliveries contains mutable recovered entries with transport-defined byte ownership.
 	Deliveries []Delivery
 }
 
 // AckRequest identifies one consumer-group delivery to settle.
 type AckRequest struct {
+	// Stream is the logical stream key.
 	Stream string
-	Group  string
-	ID     string
+	// Group is consumer-group identity.
+	Group string
+	// ID is backend entry identity, not application identity.
+	ID string
 }
 
 // Validate checks acknowledgement identity.
@@ -165,11 +197,16 @@ func (r AckRequest) Validate() error {
 
 // DeadLetterRequest describes an append-before-ack terminal transfer.
 type DeadLetterRequest struct {
-	Source      string
+	// Source is the source stream to settle after destination append.
+	Source string
+	// Destination must identify a distinct terminal stream.
 	Destination string
-	Group       string
-	Delivery    Delivery
-	Failure     FailureMetadata
+	// Group is consumer-group identity.
+	Group string
+	// Delivery holds pending source identity, body and replay lineage.
+	Delivery Delivery
+	// Failure holds bounded disposition without content redaction.
+	Failure FailureMetadata
 }
 
 // Validate checks terminal transfer identity and payload bounds.
@@ -218,20 +255,28 @@ func validateReplayLineage(delivery Delivery) error {
 
 // GroupState contains server-reported consumer-group depth components.
 type GroupState struct {
-	Pending         int64
-	Lag             int64
+	// Pending counts delivered group entries not acknowledged.
+	Pending int64
+	// Lag counts undelivered group entries; negative means unknown.
+	Lag int64
+	// OldestPendingID is the server identity used to derive pending age.
 	OldestPendingID string
 }
 
 // Stats is the common honest consumer-group depth snapshot.
 type Stats struct {
-	Depth    int64
-	Pending  int64
-	Lag      int64
+	// Depth combines pending and lag only when lag is known.
+	Depth int64
+	// Pending counts delivered group entries not acknowledged.
+	Pending int64
+	// Lag counts undelivered group entries; negative means unknown.
+	Lag int64
+	// LagKnown distinguishes determinate depth/lag from unsupported measurements.
 	LagKnown bool
 }
 
-// Stats derives depth only when the server reports group lag.
+// Stats derives depth only for nonnegative lag, otherwise leaving Depth=-1.
+// It does not validate counters or guard int64 overflow of Pending+Lag.
 func (s GroupState) Stats() Stats {
 	stats := Stats{Depth: -1, Pending: s.Pending, Lag: s.Lag}
 	if s.Lag >= 0 {
@@ -245,13 +290,21 @@ func (s GroupState) Stats() Stats {
 // client adapter. It intentionally contains queue operations rather than a
 // union of arbitrary datastore commands.
 type Transport interface {
+	// EnsureGroup creates or verifies a consumer group; existing group ownership is transport-defined.
 	EnsureGroup(context.Context, string, string) error
+	// Add appends one entry subject to native admission policy.
 	Add(context.Context, AddRequest) (string, error)
+	// Read returns new group entries with transport-defined byte ownership.
 	Read(context.Context, ReadRequest) ([]Delivery, error)
+	// Claim recovers stale pending entries; idle time is not exclusive execution fencing.
 	Claim(context.Context, ClaimRequest) (ClaimResult, error)
+	// Ack settles one pending entry; a lost response may leave an ambiguous outcome.
 	Ack(context.Context, AckRequest) error
+	// DeadLetter appends terminal metadata before acknowledging source; failures can duplicate records.
 	DeadLetter(context.Context, DeadLetterRequest) error
+	// GroupState returns measured group counters without inventing unsupported lag.
 	GroupState(context.Context, string, string) (GroupState, error)
+	// Close releases owned transport resources; this signature has no caller context.
 	Close() error
 }
 

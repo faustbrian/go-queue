@@ -1,5 +1,8 @@
 // Package managementhttp transports queue management contracts over a
-// bounded authenticated HTTP boundary.
+// bounded bearer-authenticated HTTP boundary. Authentication grants every
+// configured route; this package adds no tenant/actor authorization or server.
+// Providers and HTTP transports are borrowed and must honor contexts. Response
+// byte bounds apply to clients, not total server serialization or fleet work.
 package managementhttp
 
 import (
@@ -24,27 +27,41 @@ const (
 )
 
 var (
+	// ErrInvalidConfiguration reports invalid endpoint, credential or bound configuration.
 	ErrInvalidConfiguration = errors.New("management HTTP: invalid configuration")
-	ErrInvalidRequest       = errors.New("management HTTP: invalid request")
-	ErrInvalidResponse      = errors.New("management HTTP: invalid response")
-	ErrResponseTooLarge     = errors.New("management HTTP: response too large")
-	ErrRemoteFailure        = errors.New("management HTTP: remote failure")
+	// ErrInvalidRequest reports rejected caller request shape.
+	ErrInvalidRequest = errors.New("management HTTP: invalid request")
+	// ErrInvalidResponse reports invalid remote JSON or contract shape.
+	ErrInvalidResponse = errors.New("management HTTP: invalid response")
+	// ErrResponseTooLarge reports a remote response above its configured byte limit.
+	ErrResponseTooLarge = errors.New("management HTTP: response too large")
+	// ErrRemoteFailure reports remote transport/status failure without formatting its cause.
+	ErrRemoteFailure = errors.New("management HTTP: remote failure")
 )
 
 // HandlerConfig provides the worker-side management services and shared
 // transport credential.
 type HandlerConfig struct {
-	Token      string
-	Status     management.StatusReader
+	// Token is the shared credential granting every configured route, including explicit reveal.
+	Token string
+	// Status is a borrowed optional provider invoked by concurrent HTTP requests.
+	Status management.StatusReader
+	// Controller is a borrowed optional controller responsible for effects and idempotency.
 	Controller management.Controller
-	Records    management.RecordReader
+	// Records is a borrowed optional reader responsible for metadata and disclosure.
+	Records management.RecordReader
 }
 
 // ClientConfig provides the worker endpoint, credential, and response bound.
 type ClientConfig struct {
-	BaseURL          string
-	Token            string
-	HTTPClient       *http.Client
+	// BaseURL is an operator-approved http/https origin without credentials, query or fragment.
+	BaseURL string
+	// Token is the shared bearer credential; plain HTTP supplies no confidentiality.
+	Token string
+	// HTTPClient is shallow-copied; transport is shared and redirect behavior replaced.
+	HTTPClient *http.Client
+	// MaxResponseBytes bounds each response; zero selects four mebibytes.
+	// Supply room for the internal one-byte oversize sentinel (not MaxInt64).
 	MaxResponseBytes int64
 }
 
@@ -124,7 +141,10 @@ type queueStatusPage struct {
 	NextCursor string        `json:"next_cursor,omitempty"`
 }
 
-// NewHandler creates a worker-side management HTTP handler.
+// NewHandler borrows configured providers and protects their routes with one
+// shared bearer token. That token grants all configured operations, including
+// explicit reveal; per-actor/tenant authorization and server timeouts/limits are
+// deployment-owned. Provider calls are synchronous and may run concurrently.
 func NewHandler(config HandlerConfig) (http.Handler, error) {
 	statusMissing := nilInterface(config.Status)
 	controllerMissing := nilInterface(config.Controller)
@@ -154,7 +174,10 @@ func NewHandler(config HandlerConfig) (http.Handler, error) {
 	return h.authenticate(router), nil
 }
 
-// NewClient creates a bounded management HTTP client.
+// NewClient accepts an operator-approved HTTP(S) origin, copies the HTTP client
+// shallowly and rejects redirects. Zero response limit selects four mebibytes;
+// nil HTTPClient selects a 30-second client. Transports remain shared; TLS, proxy
+// and destination policy are caller-owned. Plain HTTP does not encrypt the token.
 func NewClient(config ClientConfig) (*Client, error) {
 	baseURL, err := url.Parse(config.BaseURL)
 	if err != nil || baseURL.Host == "" ||

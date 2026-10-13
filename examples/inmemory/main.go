@@ -1,3 +1,5 @@
+// Command inmemory demonstrates local Ring admission and process-owned cleanup.
+// The logged payload is demonstration data, not a diagnostic redaction policy.
 package main
 
 import (

@@ -18,15 +18,17 @@ func (*Ring) BackendName() string { return "memory" }
 // QueueName is empty because an in-memory ring has no broker queue name.
 func (*Ring) QueueName() string { return "" }
 
-// Ring is an in-memory worker implementation using a dynamic circular buffer.
+// Ring is a mutex-protected FIFO of borrowed task references, constructed with
+// NewRing. Its zero value is not usable. Queued messages are neither copied nor
+// durable, and must not be mutated concurrently by the caller.
 // It implements the core.Worker interface and provides automatic resizing:
 //   - Doubles capacity when full
-//   - Halves capacity when less than 25% utilized
+//   - Halves backing storage at or below half occupancy, down to two slots
 //
 // The ring buffer uses two pointers (head and tail) to track the queue boundaries:
 //   - head: points to the next task to dequeue
 //   - tail: points to the next empty slot for enqueuing
-//   - When head == tail, the queue is empty
+//   - count distinguishes empty and full when head == tail
 //   - Both pointers wrap around using modulo arithmetic
 type Ring struct {
 	sync.Mutex
@@ -52,7 +54,8 @@ func (s *Ring) Run(ctx context.Context, task core.TaskMessage) error {
 // Shutdown gracefully shuts down the worker.
 // It sets the stopFlag to indicate that the queue is shutting down and prevents new tasks from being added.
 // If the queue is already shut down, it returns ErrQueueShutdown.
-// It waits for all tasks to be processed before completing the shutdown.
+// It waits until the buffer is dequeued, not until handlers or settlement finish.
+// A consumer must keep requesting backlog for this wait to complete.
 func (s *Ring) Shutdown() error {
 	// Attempt to set the stopFlag from 0 to 1. If it fails, the queue is already shut down.
 	if !s.stopIntake() {
@@ -110,7 +113,7 @@ func (s *Ring) Queue(task core.TaskMessage) error {
 }
 
 // Request dequeues and returns the next task from the ring buffer.
-// The buffer shrinks automatically (halves in size) when less than 25% full.
+// The backing buffer halves at or below half occupancy, down to two slots.
 // Returns:
 //   - (task, nil) if a task is successfully dequeued
 //   - (nil, ErrNoTaskInQueue) if the queue is currently empty
@@ -199,18 +202,9 @@ func (q *Ring) resize(n int) {
 	q.taskQueue = nodes
 }
 
-// NewRing creates a new Ring instance with the provided options.
-// It initializes the task queue with a default size of 2, sets the capacity
-// based on the provided options, and configures the logger and run function.
-// The function returns a pointer to the newly created Ring instance.
-//
-// Parameters:
-//
-//	opts - A variadic list of Option functions to configure the Ring instance.
-//
-// Returns:
-//
-//	*Ring - A pointer to the newly created Ring instance.
+// NewRing allocates a two-slot buffer with a 10,000 pending-job admission bound
+// unless WithQueueSize changes it. Zero capacity is unbounded; negative capacity
+// panics. WithFn supplies synchronous task execution; it must honor its context.
 func NewRing(opts ...Option) *Ring {
 	o := NewOptions(opts...)
 	if o.queueSize < 0 {

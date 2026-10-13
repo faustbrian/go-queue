@@ -19,6 +19,7 @@ const (
 )
 
 var (
+	// ErrManagementControlDisabled reports missing management metadata or native client.
 	ErrManagementControlDisabled = errors.Join(
 		errors.New("redisstream: management control disabled"),
 		management.ErrUnsupportedCapability,
@@ -34,7 +35,11 @@ type redisControlEntry struct {
 	once    sync.Once
 }
 
-// Execute applies one bounded Redis Streams management command.
+// Execute applies a Redis Streams record mutation and caches its result by
+// idempotency key in this process (1,024 entries, no eviction). Record reads,
+// capacity checks, append, replay registration and source settlement use separate
+// commands: concurrent clients and failures can leave partial or unknown effects.
+// ctx must be non-nil; do not mutate retained Selection or Replay pointers.
 func (w *Worker) Execute(
 	ctx context.Context,
 	command management.Command,
@@ -385,6 +390,8 @@ func (w *Worker) retryRedisRecord(
 	return w.redisControlResult(command, management.CommandAcknowledged, "")
 }
 
+// This read is advisory for multi-command admin mutations, unlike direct-enqueue
+// Lua admission. Other clients can append between XLEN and the later XADD.
 func (w *Worker) redisStreamHasCapacity(
 	ctx context.Context, stream, replacementID string,
 ) (bool, error) {

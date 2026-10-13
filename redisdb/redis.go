@@ -1,3 +1,7 @@
+// Package redisdb adapts transient Redis Pub/Sub, not Redis Streams.
+// Construction owns a client/subscription; messages lost while disconnected have
+// no durable replay or acknowledgement. Queue publishes with a background context
+// and driver bounds, independently of handler cancellation.
 package redisdb
 
 import (
@@ -32,7 +36,7 @@ func (*Worker) BackendName() string { return "redis-pubsub" }
 // QueueName returns the configured Redis channel.
 func (w *Worker) QueueName() string { return w.opts.channelName }
 
-// Worker for Redis
+// Worker owns the backend client and intake resources; use its constructor.
 type Worker struct {
 	// redis config
 	rdb      redis.Cmdable
@@ -255,7 +259,7 @@ func closeRedisClient(client redis.Cmdable) {
 	}
 }
 
-// Run to execute new task
+// Run synchronously invokes the configured handler; it must honor ctx.
 func (w *Worker) Run(ctx context.Context, task core.TaskMessage) error {
 	return w.opts.runFunc(ctx, task)
 }
@@ -274,7 +278,9 @@ func (w *Worker) Shutdown() error {
 	return nil
 }
 
-// Queue send notification to queue
+// Queue publishes encoded bytes to transient subscribers using a background
+// context and native driver limits. Success does not guarantee subscriber receipt
+// or handler completion; caller/handler cancellation is not propagated.
 func (w *Worker) Queue(job core.TaskMessage) error {
 	if atomic.LoadInt32(&w.stopFlag) == 1 {
 		return queue.ErrQueueShutdown

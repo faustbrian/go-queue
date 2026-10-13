@@ -26,45 +26,70 @@ const (
 type WorkerState string
 
 const (
-	WorkerRunning  WorkerState = "running"
-	WorkerPaused   WorkerState = "paused"
+	// WorkerRunning presents active worker intake.
+	WorkerRunning WorkerState = "running"
+	// WorkerPaused presents suspended intake.
+	WorkerPaused WorkerState = "paused"
+	// WorkerDraining presents intake withdrawal while work drains.
 	WorkerDraining WorkerState = "draining"
-	WorkerStopped  WorkerState = "stopped"
+	// WorkerStopped presents stopped worker state, not exactly-once delivery.
+	WorkerStopped WorkerState = "stopped"
 )
 
 // DrainState describes progress of a graceful drain request.
 type DrainState string
 
 const (
+	// DrainNotRequested means no drain is reported.
 	DrainNotRequested DrainState = "not_requested"
-	DrainRequested    DrainState = "requested"
-	DrainInProgress   DrainState = "in_progress"
-	DrainCompleted    DrainState = "completed"
-	DrainTimedOut     DrainState = "timed_out"
+	// DrainRequested means drain was requested but progress is not yet reported.
+	DrainRequested DrainState = "requested"
+	// DrainInProgress means admissions or jobs are still owned.
+	DrainInProgress DrainState = "in_progress"
+	// DrainCompleted means the provider reports its drain boundary completed.
+	DrainCompleted DrainState = "completed"
+	// DrainTimedOut means the drain budget expired, not that the requested state was rolled back.
+	DrainTimedOut DrainState = "timed_out"
 )
 
 // WorkerStatus is the bounded status contract emitted by a worker.
 type WorkerStatus struct {
-	ID           string
-	Version      string
-	StartedAt    time.Time
-	HeartbeatAt  time.Time
-	Queues       []string
-	Concurrency  uint32
-	State        WorkerState
-	CurrentJobs  uint32
-	DrainStatus  DrainState
-	Backend      string
-	Protocol     ProtocolVersion
+	// ID identifies this worker report, bounded by MaxIdentityBytes.
+	ID string
+	// Version is the reporter/application version label, not protocol negotiation.
+	Version string
+	// StartedAt is the required nonzero process start time.
+	StartedAt time.Time
+	// HeartbeatAt is the report time and must not precede StartedAt.
+	HeartbeatAt time.Time
+	// Queues contains mutable logical queue labels, at most MaxQueuesPerWorker.
+	Queues []string
+	// Concurrency reports configured concurrency, from one to MaxWorkerConcurrency.
+	Concurrency uint32
+	// State is the reported or requested lifecycle state, not transport connectivity proof.
+	State WorkerState
+	// CurrentJobs must not exceed Concurrency in a valid report.
+	CurrentJobs uint32
+	// DrainStatus describes requested drain progress.
+	DrainStatus DrainState
+	// Backend identifies the reporting transport, not its address or credentials.
+	Backend string
+	// Protocol is the management protocol version; zero is unknown or invalid.
+	Protocol ProtocolVersion
+	// Capabilities contains mutable bounded capability claims, not authorization grants.
 	Capabilities []Capability
 }
 
 // StatusMetadata configures stable identity for a native worker reporter.
 type StatusMetadata struct {
-	ID          string
-	Version     string
+	// ID is the provider-owned identity, not an authenticated credential.
+	ID string
+	// Version is the reporter/application version label, not protocol negotiation.
+	Version string
+	// Concurrency is configured reporting concurrency, from one to MaxWorkerConcurrency.
 	Concurrency uint32
-	Protocol    ProtocolVersion
+	// Protocol is the management protocol version; zero is unknown or invalid.
+	Protocol ProtocolVersion
 }
 
 // Validate rejects incomplete or unbounded native reporter metadata.
@@ -88,39 +113,61 @@ func (m StatusMetadata) Validate() error {
 // Measurement distinguishes an honestly measured zero from an unsupported
 // backend metric.
 type Measurement[T any] struct {
-	Value     T
+	// Value is meaningful only when Supported is true.
+	Value T
+	// Supported distinguishes an actual measured zero from an unavailable value.
 	Supported bool
 }
 
 // QueueMetrics reports current gauges and monotonic lifecycle counters where
 // the backend can measure them honestly.
 type QueueMetrics struct {
-	Depth            Measurement[int64]
-	Lag              Measurement[int64]
-	Pending          Measurement[int64]
-	OldestAge        Measurement[time.Duration]
-	Throughput       Measurement[float64]
-	Runtime          Measurement[time.Duration]
-	Succeeded        Measurement[uint64]
-	Failed           Measurement[uint64]
-	Retried          Measurement[uint64]
-	Reclaimed        Measurement[uint64]
-	DeadLettered     Measurement[uint64]
+	// Depth reports outstanding work under the provider's scope; stream backends
+	// combine pending and known lag.
+	Depth Measurement[int64]
+	// Lag counts undelivered group entries when supported; unknown lag uses
+	// Supported=false rather than a supported negative value.
+	Lag Measurement[int64]
+	// Pending counts entries delivered to the consumer group but not acknowledged.
+	Pending Measurement[int64]
+	// OldestAge reports age of the backend's oldest supported outstanding entry.
+	OldestAge Measurement[time.Duration]
+	// Throughput is a finite nonnegative backend-reported rate when supported.
+	Throughput Measurement[float64]
+	// Runtime reports backend-measured elapsed runtime when supported.
+	Runtime Measurement[time.Duration]
+	// Succeeded counts backend-observed success under that provider's scope.
+	Succeeded Measurement[uint64]
+	// Failed counts backend-observed failures under that provider's scope.
+	Failed Measurement[uint64]
+	// Retried counts backend-observed retry deliveries, not necessarily local handler attempts.
+	Retried Measurement[uint64]
+	// Reclaimed counts recovered pending entries under the provider's scope.
+	Reclaimed Measurement[uint64]
+	// DeadLettered counts terminal transfers under the provider's scope.
+	DeadLettered Measurement[uint64]
+	// SettlementErrors counts failed backend settlement operations under the provider's scope.
 	SettlementErrors Measurement[uint64]
 }
 
 // QueueStatus is a point-in-time backend-neutral queue observation.
 type QueueStatus struct {
-	Backend    string
-	Queue      string
+	// Backend identifies the reporting transport, not its address or credentials.
+	Backend string
+	// Queue identifies the logical queue, not a connection URI.
+	Queue string
+	// ObservedAt is the nonzero report time.
 	ObservedAt time.Time
-	Metrics    QueueMetrics
+	// Metrics retains support flags instead of inventing unsupported measurements.
+	Metrics QueueMetrics
 }
 
 // StatusPageRequest defines bounded opaque-cursor status pagination.
 type StatusPageRequest struct {
+	// Cursor is provider-specific pagination state; empty begins traversal.
 	Cursor string
-	Limit  uint32
+	// Limit is the positive requested item ceiling, checked against the applicable limit.
+	Limit uint32
 }
 
 // Validate rejects unbounded status requests.
@@ -137,7 +184,9 @@ func (r StatusPageRequest) Validate() error {
 
 // WorkerStatusPage is one bounded page of worker observations.
 type WorkerStatusPage struct {
-	Items      []WorkerStatus
+	// Items contains this page's records; slice storage is mutable and not copied by validation.
+	Items []WorkerStatus
+	// NextCursor is provider-specific continuation state; empty finishes traversal.
 	NextCursor string
 }
 
@@ -166,7 +215,9 @@ func (p WorkerStatusPage) Validate() error {
 
 // QueueStatusPage is one bounded page of queue observations.
 type QueueStatusPage struct {
-	Items      []QueueStatus
+	// Items contains this page's records; slice storage is mutable and not copied by validation.
+	Items []QueueStatus
+	// NextCursor is provider-specific continuation state; empty finishes traversal.
 	NextCursor string
 }
 
@@ -196,7 +247,9 @@ func (p QueueStatusPage) Validate() error {
 // StatusReader is implemented by queue adapters that expose bounded
 // backend-neutral worker and queue observations.
 type StatusReader interface {
+	// ListWorkers returns a bounded page under provider-owned cursor/snapshot semantics.
 	ListWorkers(context.Context, StatusPageRequest) (WorkerStatusPage, error)
+	// ListQueues returns a bounded page under provider-owned cursor/snapshot semantics.
 	ListQueues(context.Context, StatusPageRequest) (QueueStatusPage, error)
 }
 
@@ -314,7 +367,9 @@ func invalidIdentity(value string) bool {
 
 // ValidationError identifies one invalid management-contract field.
 type ValidationError struct {
-	Field   string
+	// Field identifies a validation field; caller construction must keep the label safe.
+	Field string
+	// Problem describes the rejected shape; caller construction controls its disclosure.
 	Problem string
 }
 

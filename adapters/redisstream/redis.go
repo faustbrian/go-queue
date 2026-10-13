@@ -91,14 +91,19 @@ func (w *Worker) QueueName() string { return w.opts.streamName }
 // Stats describes outstanding work for this worker's Redis consumer group.
 // Depth is Pending plus Lag and is -1 when Redis cannot determine group lag.
 type Stats struct {
-	Depth        int64
-	Pending      int64
-	Lag          int64
-	LagKnown     bool
+	// Depth is Pending plus Lag, or -1 when Lag is unknown.
+	Depth int64
+	// Pending counts delivered entries still pending for this consumer group.
+	Pending int64
+	// Lag counts entries not yet delivered to the group when known.
+	Lag int64
+	// LagKnown distinguishes determinate depth from unsupported group lag.
+	LagKnown bool
+	// OldestJobAge is the oldest inspected pending/undelivered age; zero may be unavailable.
 	OldestJobAge time.Duration
 }
 
-// Worker for Redis
+// Worker owns the backend client and intake resources; use its constructor.
 type Worker struct {
 	// redis config
 	rdb               redis.Cmdable
@@ -129,7 +134,7 @@ type Worker struct {
 	controlCapacity   int
 }
 
-// NewWorker for struc
+// NewWorker constructs the worker and panics on an error from NewWorkerE.
 func NewWorker(opts ...Option) *Worker {
 	w, err := NewWorkerE(opts...)
 	if err != nil {
@@ -415,7 +420,9 @@ func (w *Worker) queue(body string) error {
 	return nil
 }
 
-// Queue send notification to queue
+// Queue synchronously encodes and appends through a source-capacity Lua check
+// with the configured command timeout. It does not bound task.Bytes output or
+// propagate a caller context. Success is source admission, not settlement.
 func (w *Worker) Queue(task core.TaskMessage) error {
 	if atomic.LoadInt32(&w.stopFlag) == 1 {
 		return queue.ErrQueueShutdown
@@ -424,7 +431,7 @@ func (w *Worker) Queue(task core.TaskMessage) error {
 	return w.queue(bytesconv.BytesToStr(task.Bytes()))
 }
 
-// Run start the worker
+// Run synchronously invokes the configured handler; it must honor ctx.
 func (w *Worker) Run(ctx context.Context, task core.TaskMessage) error {
 	w.currentJobs.Add(1)
 	defer w.currentJobs.Add(^uint32(0))
@@ -690,6 +697,9 @@ func redisLineageFromValues(values map[string]any) (redisReplayLineage, error) {
 	}, nil
 }
 
+// Terminal append and source acknowledgement are deliberately separate. An
+// append success followed by ack failure retains recovery but can duplicate the
+// destination record; a timeout does not establish whether the server applied it.
 func (w *Worker) acknowledgeRecord(ctx context.Context, id string) error {
 	outcome, err := w.rdb.Eval(
 		ctx, redisAcknowledgeScript, []string{w.opts.streamName}, w.opts.group, id,

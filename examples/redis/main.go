@@ -1,3 +1,5 @@
+// Command redis demonstrates a transient Redis Pub/Sub worker using REDIS_ADDR.
+// It requires a reachable server and is not a durable queue example.
 package main
 
 import (

@@ -30,19 +30,32 @@ const (
 // Metadata carries optional, backend-neutral job identity into failure and
 // dead-letter records. Empty fields remain unknown and must not be fabricated.
 type Metadata struct {
-	OriginalID           string            `json:"original_id,omitempty" msgpack:"original_id,omitempty"`
-	PayloadSchemaVersion string            `json:"payload_schema_version,omitempty" msgpack:"payload_schema_version,omitempty"`
-	ContentType          string            `json:"content_type,omitempty" msgpack:"content_type,omitempty"`
-	EnqueuedAt           *time.Time        `json:"enqueued_at,omitempty" msgpack:"enqueued_at,omitempty"`
-	RetryPolicy          string            `json:"retry_policy,omitempty" msgpack:"retry_policy,omitempty"`
-	HandlerType          string            `json:"handler_type,omitempty" msgpack:"handler_type,omitempty"`
-	JobType              string            `json:"job_type,omitempty" msgpack:"job_type,omitempty"`
-	Tags                 map[string]string `json:"tags,omitempty" msgpack:"tags,omitempty"`
-	TraceID              string            `json:"trace_id,omitempty" msgpack:"trace_id,omitempty"`
-	TenantID             string            `json:"tenant_id,omitempty" msgpack:"tenant_id,omitempty"`
-	ProducerVersion      string            `json:"producer_version,omitempty" msgpack:"producer_version,omitempty"`
-	Correlation          map[string]string `json:"correlation,omitempty" msgpack:"correlation,omitempty"`
-	TraceContext         map[string]string `json:"trace_context,omitempty" msgpack:"trace_context,omitempty"`
+	// OriginalID is optional application identity, distinct from backend source identity.
+	OriginalID string `json:"original_id,omitempty" msgpack:"original_id,omitempty"`
+	// PayloadSchemaVersion identifies an application schema this package does not validate.
+	PayloadSchemaVersion string `json:"payload_schema_version,omitempty" msgpack:"payload_schema_version,omitempty"`
+	// ContentType is optional claimed media type, not verified content.
+	ContentType string `json:"content_type,omitempty" msgpack:"content_type,omitempty"`
+	// EnqueuedAt is an optional nonzero time; nil means unknown.
+	EnqueuedAt *time.Time `json:"enqueued_at,omitempty" msgpack:"enqueued_at,omitempty"`
+	// RetryPolicy is optional policy identity, not executable retry configuration.
+	RetryPolicy string `json:"retry_policy,omitempty" msgpack:"retry_policy,omitempty"`
+	// HandlerType is an optional handler label, not serialized code.
+	HandlerType string `json:"handler_type,omitempty" msgpack:"handler_type,omitempty"`
+	// JobType is optional application job identity.
+	JobType string `json:"job_type,omitempty" msgpack:"job_type,omitempty"`
+	// Tags contains mutable bounded dimensions; values are not automatically redacted.
+	Tags map[string]string `json:"tags,omitempty" msgpack:"tags,omitempty"`
+	// TraceID is claimed trace identity, not authenticated evidence.
+	TraceID string `json:"trace_id,omitempty" msgpack:"trace_id,omitempty"`
+	// TenantID is claimed tenancy metadata, not access enforcement.
+	TenantID string `json:"tenant_id,omitempty" msgpack:"tenant_id,omitempty"`
+	// ProducerVersion identifies the producing application when known.
+	ProducerVersion string `json:"producer_version,omitempty" msgpack:"producer_version,omitempty"`
+	// Correlation is a mutable bounded transport carrier, not authenticated identity.
+	Correlation map[string]string `json:"correlation,omitempty" msgpack:"correlation,omitempty"`
+	// TraceContext is a mutable telemetry carrier bounded by count and total bytes.
+	TraceContext map[string]string `json:"trace_context,omitempty" msgpack:"trace_context,omitempty"`
 }
 
 // Validate rejects unbounded identity, tag, and time metadata.

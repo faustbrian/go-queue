@@ -1,41 +1,65 @@
 // Package management defines stable worker/control-plane contracts without
-// implementing queue delivery or backend operations.
+// implementing queue delivery or backend operations. DTO validation checks
+// shape/bounds, not authentication, privacy or durability. Mutable slices/maps
+// and optional pointers remain caller/provider-owned unless a constructor
+// explicitly copies them. Capability claims are not authorization grants.
 package management
 
 import "slices"
 
 // ProtocolVersion identifies a worker/control-plane management protocol.
 type ProtocolVersion struct {
+	// Major orders versions before Minor.
 	Major uint16
+	// Minor orders versions within one Major.
 	Minor uint16
 }
 
 // ProtocolRange is an inclusive set of protocol versions supported during a
 // rolling upgrade.
 type ProtocolRange struct {
+	// Minimum is the inclusive lower supported version.
 	Minimum ProtocolVersion
+	// Maximum is the inclusive upper supported version; reversed ranges negotiate unknown.
 	Maximum ProtocolVersion
 }
 
 // Capability identifies an optional management or visibility operation.
+// Capability claims are not authorization grants.
 type Capability string
 
 const (
-	CapabilityWorkerStatus   Capability = "worker_status"
-	CapabilityQueueStatus    Capability = "queue_status"
-	CapabilityPause          Capability = "pause"
-	CapabilityResume         Capability = "resume"
-	CapabilityDrain          Capability = "drain"
-	CapabilityTerminate      Capability = "terminate"
-	CapabilityFailures       Capability = "failures"
-	CapabilityDeadLetters    Capability = "dead_letters"
-	CapabilityRetry          Capability = "retry"
-	CapabilityBulkRetry      Capability = "bulk_retry"
-	CapabilityDelete         Capability = "delete"
-	CapabilityPurge          Capability = "purge"
-	CapabilityReplay         Capability = "replay"
+	// CapabilityWorkerStatus advertises optional worker observations.
+	CapabilityWorkerStatus Capability = "worker_status"
+	// CapabilityQueueStatus advertises optional queue observations.
+	CapabilityQueueStatus Capability = "queue_status"
+	// CapabilityPause advertises optional intake suspension.
+	CapabilityPause Capability = "pause"
+	// CapabilityResume advertises optional intake resumption.
+	CapabilityResume Capability = "resume"
+	// CapabilityDrain advertises optional graceful drain.
+	CapabilityDrain Capability = "drain"
+	// CapabilityTerminate advertises optional termination.
+	CapabilityTerminate Capability = "terminate"
+	// CapabilityFailures advertises optional failure listing/inspection.
+	CapabilityFailures Capability = "failures"
+	// CapabilityDeadLetters advertises optional terminal listing/inspection.
+	CapabilityDeadLetters Capability = "dead_letters"
+	// CapabilityRetry advertises optional single-record retry.
+	CapabilityRetry Capability = "retry"
+	// CapabilityBulkRetry advertises optional bounded selected retry.
+	CapabilityBulkRetry Capability = "bulk_retry"
+	// CapabilityDelete advertises optional record deletion.
+	CapabilityDelete Capability = "delete"
+	// CapabilityPurge advertises optional target purge.
+	CapabilityPurge Capability = "purge"
+	// CapabilityReplay advertises optional explicit administrative replay.
+	CapabilityReplay Capability = "replay"
+	// CapabilityRetentionCount advertises optional maximum-count retention.
 	CapabilityRetentionCount Capability = "retention_count"
-	CapabilityRetentionTime  Capability = "retention_time"
+	// CapabilityRetentionTime advertises optional time retention.
+	CapabilityRetentionTime Capability = "retention_time"
+	// CapabilityRetentionBytes advertises optional byte retention.
 	CapabilityRetentionBytes Capability = "retention_bytes"
 )
 
@@ -44,18 +68,26 @@ const (
 type CompatibilityState string
 
 const (
-	CompatibilityCompatible  CompatibilityState = "compatible"
+	// CompatibilityCompatible means the version falls within the inclusive range.
+	CompatibilityCompatible CompatibilityState = "compatible"
+	// CompatibilityWorkerOlder means the worker version is below the supported minimum.
 	CompatibilityWorkerOlder CompatibilityState = "worker_older"
+	// CompatibilityWorkerNewer means the worker version is above the supported maximum.
 	CompatibilityWorkerNewer CompatibilityState = "worker_newer"
-	CompatibilityUnknown     CompatibilityState = "unknown"
+	// CompatibilityUnknown means a reversed range or zero worker version prevents negotiation.
+	CompatibilityUnknown CompatibilityState = "unknown"
 )
 
 // Compatibility is the deterministic result of version and capability
 // negotiation.
 type Compatibility struct {
-	State            CompatibilityState
-	Enabled          []Capability
-	WorkerOnly       []Capability
+	// State classifies version compatibility, independently of authentication.
+	State CompatibilityState
+	// Enabled is a sorted, deduplicated intersection only for compatible peers.
+	Enabled []Capability
+	// WorkerOnly contains sorted worker-only capability claims.
+	WorkerOnly []Capability
+	// ControlPlaneOnly contains sorted control-plane-only capability claims.
 	ControlPlaneOnly []Capability
 }
 

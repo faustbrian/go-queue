@@ -50,6 +50,7 @@ boundaries, not exactly-once transactions.
 
 Valkey dead-letters permanent and malformed handler failures immediately.
 Retryable failures reach the dead-letter stream only at the configured backend
-delivery-attempt limit. Canceled and infrastructure failures remain pending
-even at that limit so shutdown, lease, broker, and settlement uncertainty do
-not discard recoverable work.
+delivery-attempt limit. Infrastructure failures and unlisted canceled codes
+remain pending even at that limit, preserving recoverable work during shutdown,
+lease, broker and settlement uncertainty. `WithCanceledDeadLetterCodes` can
+explicitly make selected canceled codes terminal at the configured ceiling.

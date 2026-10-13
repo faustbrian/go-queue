@@ -16,10 +16,15 @@ import (
 // NativeConfig supplies explicit native connection, resource bounds, queue
 // type, and stable application message identity to the compatibility adapter.
 type NativeConfig struct {
-	Connection        rabbitmqqueue.ConnectionConfig
-	Producer          rabbitmqqueue.ProducerConfig
-	Consumer          rabbitmqqueue.ConsumerConfig
-	MessageID         func(core.TaskMessage) (string, error)
+	// Connection supplies native endpoint, credentials, TLS and recovery policy.
+	Connection rabbitmqqueue.ConnectionConfig
+	// Producer supplies native bounds; WithPublishTimeout overrides PublishTimeout.
+	Producer rabbitmqqueue.ProducerConfig
+	// Consumer supplies manual-settlement/prefetch bounds; adapter options override queue/name.
+	Consumer rabbitmqqueue.ConsumerConfig
+	// MessageID is required synchronous code returning stable nonempty outbound identity.
+	MessageID func(core.TaskMessage) (string, error)
+	// DeliveryMessageID optionally recovers missing broker identity; the decoded message may be nil.
 	DeliveryMessageID func(rabbitmqqueue.Delivery, *job.Message) (string, error)
 }
 

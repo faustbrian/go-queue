@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// MaxDesiredStateTargets bounds one reconciler's copied target set.
 const MaxDesiredStateTargets = 256
 
 var (
@@ -29,22 +30,32 @@ var (
 type DesiredState string
 
 const (
-	DesiredActive      DesiredState = "active"
-	DesiredPaused      DesiredState = "paused"
-	DesiredDraining    DesiredState = "draining"
+	// DesiredActive permits local intake.
+	DesiredActive DesiredState = "active"
+	// DesiredPaused stops new admissions and waits for admission reservations, not active jobs.
+	DesiredPaused DesiredState = "paused"
+	// DesiredDraining stops intake and waits for admissions and jobs.
+	DesiredDraining DesiredState = "draining"
+	// DesiredTerminating irreversibly stops intake and waits for drain.
 	DesiredTerminating DesiredState = "terminating"
 )
 
 // DesiredRecord is one attributed, monotonic target-state revision.
 type DesiredRecord struct {
-	Target    Target
-	State     DesiredState
-	Revision  uint64
+	// Target scopes the operation to one logical resource.
+	Target Target
+	// State is the reported or requested lifecycle state, not transport connectivity proof.
+	State DesiredState
+	// Revision is a positive target-local revision; regressions are rejected by the reconciler.
+	Revision uint64
+	// ChangedAt is the nonzero authored time, not an ordering substitute for Revision.
 	ChangedAt time.Time
+	// CommandID attributes the desired revision to a bounded command identity.
 	CommandID string
 }
 
-// Validate rejects unauthored, unbounded, or unsupported desired state.
+// Validate checks revision, target, state, command identity and time shape.
+// It does not authenticate authorship or establish durability.
 func (r DesiredRecord) Validate() error {
 	if !desiredTarget(r.Target) {
 		return invalid("target", "is unsupported or invalid")
@@ -67,24 +78,31 @@ func (r DesiredRecord) Validate() error {
 
 // DesiredStateReader reads authoritative tenant-scoped desired state.
 type DesiredStateReader interface {
+	// GetDesiredState returns target-scoped authoritative state or ErrDesiredStateNotFound.
 	GetDesiredState(context.Context, Target) (DesiredRecord, error)
 }
 
 // DesiredStateApplier changes local queue admission or lifecycle state.
 type DesiredStateApplier interface {
+	// ApplyDesiredState applies a revision; a returned error need not undo effects already applied.
 	ApplyDesiredState(context.Context, DesiredRecord) error
 }
 
 // DesiredStateReconcilerConfig defines one bounded pull reconciliation set.
 type DesiredStateReconcilerConfig struct {
-	Reader  DesiredStateReader
+	// Reader is a borrowed authoritative provider called under the reconciler mutex.
+	Reader DesiredStateReader
+	// Applier is a borrowed synchronous callback called under the reconciler mutex.
 	Applier DesiredStateApplier
+	// Targets is copied at construction and applied in configured order; duplicates are rejected.
 	Targets []Target
 }
 
-// DesiredStateReconciler applies each revision at most once per target.
-// Scheduling and retry policy remain caller-owned; Reconcile starts no
-// goroutines and a source failure cannot stop normal queue delivery.
+// DesiredStateReconciler remembers successfully applied revisions per target in
+// this process only. An Applier that fails after a side effect can be called again;
+// this is not durable exactly-once application. Scheduling/retry remain caller-owned.
+// The mutex serializes complete reconciliation, including Reader and Applier calls.
+// Those callbacks must not reenter Reconcile, and must honor their contexts.
 type DesiredStateReconciler struct {
 	mu      sync.Mutex
 	reader  DesiredStateReader
@@ -119,7 +137,8 @@ func NewDesiredStateReconciler(
 	}, nil
 }
 
-// Reconcile reads and applies every configured target in deterministic order.
+// Reconcile reads and applies targets in configured order, holding its mutex
+// through all provider calls. Waiting for the mutex is not context-aware.
 // Successfully applied revisions remain committed when a later target fails.
 func (r *DesiredStateReconciler) Reconcile(ctx context.Context) error {
 	if ctx == nil {

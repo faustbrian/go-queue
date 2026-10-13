@@ -60,7 +60,7 @@ type options struct {
 
 // DeliveryAttemptLimitResolver selects the terminal broker-delivery ceiling
 // for one decoded message. It must be deterministic, side-effect-free, and
-// return between two and 100. WithDeadLetter remains the default when no
+// return between one and 100. WithDeadLetter remains the default when no
 // resolver is configured.
 type DeliveryAttemptLimitResolver func(core.TaskMessage) int64
 
@@ -106,7 +106,9 @@ func WithDB(database int) Option {
 	}
 }
 
-// WithTLSConfig enables TLS using a private clone of config.
+// WithTLSConfig clones config and raises its minimum protocol to TLS1.2.
+// Clone is shallow for nested certificates/pools/callbacks; coordinate their
+// lifetime. Verification flags, including InsecureSkipVerify, remain caller-owned.
 func WithTLSConfig(config *tls.Config) Option {
 	return func(opts *options) error {
 		if config == nil {
@@ -158,7 +160,8 @@ func WithBlockTime(timeout time.Duration) Option {
 	}
 }
 
-// WithShutdownTimeout bounds graceful worker shutdown.
+// WithShutdownTimeout bounds the read/reclaim-loop wait during worker shutdown.
+// Native client Close is synchronous and is not given this context.
 func WithShutdownTimeout(timeout time.Duration) Option {
 	return func(opts *options) error {
 		opts.shutdownTimeout = timeout

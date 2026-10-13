@@ -1,3 +1,7 @@
+// Package nats adapts Core NATS queue subscriptions, not JetStream. Delivery is
+// transient without handler acknowledgements or durable replay. Construction opens
+// and subscribes an owned connection; Shutdown drains/closes it. Request decoding
+// is bounded, but broker acceptance is not proof of handler completion.
 package nats
 
 import (
@@ -24,7 +28,7 @@ func (*Worker) BackendName() string { return "nats" }
 // QueueName returns the configured NATS subject.
 func (w *Worker) QueueName() string { return w.opts.subj }
 
-// Worker for NSQ
+// Worker owns a Core NATS connection and transient subscription.
 type Worker struct {
 	client       *nats.Conn
 	stop         chan struct{}
@@ -39,7 +43,7 @@ type Worker struct {
 	tasks        chan *nats.Msg
 }
 
-// NewWorker for struc
+// NewWorker constructs the worker and panics on an error from NewWorkerE.
 func NewWorker(opts ...Option) *Worker {
 	w, err := NewWorkerE(opts...)
 	if err != nil {
@@ -105,7 +109,7 @@ func (w *Worker) handleMessage(msg *nats.Msg) {
 	}
 }
 
-// Run start the worker
+// Run synchronously invokes the configured handler; it must honor ctx.
 func (w *Worker) Run(ctx context.Context, task core.TaskMessage) error {
 	return w.opts.runFunc(ctx, task)
 }
@@ -132,7 +136,8 @@ func (w *Worker) Shutdown() error {
 	return nil
 }
 
-// Queue send notification to queue
+// Queue publishes encoded bytes through the Core NATS client without a durable
+// confirmation or handler acknowledgement. A closed worker rejects admission.
 func (w *Worker) Queue(job core.TaskMessage) error {
 	if atomic.LoadInt32(&w.stopFlag) == 1 {
 		return queue.ErrQueueShutdown

@@ -1,3 +1,6 @@
+// Command valkey demonstrates separately owned Valkey producer and worker
+// connections. It requires a reachable server; handlers must make effects
+// idempotent across redelivery and honor cancellation in application calls.
 package main
 
 import (

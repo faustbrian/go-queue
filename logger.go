@@ -12,7 +12,9 @@ import (
 //   - Error: Recoverable errors (task failures, runtime errors)
 //   - Fatal: Panics and critical failures (includes stack traces)
 //
-// Implement this interface to integrate with custom logging systems (logrus, zap, etc.).
+// Methods can run concurrently and synchronously; implementations must return
+// promptly and coordinate mutable state. Root Queue contains logger panics,
+// but backend-specific direct logging calls may not use that panic boundary.
 type Logger interface {
 	// Infof logs formatted informational messages.
 	Infof(format string, args ...any)
@@ -35,18 +37,9 @@ type Logger interface {
 	Fatal(args ...any)
 }
 
-// NewLogger creates a standard logger that writes to stderr with timestamps.
-// This is the default logger used by queues unless overridden with WithLogger.
-//
-// Log format:
-//   - INFO messages: Simple timestamped output
-//   - ERROR messages: Simple timestamped output
-//   - FATAL messages: Includes stack trace with file:line information
-//
-// Use cases:
-//   - Development and debugging
-//   - Simple production deployments without structured logging
-//   - When detailed error context is needed
+// NewLogger writes timestamped levels to stderr. Fatal/Fatalf add source-backed
+// stack text but do not exit or panic. Source and formatted arguments are not
+// redacted; callers must control diagnostic content and disclosure.
 func NewLogger() Logger {
 	return defaultLogger{
 		infoLogger:  log.New(os.Stderr, "INFO: ", log.Ldate|log.Ltime),
@@ -104,15 +97,8 @@ func (l defaultLogger) Fatal(args ...any) {
 	l.logWithCaller(l.fatalLogger, args...)
 }
 
-// NewEmptyLogger creates a no-op logger that discards all log messages.
-// This is useful for:
-//   - Performance-sensitive production environments where logging overhead matters
-//   - Testing scenarios where log output would clutter test results
-//   - Silent background workers that don't need observability
-//
-// Example:
-//
-//	q := queue.NewPool(5, queue.WithLogger(queue.NewEmptyLogger()))
+// NewEmptyLogger returns a logger that discards every level without formatting
+// arguments or capturing source-backed stacks.
 func NewEmptyLogger() Logger {
 	return emptyLogger{}
 }

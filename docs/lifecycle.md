@@ -26,9 +26,11 @@ work, while accepted submissions, active handlers, and the concrete worker
 remain owned. Repeated calls are no-ops.
 
 `ReleaseContext` closes admission when necessary, waits for an already accepted
-publish to finish, joins admitted handlers without cancelling their contexts,
-and closes the concrete worker only after the drain completes. The supplied
-context bounds both waits. If it expires, the transport remains open and a
+publish to finish, joins tracked scheduler/work wrappers without cancelling
+their contexts, and closes the concrete worker only after the drain completes. The supplied
+context bounds both waits, but does not preempt synchronous worker shutdown or
+callbacks. An inner handler ignoring its timeout can outlive its work wrapper.
+If the drain context expires before shutdown, the transport remains open and a
 later call may resume release.
 Concrete worker shutdown panics are contained as `ErrWorkerShutdownPanic`, do
 not disclose their values, and remain the cached terminal result on every
@@ -40,7 +42,8 @@ releases that reservation before the scheduler exits.
 
 ## Delivery path
 
-1. `Queue` or `QueueTask` builds and validates a `job.Message`.
+1. `Queue` or `QueueTask` builds and validates a `job.Message`. Only the first
+   `AllowOption` is used; application payload bytes are borrowed, not copied.
 2. `Worker.Queue` publishes it. The RabbitMQ adapter reconciles mandatory
    routing and waits for the exact publisher confirmation.
 3. The scheduler requests a delivery only while a worker slot is available.

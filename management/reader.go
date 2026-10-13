@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// MaxStatusProviders bounds each configured provider set, not pagination fetch cost.
 const MaxStatusProviders = 1_000
 
 var (
@@ -24,11 +25,13 @@ var (
 
 // WorkerStatusProvider emits one native worker observation.
 type WorkerStatusProvider interface {
+	// ObserveWorker reports native worker state; the provider owns context handling and concurrency.
 	ObserveWorker(context.Context) (WorkerStatus, error)
 }
 
 // QueueStatusProvider emits one logical backend queue observation.
 type QueueStatusProvider interface {
+	// ObserveQueue reports native queue support flags and values, not invented metrics.
 	ObserveQueue(context.Context) (QueueStatus, error)
 }
 
@@ -40,8 +43,10 @@ type StatusProvider interface {
 
 // StatusReaderConfig separates worker cardinality from logical queue sources.
 type StatusReaderConfig struct {
+	// Workers contains borrowed providers; construction copies the slice, not providers.
 	Workers []WorkerStatusProvider
-	Queues  []QueueStatusProvider
+	// Queues contains borrowed providers; construction copies the slice, not providers.
+	Queues []QueueStatusProvider
 }
 
 // ProviderStatusReader composes bounded native adapter observations.
@@ -50,7 +55,9 @@ type ProviderStatusReader struct {
 	queues  []QueueStatusProvider
 }
 
-// NewStatusReader creates a deterministic provider-backed status reader.
+// NewStatusReader copies bounded provider slices (at least one nonempty), rejecting nil and
+// typed-nil entries. Providers remain borrowed; concurrent reader use requires
+// their own concurrency safety and context-aware return behavior.
 func NewStatusReader(config StatusReaderConfig) (*ProviderStatusReader, error) {
 	if (len(config.Workers) == 0 && len(config.Queues) == 0) ||
 		len(config.Workers) > MaxStatusProviders || len(config.Queues) > MaxStatusProviders {
@@ -72,7 +79,10 @@ func NewStatusReader(config StatusReaderConfig) (*ProviderStatusReader, error) {
 	return &ProviderStatusReader{workers: workers, queues: queues}, nil
 }
 
-// ListWorkers returns one worker-ID-sorted bounded provider page.
+// ListWorkers calls every worker provider sequentially on each request, validates
+// and sorts by ID, then returns a shallow page. Nested slices retain provider
+// aliases. Offset cursors refer to newly fetched data, not a stable snapshot; the
+// page bound does not bound observation work. Context is passed to providers.
 func (r *ProviderStatusReader) ListWorkers(
 	ctx context.Context,
 	request StatusPageRequest,
@@ -108,7 +118,9 @@ func (r *ProviderStatusReader) ListWorkers(
 	return WorkerStatusPage{Items: pageItems, NextCursor: next}, nil
 }
 
-// ListQueues returns one queue-name-sorted bounded provider page.
+// ListQueues observes every queue provider on each request, rejects duplicate
+// backend/queue identities and sorts before offset pagination. It does not hold
+// a stable snapshot across requests or preempt a provider that ignores context.
 func (r *ProviderStatusReader) ListQueues(
 	ctx context.Context,
 	request StatusPageRequest,

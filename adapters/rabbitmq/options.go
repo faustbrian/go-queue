@@ -99,9 +99,13 @@ func WithNativeConfig(config NativeConfig) Option {
 
 // DeadLetterConfig owns RabbitMQ terminal routing and bounded delivery policy.
 type DeadLetterConfig struct {
-	Exchange            string
-	Queue               string
-	RoutingKey          string
+	// Exchange is the infrastructure-owned terminal exchange, not a declaration request.
+	Exchange string
+	// Queue identifies the distinct infrastructure-owned terminal queue.
+	Queue string
+	// RoutingKey is the terminal exchange route.
+	RoutingKey string
+	// MaxDeliveryAttempts is the inclusive broker-attempt ceiling from two to 101.
 	MaxDeliveryAttempts uint32
 }
 
@@ -222,15 +226,8 @@ func WithTag(val string) Option {
 	}
 }
 
-/*
-WithAutoAck enables or disables automatic message acknowledgment.
-
-Parameters:
-- val: true to enable auto-ack, false to disable.
-
-Returns:
-- Option: Functional option to set autoAck.
-*/
+// WithAutoAck retains legacy configuration syntax. NewWorkerE rejects true
+// because the native adapter requires explicit manual settlement.
 func WithAutoAck(val bool) Option {
 	return func(w *options) {
 		w.autoAck = val

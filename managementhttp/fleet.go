@@ -27,12 +27,15 @@ var (
 
 // Endpoint is one stable worker-management transport target.
 type Endpoint struct {
-	ID      string
+	// ID is a unique endpoint label, not necessarily a reported worker ID.
+	ID string
+	// BaseURL is an operator-approved origin; duplicate normalized origins are rejected.
 	BaseURL string
 }
 
 // EndpointResolver returns the current bounded worker-management fleet.
 type EndpointResolver interface {
+	// ResolveEndpoints returns operator-trusted endpoints for this operation, honoring ctx.
 	ResolveEndpoints(context.Context) ([]Endpoint, error)
 }
 
@@ -46,9 +49,13 @@ func (resolve EndpointResolverFunc) ResolveEndpoints(ctx context.Context) ([]End
 
 // FleetClientConfig configures dynamic authenticated worker-management access.
 type FleetClientConfig struct {
-	Resolver         EndpointResolver
-	Token            string
-	HTTPClient       *http.Client
+	// Resolver is borrowed, called per operation, and must be safe for concurrent calls.
+	Resolver EndpointResolver
+	// Token is shared by all resolved endpoints; resolution is a trust boundary.
+	Token string
+	// HTTPClient is borrowed until NewClient shallow-copies it; do not mutate it concurrently.
+	HTTPClient *http.Client
+	// MaxResponseBytes bounds each endpoint response; zero selects NewClient defaults.
 	MaxResponseBytes int64
 }
 
@@ -73,6 +80,7 @@ func NewFleetClient(config FleetClientConfig) (*FleetClient, error) {
 	}, nil
 }
 
+// ListWorkers resolves/fetches all endpoints, then returns one sorted status page; cursors are not stable snapshots.
 func (client *FleetClient) ListWorkers(
 	ctx context.Context,
 	request management.StatusPageRequest,
@@ -102,6 +110,7 @@ func (client *FleetClient) ListWorkers(
 	return reader.ListWorkers(ctx, request)
 }
 
+// ListQueues fetches all endpoints and keeps the newest observation per queue name, even across backends.
 func (client *FleetClient) ListQueues(
 	ctx context.Context,
 	request management.StatusPageRequest,
@@ -131,6 +140,7 @@ func (client *FleetClient) ListQueues(
 	return reader.ListQueues(ctx, request)
 }
 
+// Execute routes worker targets after discovery; queue/group targets fan out and may return partial results.
 func (client *FleetClient) Execute(
 	ctx context.Context,
 	command management.Command,
@@ -152,6 +162,7 @@ func (client *FleetClient) Execute(
 	return remotes[0].client.Execute(ctx, command)
 }
 
+// ListFailures reads the lexically first endpoint only; it does not aggregate record stores.
 func (client *FleetClient) ListFailures(
 	ctx context.Context,
 	request management.PageRequest,
@@ -167,6 +178,7 @@ func (client *FleetClient) ListFailures(
 	return remote.client.ListFailures(ctx, request)
 }
 
+// ListDeadLetters reads the lexically first endpoint only; it assumes a shared record store.
 func (client *FleetClient) ListDeadLetters(
 	ctx context.Context,
 	request management.PageRequest,
@@ -182,6 +194,7 @@ func (client *FleetClient) ListDeadLetters(
 	return remote.client.ListDeadLetters(ctx, request)
 }
 
+// Inspect inspects the lexically first endpoint only at requested disclosure.
 func (client *FleetClient) Inspect(
 	ctx context.Context,
 	request management.InspectRequest,

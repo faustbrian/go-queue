@@ -1,3 +1,5 @@
+// Command semvercheck validates one v-prefixed tag or prints the next stable
+// patch, minor or major version. It reports invalid input without changing Git.
 package main
 
 import (

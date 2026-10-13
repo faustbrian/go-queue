@@ -7,6 +7,10 @@ versioning and Keep a Changelog structure.
 
 ### Changed
 
+- Clarify JSON envelope and borrowed payload ownership, bounded Ring defaults,
+  cooperative handler cancellation and release waits, process-local management
+  deduplication, stream transfer/replay windows, and backend-specific limits.
+
 - Adopt NATS client 1.54.0, including its subscription-race fix, while
   retaining Core NATS transient delivery, reconnect, and bounded shutdown
   semantics.

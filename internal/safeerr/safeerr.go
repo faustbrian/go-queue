@@ -9,6 +9,8 @@ type Error struct {
 }
 
 // Wrap preserves cause for errors.Is and errors.As while exposing only message.
+// The caller must supply safe message text; cause is accessible through Unwrap.
+// Even a nil cause produces a non-nil wrapper.
 func Wrap(message string, cause error) error {
 	return &Error{message: message, cause: cause}
 }

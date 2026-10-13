@@ -28,7 +28,9 @@ const (
 type RecordKind string
 
 const (
-	RecordFailure    RecordKind = "failure"
+	// RecordFailure identifies a failed delivery attempt, not necessarily terminal work.
+	RecordFailure RecordKind = "failure"
+	// RecordDeadLetter identifies a terminal delivery record.
 	RecordDeadLetter RecordKind = "dead_letter"
 )
 
@@ -38,61 +40,106 @@ const (
 type PayloadVisibility string
 
 const (
-	PayloadHidden   PayloadVisibility = ""
+	// PayloadHidden omits data and is the fail-closed zero visibility.
+	PayloadHidden PayloadVisibility = ""
+	// PayloadRedacted marks nonrevealed disclosure; Data still must be empty.
 	PayloadRedacted PayloadVisibility = "redacted"
+	// PayloadRevealed permits bounded Data after caller-owned authorization.
 	PayloadRevealed PayloadVisibility = "revealed"
 )
 
 // Payload is a bounded administrative representation. Data must remain empty
 // unless privileged access explicitly requested revealed content.
 type Payload struct {
-	Visibility  PayloadVisibility
+	// Visibility selects disclosure; hidden is the zero value, not an authorization check.
+	Visibility PayloadVisibility
+	// ContentType is an optional application media-type label, not verified payload content.
 	ContentType string
-	Size        int64
-	Data        []byte
+	// Size reports original byte size and may exceed revealed Data length.
+	Size int64
+	// Data is mutable; value copies share its backing array. Validation permits
+	// bytes only when revealed.
+	Data []byte
 }
 
 // JobRecord is the backend-neutral failure or dead-letter representation.
 type JobRecord struct {
-	Kind        RecordKind
-	ID          string
-	Backend     string
-	Queue       string
-	OccurredAt  time.Time
-	Attempts    uint32
+	// Kind selects the supported resource or record category.
+	Kind RecordKind
+	// ID identifies this backend failure/dead-letter record, separately from OriginalID.
+	ID string
+	// Backend identifies the reporting transport, not its address or credentials.
+	Backend string
+	// Queue identifies the logical queue, not a connection URI.
+	Queue string
+	// OccurredAt is the backend/event time of this observation, not a universal ordering clock.
+	OccurredAt time.Time
+	// Attempts counts backend delivery attempts, independently of local handler retries.
+	Attempts uint32
+	// FailureCode is an operational failure label, not arbitrary error text.
 	FailureCode string
-	Payload     Payload
+	// Payload holds disclosure-controlled mutable application bytes.
+	Payload Payload
 
-	EnvelopeVersion      uint16
+	// EnvelopeVersion is zero for basic legacy records or CurrentEnvelopeVersion for extended metadata.
+	EnvelopeVersion uint16
+	// PayloadSchemaVersion is optional application schema identity; this package does not validate that schema.
 	PayloadSchemaVersion string
-	OriginalID           string
-	Topic                string
-	Stream               string
-	RoutingKey           string
-	ConsumerGroup        string
-	SourceRecordID       string
-	EnqueuedAt           *time.Time
-	FirstDeliveryAt      *time.Time
-	LastDeliveryAt       *time.Time
-	DeadLetteredAt       *time.Time
-	RetryPolicy          string
-	Classification       Classification
-	FailureSummary       string
-	Diagnostics          Payload
-	HandlerType          string
-	JobType              string
-	Tags                 map[string]string
-	TraceID              string
-	TenantID             string
-	ProducerVersion      string
-	WorkerVersion        string
+	// OriginalID is optional application identity, distinct from backend source identity.
+	OriginalID string
+	// Topic is optional source topic identity.
+	Topic string
+	// Stream is the logical stream key, not a transport endpoint.
+	Stream string
+	// RoutingKey is optional source routing identity.
+	RoutingKey string
+	// ConsumerGroup is optional source consumer-group identity.
+	ConsumerGroup string
+	// SourceRecordID identifies the original backend source entry when known.
+	SourceRecordID string
+	// EnqueuedAt is an optional nonzero enqueue time; nil means unknown.
+	EnqueuedAt *time.Time
+	// FirstDeliveryAt is optional first-delivery time; nil means unknown.
+	FirstDeliveryAt *time.Time
+	// LastDeliveryAt is optional last-delivery time, ordered after FirstDeliveryAt when both known.
+	LastDeliveryAt *time.Time
+	// DeadLetteredAt is required for a versioned terminal record.
+	DeadLetteredAt *time.Time
+	// RetryPolicy is optional application policy identity, not executable retry configuration.
+	RetryPolicy string
+	// Classification selects the recorded backend-neutral failure disposition.
+	Classification Classification
+	// FailureSummary is deliberately safe operator text; Validate bounds but does not redact it.
+	FailureSummary string
+	// Diagnostics uses independent disclosure bounds; it must not expose bytes implicitly.
+	Diagnostics Payload
+	// HandlerType is an optional handler label, not serialized code.
+	HandlerType string
+	// JobType is optional application job identity.
+	JobType string
+	// Tags contains mutable application dimensions with bounded keys, values and count.
+	Tags map[string]string
+	// TraceID is optional caller-supplied trace identity, not authenticated evidence.
+	TraceID string
+	// TenantID is optional caller-supplied tenancy metadata, not access enforcement.
+	TenantID string
+	// ProducerVersion identifies the producer application when known.
+	ProducerVersion string
+	// WorkerVersion identifies the handling application when known.
+	WorkerVersion string
+	// OriginalDeadLetterID identifies the first terminal record in replay lineage.
 	OriginalDeadLetterID string
-	PriorDeadLetterID    string
-	ReplayGeneration     uint32
-	RetentionDeadline    *time.Time
+	// PriorDeadLetterID identifies the terminal record immediately preceding this replay.
+	PriorDeadLetterID string
+	// ReplayGeneration is positive only with complete original/prior lineage; zero means no replay metadata.
+	ReplayGeneration uint32
+	// RetentionDeadline is optional nonzero expiry, later than DeadLetteredAt when both known.
+	RetentionDeadline *time.Time
 }
 
-// Validate rejects malformed metadata and unsafe payload disclosure.
+// Validate checks record shape, chronology and disclosure byte bounds. It
+// neither authenticates metadata nor redacts FailureSummary, tags or identity
+// content, and it does not copy mutable data. Reveal authorization is external.
 func (r JobRecord) Validate() error {
 	if !r.Kind.valid() {
 		return invalid("kind", "is unsupported")
@@ -278,25 +325,35 @@ func (v PayloadVisibility) valid() bool {
 type SortField string
 
 const (
+	// SortOccurredAt requests observation-time order.
 	SortOccurredAt SortField = "occurred_at"
-	SortQueue      SortField = "queue"
-	SortAttempts   SortField = "attempts"
+	// SortQueue requests logical queue order where supported.
+	SortQueue SortField = "queue"
+	// SortAttempts requests delivery-attempt order where supported.
+	SortAttempts SortField = "attempts"
 )
 
 // SortDirection identifies ascending or descending ordering.
 type SortDirection string
 
 const (
-	SortAscending  SortDirection = "asc"
+	// SortAscending requests forward ordering.
+	SortAscending SortDirection = "asc"
+	// SortDescending requests reverse ordering.
 	SortDescending SortDirection = "desc"
 )
 
 // PageRequest defines bounded cursor pagination, sorting, and search.
 type PageRequest struct {
-	Cursor    string
-	Limit     uint32
-	Search    string
-	Sort      SortField
+	// Cursor is provider-specific pagination state; empty begins traversal.
+	Cursor string
+	// Limit is the positive requested item ceiling, checked against the applicable limit.
+	Limit uint32
+	// Search is bounded provider-defined metadata search, not payload search.
+	Search string
+	// Sort selects requested ordering; a provider may reject unsupported fields.
+	Sort SortField
+	// Direction selects ascending or descending traversal.
 	Direction SortDirection
 }
 
@@ -341,7 +398,9 @@ func (d SortDirection) valid() bool {
 
 // RecordPage is one bounded page of failure or dead-letter metadata.
 type RecordPage struct {
-	Items      []JobRecord
+	// Items contains this page's records; slice storage is mutable and not copied by validation.
+	Items []JobRecord
+	// NextCursor is provider-specific continuation state; empty finishes traversal.
 	NextCursor string
 }
 
@@ -370,8 +429,11 @@ func (p RecordPage) Validate() error {
 
 // InspectRequest asks for one record at an explicit payload visibility.
 type InspectRequest struct {
-	Kind       RecordKind
-	ID         string
+	// Kind selects the supported resource or record category.
+	Kind RecordKind
+	// ID is the provider-owned identity, not an authenticated credential.
+	ID string
+	// Visibility selects disclosure; hidden is the zero value, not an authorization check.
 	Visibility PayloadVisibility
 }
 
@@ -393,7 +455,10 @@ func (r InspectRequest) Validate() error {
 // RecordReader is implemented by queue adapters that expose safe failure
 // and dead-letter inspection without leaking native backend clients.
 type RecordReader interface {
+	// ListFailures lists bounded metadata with payload and diagnostics hidden.
 	ListFailures(context.Context, PageRequest) (RecordPage, error)
+	// ListDeadLetters lists bounded terminal metadata with payload and diagnostics hidden.
 	ListDeadLetters(context.Context, PageRequest) (RecordPage, error)
+	// Inspect returns one record with no more disclosure than requested; authorization is caller-owned.
 	Inspect(context.Context, InspectRequest) (JobRecord, error)
 }

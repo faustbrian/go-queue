@@ -43,17 +43,21 @@ const (
 // Failure attaches a stable classification and safe code while preserving the
 // original cause for errors.Is and errors.As.
 type Failure struct {
+	// Classification selects backend failure disposition; it does not redact the cause.
 	Classification Classification
-	Code           string
-	cause          error
+	// Code is caller-supplied failure text; keep it stable and non-sensitive.
+	Code  string
+	cause error
 }
 
-// NewFailure classifies cause with a stable, non-sensitive failure code.
+// NewFailure retains cause and caller-supplied classification/code without
+// validation. The caller must provide non-sensitive code text; Error prints it.
 func NewFailure(classification Classification, code string, cause error) *Failure {
 	return &Failure{Classification: classification, Code: code, cause: cause}
 }
 
-// Validate rejects unknown dispositions and unsafe failure codes.
+// Validate rejects unknown dispositions and blank or oversized codes. It does
+// not redact content or establish that caller-supplied text is safe to disclose.
 func (e *Failure) Validate() error {
 	if e == nil || !e.Classification.valid() {
 		return invalid("classification", "is unsupported")
@@ -79,14 +83,18 @@ func (e *Failure) Unwrap() error {
 // a wrapped or joined failure graph. Code is empty when no classified failure
 // supplied one.
 type FailureResolution struct {
+	// Classification selects backend failure disposition; it does not redact the cause.
 	Classification Classification
-	Code           string
+	// Code is the selected winning-classification code, or empty when absent.
+	Code string
 }
 
 // ResolveFailure resolves wrapped and joined failures with deterministic
 // safety precedence: infrastructure, canceled, malformed, permanent, then
 // retryable. Codes come only from the winning classification; equal-rank codes
-// use lexical order so errors.Join argument order cannot change persistence.
+// use lexical order among visited nodes. The walk visits at most 64 nodes, so
+// larger graphs can depend on traversal order. Custom Unwrap/Is methods remain
+// caller code; their termination and panic behavior are not controlled here.
 func ResolveFailure(err error) FailureResolution {
 	resolution := FailureResolution{Classification: ClassificationRetryable}
 	stack := []error{err}

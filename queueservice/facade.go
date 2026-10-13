@@ -198,7 +198,10 @@ func (err *OptionsError) Error() string {
 func (*OptionsError) Unwrap() error { return ErrInvalidOptions }
 
 // CallbackPanicError identifies a recovered callback without retaining its value.
-type CallbackPanicError struct{ Operation CallbackOperation }
+type CallbackPanicError struct {
+	// Operation identifies the callback boundary without retaining its panic value.
+	Operation CallbackOperation
+}
 
 // Error returns a secret-safe callback failure.
 func (err *CallbackPanicError) Error() string {

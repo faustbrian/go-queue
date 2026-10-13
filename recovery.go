@@ -30,15 +30,9 @@ var bufferPool = sync.Pool{
 	},
 }
 
-// stack captures and returns the current stack trace, skipping the specified number of frames.
-// It retrieves the stack trace information, including the file name, line number, and function name,
-// and formats it into a byte slice. The function uses a buffer pool to manage memory efficiently.
-//
-// Parameters:
-//   - skip: The number of stack frames to skip before recording the trace.
-//
-// Returns:
-//   - A byte slice containing the formatted stack trace.
+// stack captures trace and source lines in pooled storage. The returned bytes
+// alias a buffer already returned to the pool; they are not an owned snapshot.
+// Source lines may contain application data, so diagnostic disclosure is caller-owned.
 func stack(skip int) []byte {
 	buf := bufferPool.Get().(*bytes.Buffer)
 	defer bufferPool.Put(buf)

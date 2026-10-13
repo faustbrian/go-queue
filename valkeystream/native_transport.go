@@ -424,6 +424,9 @@ func (t *nativeTransport) Ack(ctx context.Context, request streamqueue.AckReques
 	return nil
 }
 
+// Terminal append and source acknowledgement are deliberately separate. An
+// append success followed by ack failure retains recovery but can duplicate the
+// destination record; a timeout does not establish whether the server applied it.
 func (t *nativeTransport) DeadLetter(ctx context.Context, request streamqueue.DeadLetterRequest) error {
 	if err := request.Validate(t.maxPayloadBytes); err != nil {
 		return err
@@ -610,6 +613,9 @@ func (t *nativeTransport) RetryRecord(
 	return outcome, nil
 }
 
+// Replay registration is serialized with append/replacement inside the server
+// script, but registry entries are count-evicted. Old identities can replay again
+// after eviction. A script/network error is not proof that no effects occurred.
 func (t *nativeTransport) ReplayRecord(
 	ctx context.Context, recordStream, recordID, destination string,
 	policy management.ReplayPolicy,

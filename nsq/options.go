@@ -10,8 +10,9 @@ import (
 	nsq "github.com/nsqio/go-nsq"
 )
 
-// An Option configures a mutex.
+// Option configures NSQ producer/consumer policy at construction.
 type Option interface {
+	// Apply mutates construction settings synchronously.
 	Apply(*Options)
 }
 
@@ -23,6 +24,8 @@ func (f OptionFunc) Apply(option *Options) {
 	f(option)
 }
 
+// Options retains private NSQ construction settings; use the With functions.
+// Options are applied in order without nil-option normalization.
 type Options struct {
 	maxInFlight          int
 	addr                 string
