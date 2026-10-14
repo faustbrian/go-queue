@@ -7,9 +7,3 @@ use (
 	./queueservice
 	./rabbitmq
 )
-
-replace github.com/faustbrian/go-queue v1.1.0 => .
-
-replace github.com/faustbrian/go-queue/adapters/rabbitmq v1.0.0 => ./adapters/rabbitmq
-
-replace github.com/faustbrian/go-queue/adapters/service v1.0.0 => ./adapters/service
