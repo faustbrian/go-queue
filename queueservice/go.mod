@@ -7,7 +7,7 @@ require (
 	github.com/faustbrian/go-queue v1.1.0
 	github.com/faustbrian/go-queue/adapters/service v1.0.0
 	github.com/faustbrian/go-service v1.0.0
-	go.opentelemetry.io/otel v1.44.0
+	go.opentelemetry.io/otel v1.47.0
 )
 
 require (
@@ -18,7 +18,6 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/redis/go-redis/v9 v9.23.0 // indirect
-	github.com/stretchr/testify v1.12.1 // indirect
-	go.opentelemetry.io/otel/trace v1.44.0 // indirect
+	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 )
