@@ -21,7 +21,7 @@ require (
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/klauspost/compress v1.20.0 // indirect
 	github.com/moby/moby/api v1.56.1 // indirect
-	github.com/moby/moby/client v0.6.1 // indirect
+	github.com/moby/moby/client v0.6.2 // indirect
 	github.com/testcontainers/testcontainers-go v0.44.0 // indirect
 	github.com/valkey-io/valkey-go v1.0.76 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
