@@ -3,6 +3,17 @@
 All notable changes are documented here. The project follows semantic
 versioning and Keep a Changelog structure.
 
+## 1.1.5 - 2026-10-22
+
+### Changed
+
+- Publish the current source and documentation with a fresh immutable tag.
+- Publish independently versioned modules from the same source snapshot:
+  - `adapters/rabbitmq/v1.1.0`.
+  - `adapters/service/v1.1.0`.
+  - `rabbitmq/v1.1.0`.
+  - `queueservice/v1.1.0`.
+
 ## [1.1.4] - 2026-10-13
 
 This entry records a prepared root patch; publication is separate. Adopt
