@@ -17,6 +17,6 @@
 - Deduplication and delayed-delivery helpers.
 - Maintained metrics exporters outside the core contract.
 
-Dead-letter settlement and Redis pending recovery are stable v1 behavior
+Dead-letter settlement and Redis pending recovery are stable behavior
 documented in `docs/dead-letter-architecture.md` and
 `docs/dead-letter-operations.md`.

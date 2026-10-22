@@ -2,8 +2,9 @@
 
 [Documentation index](../README.md) · [Backend selection](../backend-support.md)
 
-Import `github.com/faustbrian/go-queue/adapters/redisstream` as `redisstream`.
-The former `/redisstream` compatibility path was removed in v2. Configure a stream, group, and unique
+Import `github.com/faustbrian/go-queue/v2/adapters/redisstream` as
+`redisstream`. The former `/redisstream` compatibility path was removed in v2.
+Configure a stream, group, and unique
 consumer name.
 
 Use `WithConnectTimeout`, `WithRequestTimeout`, and `WithBlockTime` to bound

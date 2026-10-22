@@ -18,7 +18,7 @@ Version 2 removes these compatibility paths; use the successor:
 
 | Removed path | Successor path | Package identifier |
 | --- | --- | --- |
-| `github.com/faustbrian/go-queue/redisstream` | `github.com/faustbrian/go-queue/adapters/redisstream` | `redisdb` becomes unambiguous `redisstream` |
+| `github.com/faustbrian/go-queue/redisstream` | `github.com/faustbrian/go-queue/v2/adapters/redisstream` | `redisdb` becomes unambiguous `redisstream` |
 | `github.com/faustbrian/go-queue/rabbitmq` | `github.com/faustbrian/go-queue/adapters/rabbitmq` | `rabbitmq` |
 | `github.com/faustbrian/go-queue/queueservice` | `github.com/faustbrian/go-queue/adapters/service` | `queueservice` |
 

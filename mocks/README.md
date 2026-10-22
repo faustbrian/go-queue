@@ -2,16 +2,16 @@
 
 The current three files are generated from `core/worker.go` by explicitly
 selected `go.uber.org/mock/mockgen` **v0.6.0**, not an ambient executable.
-Run from the repository root with Go 1.27.2 and normal public proxy/SumDB:
+Run from the repository root with Go 1.27.3 and normal public proxy/SumDB:
 
 ```sh
-GOTOOLCHAIN=go1.27.2 GOWORK=off go generate ./mocks
+GOTOOLCHAIN=go1.27.3 GOWORK=off go generate ./mocks
 git diff -- mocks/mock_worker.go mocks/mock_queued_message.go mocks/mock_task_message.go
-GOTOOLCHAIN=go1.27.2 GOWORK=off go test . ./core ./job ./mocks
+GOTOOLCHAIN=go1.27.3 GOWORK=off go test . ./core ./job ./mocks
 ```
 
 The directives execute in `mocks/` with relative destination names and the
-unversioned `github.com/faustbrian/go-queue/core` import path. Regenerate all
+v2 `github.com/faustbrian/go-queue/v2/core` import path. Regenerate all
 three files after a reviewed interface or producer change; do not manually
 edit generated bodies. The root module's runtime dependency pin alone does
 not identify a generator.
