@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/core"
 
 	nsq "github.com/nsqio/go-nsq"
 )

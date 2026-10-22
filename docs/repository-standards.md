@@ -35,7 +35,7 @@ concepts.
 This repository's `ci.yml` consumes immutable shared CI and checksum-qualified
 public Tools. PR, main and scheduled runs use bounded local verification with
 fail-closed Required and security checks; explicit `release_dry_run` selects
-full release rehearsal. Verification uses Go 1.27.2 while all module minima
+full release rehearsal. Verification uses Go 1.27.3 while all module minima
 remain Go 1.27.0. Reachable dependency scanning uses `govulncheck` in the
 applicable security/full route.
 

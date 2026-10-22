@@ -1,4 +1,4 @@
-module github.com/faustbrian/go-queue
+module github.com/faustbrian/go-queue/v2
 
 go 1.27.0
 

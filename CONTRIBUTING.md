@@ -33,7 +33,7 @@ that hide a failing package.
 
 ## Verification
 
-Use Go 1.27.2 for verification; the modules' minimum remains Go 1.27.0.
+Use Go 1.27.3 for verification; the modules' minimum remains Go 1.27.0.
 From the root, ordinary standalone tests need neither sibling repositories nor
 building the verifier release from source:
 

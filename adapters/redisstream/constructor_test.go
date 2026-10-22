@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/v2/management"
 	"github.com/stretchr/testify/require"
 )
 

@@ -5,7 +5,7 @@
 ## Install
 
 ```sh
-go get github.com/faustbrian/go-queue@v1
+go get github.com/faustbrian/go-queue/v2@v2.0.0
 ```
 
 ## Choose A Backend

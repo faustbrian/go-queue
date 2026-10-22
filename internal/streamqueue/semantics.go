@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/v2/management"
 )
 
 // MaxBatchSize bounds one read or reclaim operation.

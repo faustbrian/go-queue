@@ -4,6 +4,4 @@ use (
 	.
 	./adapters/rabbitmq
 	./adapters/service
-	./queueservice
-	./rabbitmq
 )

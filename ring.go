@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/v2/core"
 )
 
 var _ core.Worker = (*Ring)(nil)

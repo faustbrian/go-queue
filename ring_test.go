@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/job"
-	"github.com/faustbrian/go-queue/mocks"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/job"
+	"github.com/faustbrian/go-queue/v2/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

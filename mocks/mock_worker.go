@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	core "github.com/faustbrian/go-queue/core"
+	core "github.com/faustbrian/go-queue/v2/core"
 	gomock "go.uber.org/mock/gomock"
 )
 

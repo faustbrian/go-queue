@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	queue "github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/internal/testutil/apiguard"
-	"github.com/faustbrian/go-queue/management"
-	"github.com/faustbrian/go-queue/valkeystream"
+	queue "github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/internal/testutil/apiguard"
+	"github.com/faustbrian/go-queue/v2/management"
+	"github.com/faustbrian/go-queue/v2/valkeystream"
 	"github.com/stretchr/testify/assert"
 )
 

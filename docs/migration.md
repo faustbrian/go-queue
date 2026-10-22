@@ -2,47 +2,43 @@
 
 [Documentation index](README.md)
 
+## To v2
+
+Replace root imports `github.com/faustbrian/go-queue` and its subpackages with
+`github.com/faustbrian/go-queue/v2`, keeping each subpackage suffix. Version 2
+removes the compatibility facades listed below; import their successors.
+Queue topology, message identity, retry policy, acknowledgement and shutdown
+order are unchanged. The independently versioned `adapters/rabbitmq` and
+`adapters/service` modules follow with their own majors built on root v2;
+keep them with root v1 until those are published.
+
 ## Target-oriented adapter paths
 
-Three released integration paths now have additive successors:
+Version 2 removes these compatibility paths; use the successor:
 
-| Compatibility path | Successor path | Package identifier |
+| Removed path | Successor path | Package identifier |
 | --- | --- | --- |
 | `github.com/faustbrian/go-queue/redisstream` | `github.com/faustbrian/go-queue/adapters/redisstream` | `redisdb` becomes unambiguous `redisstream` |
 | `github.com/faustbrian/go-queue/rabbitmq` | `github.com/faustbrian/go-queue/adapters/rabbitmq` | `rabbitmq` |
 | `github.com/faustbrian/go-queue/queueservice` | `github.com/faustbrian/go-queue/adapters/service` | `queueservice` |
 
-For RabbitMQ and service integration, change only the import path; the
-compatibility surface remains source-compatible and delegates runtime behavior
-to the successor. Redis Streams also requires callers that relied on the
-implicit package identifier to rename `redisdb` references to `redisstream`, or
-to retain an explicit `redisdb` import alias. Do not deploy both paths as
-separate workers: they construct the same implementation and therefore share
-the same delivery and ownership rules.
-
-Release order is mandatory. Root `v1.1.0` publishes the Redis Streams successor
-and compatibility facade atomically. Publish `adapters/service/v1.0.0` after
-root `v1.1.0`, then publish the `queueservice` compatibility patch. RabbitMQ is
-an independent sequence: publish `adapters/rabbitmq/v1.0.0`, verify it as a
-clean external consumer, then publish the `rabbitmq` compatibility patch.
-Rollback changes imports back to the v1 path without changing queue topology,
-message identity, retry policy, or shutdown order.
+Change the import path; the successors carry the same behavior. Redis Streams
+callers that relied on the implicit package identifier rename `redisdb`
+references to `redisstream` or keep an explicit `redisdb` import alias.
 
 ## Import mapping
 
 | Upstream | Consolidated import |
 | --- | --- |
-| `github.com/golang-queue/queue` | `github.com/faustbrian/go-queue` |
-| `github.com/golang-queue/redisdb` | `github.com/faustbrian/go-queue/redisdb` |
-| `github.com/golang-queue/redisdb-stream` | `github.com/faustbrian/go-queue/redisstream` |
-| No upstream package | `github.com/faustbrian/go-queue/valkeystream` |
-| `github.com/golang-queue/nats` | `github.com/faustbrian/go-queue/nats` |
-| `github.com/golang-queue/nsq` | `github.com/faustbrian/go-queue/nsq` |
+| `github.com/golang-queue/queue` | `github.com/faustbrian/go-queue/v2` |
+| `github.com/golang-queue/redisdb` | `github.com/faustbrian/go-queue/v2/redisdb` |
+| `github.com/golang-queue/redisdb-stream` | `github.com/faustbrian/go-queue/v2/adapters/redisstream` |
+| No upstream package | `github.com/faustbrian/go-queue/v2/valkeystream` |
+| `github.com/golang-queue/nats` | `github.com/faustbrian/go-queue/v2/nats` |
+| `github.com/golang-queue/nsq` | `github.com/faustbrian/go-queue/v2/nsq` |
 | `github.com/golang-queue/rabbitmq` | `github.com/faustbrian/go-queue/adapters/rabbitmq` |
 
-The compatibility `github.com/faustbrian/go-queue/redisstream` package retains
-the upstream Go package name `redisdb`; the successor package identifier is
-`redisstream`.
+The successor package identifier is `redisstream`.
 
 ## Intentional divergences
 

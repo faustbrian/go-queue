@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	queue "github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/job"
+	queue "github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/job"
 	server "github.com/nats-io/nats-server/v2/server"
 	natsgo "github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"

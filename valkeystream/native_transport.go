@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/internal/safeerr"
-	"github.com/faustbrian/go-queue/internal/streamqueue"
-	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/internal/safeerr"
+	"github.com/faustbrian/go-queue/v2/internal/streamqueue"
+	"github.com/faustbrian/go-queue/v2/management"
 	valkey "github.com/valkey-io/valkey-go"
 )
 

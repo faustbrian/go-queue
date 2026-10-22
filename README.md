@@ -17,9 +17,10 @@ integration. The RabbitMQ adapter delegates AMQP policy to
 
 ## Status
 
-The root module and independently released adapters have stable v1 APIs.
-The former `redisstream`, `rabbitmq`, and `queueservice` paths are deprecated
-compatibility facades, not separate worker implementations. Durable delivery
+The root module is stable at v2; the independently released adapters keep
+their own versions. Version 2 removed the former `redisstream`, `rabbitmq` and
+`queueservice` compatibility facades; see the
+[migration guide](docs/migration.md#to-v2). Durable delivery
 claims require [backend-specific integration evidence](docs/integration-evidence.md).
 
 ## Requirements
@@ -27,21 +28,20 @@ claims require [backend-specific integration evidence](docs/integration-evidence
 - Go 1.27.0 or later
 - a supported broker for non-memory backends
 
-CI and the development workspace use Go 1.27.2. Build applications with
+CI and the development workspace use Go 1.27.3. Build applications with
 a patched Go release; this CI selection does not raise module language
 minimums or patch the runtime of already-built applications.
 
 ## Installation
 
 ```sh
-go get github.com/faustbrian/go-queue@v1
+go get github.com/faustbrian/go-queue/v2@v2.0.0
 ```
 
 Root backend packages, including `adapters/redisstream`, ship in the same
 module and are imported explicitly. Install the independently versioned
 `github.com/faustbrian/go-queue/adapters/rabbitmq` or
-`github.com/faustbrian/go-queue/adapters/service` module when needed. Former
-v1 paths remain deprecated compatibility facades.
+`github.com/faustbrian/go-queue/adapters/service` module when needed.
 
 ## Choosing this package
 
@@ -69,7 +69,6 @@ this AMQP job adapter. No backend provides exactly-once application effects.
 | `management`, `managementhttp` | Capability-negotiated worker status and control | Root module |
 | [`adapters/rabbitmq`](adapters/rabbitmq/README.md) | AMQP job integration over `go-rabbitmq-queues` | Independent nested module |
 | [`adapters/service`](adapters/service/README.md) | `go-service` admission, drain, and shutdown integration | Independent nested module |
-| [`redisstream`](redisstream/README.md), [`rabbitmq`](rabbitmq/README.md), [`queueservice`](queueservice/README.md) | Deprecated compatibility facades | Redis facade in root; others independently tagged |
 
 Select and install only the modules needed. See the
 [release guide](docs/releasing.md) for nested-module tags and

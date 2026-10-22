@@ -1,8 +1,8 @@
 package streamqueue
 
 import (
-	"github.com/faustbrian/go-queue/job"
-	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/v2/job"
+	"github.com/faustbrian/go-queue/v2/management"
 )
 
 // MessageMetadata returns validated operational metadata from the bounded job

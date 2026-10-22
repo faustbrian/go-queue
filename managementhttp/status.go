@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/v2/management"
 )
 
 const (

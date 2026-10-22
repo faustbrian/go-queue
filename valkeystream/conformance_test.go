@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/internal/testutil/streamconformance"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/internal/testutil/streamconformance"
 )
 
 func TestValkeyStreamWorkerConformance(t *testing.T) {

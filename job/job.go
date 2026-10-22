@@ -13,7 +13,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/v2/core"
 )
 
 // TaskFunc executes local work within one delivery timeout shared by all retries.

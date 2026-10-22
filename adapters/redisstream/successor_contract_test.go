@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/faustbrian/go-queue/adapters/redisstream"
-	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/v2/adapters/redisstream"
+	"github.com/faustbrian/go-queue/v2/core"
 )
 
 func TestSuccessorExposesUnambiguousRedisStreamWorkerAPI(t *testing.T) {

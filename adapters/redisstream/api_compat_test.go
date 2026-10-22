@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	queue "github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/adapters/redisstream"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/internal/testutil/apiguard"
+	queue "github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/adapters/redisstream"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/internal/testutil/apiguard"
 	"github.com/stretchr/testify/assert"
 )
 

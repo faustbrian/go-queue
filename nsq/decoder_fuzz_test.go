@@ -3,8 +3,8 @@ package nsq
 import (
 	"testing"
 
-	"github.com/faustbrian/go-queue/job"
-	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/v2/job"
+	"github.com/faustbrian/go-queue/v2/management"
 	nsqgo "github.com/nsqio/go-nsq"
 )
 

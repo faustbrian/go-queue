@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/faustbrian/go-queue/internal/streamqueue"
-	"github.com/faustbrian/go-queue/job"
-	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/v2/internal/streamqueue"
+	"github.com/faustbrian/go-queue/v2/job"
+	"github.com/faustbrian/go-queue/v2/management"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

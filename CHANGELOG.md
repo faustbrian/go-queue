@@ -3,6 +3,20 @@
 All notable changes are documented here. The project follows semantic
 versioning and Keep a Changelog structure.
 
+## 2.0.0 - 2026-10-22
+
+### Changed
+
+- Move the root module to `github.com/faustbrian/go-queue/v2`. Queue topology,
+  message identity, retry policy, acknowledgement and shutdown order are
+  unchanged.
+
+### Removed
+
+- Remove the deprecated root `redisstream` facade and the `queueservice` and
+  `rabbitmq` compatibility modules. Import `adapters/redisstream`,
+  `adapters/service` and `adapters/rabbitmq` instead.
+
 ## 1.1.5 - 2026-10-22
 
 ### Changed

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/v2/job"
 )
 
 type correlationMessage string

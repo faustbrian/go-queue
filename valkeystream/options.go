@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/management"
+	"github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/management"
 )
 
 const (

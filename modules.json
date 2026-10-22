@@ -5,14 +5,14 @@
   "modules": [
     {
       "directory": ".",
-      "module_path": "github.com/faustbrian/go-queue",
+      "module_path": "github.com/faustbrian/go-queue/v2",
       "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": ".",
           "directory": ".",
           "name": "queue",
-          "import_path": "github.com/faustbrian/go-queue",
+          "import_path": "github.com/faustbrian/go-queue/v2",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -24,7 +24,7 @@
           "module_directory": ".",
           "directory": "adapters/redisstream",
           "name": "redisstream",
-          "import_path": "github.com/faustbrian/go-queue/adapters/redisstream",
+          "import_path": "github.com/faustbrian/go-queue/v2/adapters/redisstream",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -36,7 +36,7 @@
           "module_directory": ".",
           "directory": "cmd/semvercheck",
           "name": "main",
-          "import_path": "github.com/faustbrian/go-queue/cmd/semvercheck",
+          "import_path": "github.com/faustbrian/go-queue/v2/cmd/semvercheck",
           "kind": "tooling",
           "production": false,
           "executable": true,
@@ -48,7 +48,7 @@
           "module_directory": ".",
           "directory": "core",
           "name": "core",
-          "import_path": "github.com/faustbrian/go-queue/core",
+          "import_path": "github.com/faustbrian/go-queue/v2/core",
           "kind": "public",
           "production": true,
           "executable": false,
@@ -60,7 +60,7 @@
           "module_directory": ".",
           "directory": "examples/inmemory",
           "name": "main",
-          "import_path": "github.com/faustbrian/go-queue/examples/inmemory",
+          "import_path": "github.com/faustbrian/go-queue/v2/examples/inmemory",
           "kind": "example",
           "production": false,
           "executable": true,
@@ -72,7 +72,7 @@
           "module_directory": ".",
           "directory": "examples/redis",
           "name": "main",
-          "import_path": "github.com/faustbrian/go-queue/examples/redis",
+          "import_path": "github.com/faustbrian/go-queue/v2/examples/redis",
           "kind": "example",
           "production": false,
           "executable": true,
@@ -84,7 +84,7 @@
           "module_directory": ".",
           "directory": "examples/valkey",
           "name": "main",
-          "import_path": "github.com/faustbrian/go-queue/examples/valkey",
+          "import_path": "github.com/faustbrian/go-queue/v2/examples/valkey",
           "kind": "example",
           "production": false,
           "executable": true,
@@ -96,7 +96,7 @@
           "module_directory": ".",
           "directory": "internal/safeerr",
           "name": "safeerr",
-          "import_path": "github.com/faustbrian/go-queue/internal/safeerr",
+          "import_path": "github.com/faustbrian/go-queue/v2/internal/safeerr",
           "kind": "internal",
           "production": true,
           "executable": true,
@@ -108,7 +108,7 @@
           "module_directory": ".",
           "directory": "internal/semver",
           "name": "semver",
-          "import_path": "github.com/faustbrian/go-queue/internal/semver",
+          "import_path": "github.com/faustbrian/go-queue/v2/internal/semver",
           "kind": "tooling",
           "production": false,
           "executable": true,
@@ -120,7 +120,7 @@
           "module_directory": ".",
           "directory": "internal/streamqueue",
           "name": "streamqueue",
-          "import_path": "github.com/faustbrian/go-queue/internal/streamqueue",
+          "import_path": "github.com/faustbrian/go-queue/v2/internal/streamqueue",
           "kind": "internal",
           "production": true,
           "executable": true,
@@ -132,7 +132,7 @@
           "module_directory": ".",
           "directory": "internal/testutil/apiguard",
           "name": "apiguard",
-          "import_path": "github.com/faustbrian/go-queue/internal/testutil/apiguard",
+          "import_path": "github.com/faustbrian/go-queue/v2/internal/testutil/apiguard",
           "kind": "test support",
           "production": false,
           "executable": true,
@@ -144,7 +144,7 @@
           "module_directory": ".",
           "directory": "internal/testutil/streamconformance",
           "name": "streamconformance",
-          "import_path": "github.com/faustbrian/go-queue/internal/testutil/streamconformance",
+          "import_path": "github.com/faustbrian/go-queue/v2/internal/testutil/streamconformance",
           "kind": "test support",
           "production": false,
           "executable": true,
@@ -156,7 +156,7 @@
           "module_directory": ".",
           "directory": "job",
           "name": "job",
-          "import_path": "github.com/faustbrian/go-queue/job",
+          "import_path": "github.com/faustbrian/go-queue/v2/job",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -168,7 +168,7 @@
           "module_directory": ".",
           "directory": "management",
           "name": "management",
-          "import_path": "github.com/faustbrian/go-queue/management",
+          "import_path": "github.com/faustbrian/go-queue/v2/management",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -180,7 +180,7 @@
           "module_directory": ".",
           "directory": "managementhttp",
           "name": "managementhttp",
-          "import_path": "github.com/faustbrian/go-queue/managementhttp",
+          "import_path": "github.com/faustbrian/go-queue/v2/managementhttp",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -192,7 +192,7 @@
           "module_directory": ".",
           "directory": "mocks",
           "name": "mocks",
-          "import_path": "github.com/faustbrian/go-queue/mocks",
+          "import_path": "github.com/faustbrian/go-queue/v2/mocks",
           "kind": "test support",
           "production": false,
           "executable": true,
@@ -204,7 +204,7 @@
           "module_directory": ".",
           "directory": "nats",
           "name": "nats",
-          "import_path": "github.com/faustbrian/go-queue/nats",
+          "import_path": "github.com/faustbrian/go-queue/v2/nats",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -216,7 +216,7 @@
           "module_directory": ".",
           "directory": "nsq",
           "name": "nsq",
-          "import_path": "github.com/faustbrian/go-queue/nsq",
+          "import_path": "github.com/faustbrian/go-queue/v2/nsq",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -228,19 +228,7 @@
           "module_directory": ".",
           "directory": "redisdb",
           "name": "redisdb",
-          "import_path": "github.com/faustbrian/go-queue/redisdb",
-          "kind": "public",
-          "production": true,
-          "executable": true,
-          "coverage_required": true,
-          "build_required": true,
-          "build_tags": []
-        },
-        {
-          "module_directory": ".",
-          "directory": "redisstream",
-          "name": "redisdb",
-          "import_path": "github.com/faustbrian/go-queue/redisstream",
+          "import_path": "github.com/faustbrian/go-queue/v2/redisdb",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -252,7 +240,7 @@
           "module_directory": ".",
           "directory": "valkeystream",
           "name": "valkeystream",
-          "import_path": "github.com/faustbrian/go-queue/valkeystream",
+          "import_path": "github.com/faustbrian/go-queue/v2/valkeystream",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -269,19 +257,16 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.1.5",
+      "version": "2.0.0",
       "tag_prefix": "v",
       "owned_dependencies": [],
       "reverse_owned_dependencies": [
-        "github.com/faustbrian/go-queue/adapters/rabbitmq",
-        "github.com/faustbrian/go-queue/adapters/service",
         "github.com/faustbrian/go-cloudevents/adapters/golib",
         "github.com/faustbrian/go-event-sourcing/adapters/queue",
         "github.com/faustbrian/go-idempotency/compatibility/ecosystem",
         "github.com/faustbrian/go-lease",
         "github.com/faustbrian/go-transactional-outbox/adapters/queue",
         "github.com/faustbrian/go-queue-control-plane",
-        "github.com/faustbrian/go-queue/queueservice",
         "github.com/faustbrian/go-scheduler",
         "github.com/faustbrian/go-service/compatibility",
         "github.com/faustbrian/go-service/integration/adoption",
@@ -341,18 +326,17 @@
         ],
         "public_package_identifier": "queue",
         "primary_entry_packages": [
-          "github.com/faustbrian/go-queue"
+          "github.com/faustbrian/go-queue/v2"
         ],
         "package_selection": {
-          "github.com/faustbrian/go-queue": "Use to coordinate bounded worker concurrency, handler retry, cancellation, observation, and settlement over an explicitly selected backend.",
-          "github.com/faustbrian/go-queue/management": "Use for backend-neutral status, record inspection, lifecycle control, desired-state reconciliation, and capability negotiation contracts.",
-          "github.com/faustbrian/go-queue/managementhttp": "Use to expose or consume bounded authenticated queue-management contracts over HTTP.",
-          "github.com/faustbrian/go-queue/nats": "Use for transient NATS Core worker delivery.",
-          "github.com/faustbrian/go-queue/nsq": "Use for NSQ delivery with explicit requeue and dead-letter behavior.",
-          "github.com/faustbrian/go-queue/redisdb": "Use for low-latency, non-durable Redis Pub/Sub delivery.",
-          "github.com/faustbrian/go-queue/adapters/redisstream": "Use for durable Redis Streams consumer-group delivery, reclaim, settlement, and dead-letter handling.",
-          "github.com/faustbrian/go-queue/valkeystream": "Use for native durable Valkey Streams publishing, consumption, reclaim, and dead-letter handling.",
-          "github.com/faustbrian/go-queue/redisstream": "Deprecated compatibility facade for durable Redis Streams consumers; use github.com/faustbrian/go-queue/adapters/redisstream for new code."
+          "github.com/faustbrian/go-queue/v2": "Use to coordinate bounded worker concurrency, handler retry, cancellation, observation, and settlement over an explicitly selected backend.",
+          "github.com/faustbrian/go-queue/v2/management": "Use for backend-neutral status, record inspection, lifecycle control, desired-state reconciliation, and capability negotiation contracts.",
+          "github.com/faustbrian/go-queue/v2/managementhttp": "Use to expose or consume bounded authenticated queue-management contracts over HTTP.",
+          "github.com/faustbrian/go-queue/v2/nats": "Use for transient NATS Core worker delivery.",
+          "github.com/faustbrian/go-queue/v2/nsq": "Use for NSQ delivery with explicit requeue and dead-letter behavior.",
+          "github.com/faustbrian/go-queue/v2/redisdb": "Use for low-latency, non-durable Redis Pub/Sub delivery.",
+          "github.com/faustbrian/go-queue/v2/adapters/redisstream": "Use for durable Redis Streams consumer-group delivery, reclaim, settlement, and dead-letter handling.",
+          "github.com/faustbrian/go-queue/v2/valkeystream": "Use for native durable Valkey Streams publishing, consumption, reclaim, and dead-letter handling."
         },
         "lifecycle_status": "active",
         "maturity": "stable",
@@ -383,16 +367,13 @@
         "optional_owned_dependencies": [],
         "adapters": [
           "github.com/faustbrian/go-queue/adapters/rabbitmq",
-          "github.com/faustbrian/go-queue/adapters/redisstream",
+          "github.com/faustbrian/go-queue/v2/adapters/redisstream",
           "github.com/faustbrian/go-queue/adapters/service",
-          "github.com/faustbrian/go-queue/managementhttp",
-          "github.com/faustbrian/go-queue/nats",
-          "github.com/faustbrian/go-queue/nsq",
-          "github.com/faustbrian/go-queue/queueservice",
-          "github.com/faustbrian/go-queue/rabbitmq",
-          "github.com/faustbrian/go-queue/redisdb",
-          "github.com/faustbrian/go-queue/redisstream",
-          "github.com/faustbrian/go-queue/valkeystream"
+          "github.com/faustbrian/go-queue/v2/managementhttp",
+          "github.com/faustbrian/go-queue/v2/nats",
+          "github.com/faustbrian/go-queue/v2/nsq",
+          "github.com/faustbrian/go-queue/v2/redisdb",
+          "github.com/faustbrian/go-queue/v2/valkeystream"
         ],
         "companions": [
           "github.com/faustbrian/go-event-sourcing/adapters/queue",
@@ -435,7 +416,7 @@
           "examples": "docs/examples.md",
           "faq": "docs/faq.md",
           "changelog": "CHANGELOG.md",
-          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/v2",
           "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
@@ -491,9 +472,7 @@
         "github.com/faustbrian/go-queue",
         "github.com/faustbrian/go-rabbitmq-queues"
       ],
-      "reverse_owned_dependencies": [
-        "github.com/faustbrian/go-queue/rabbitmq"
-      ],
+      "reverse_owned_dependencies": [],
       "external_runtime_dependencies": [
         "github.com/stretchr/testify",
         "go.uber.org/goleak"
@@ -550,9 +529,7 @@
         },
         "optional_owned_dependencies": [],
         "adapters": [],
-        "companions": [
-          "github.com/faustbrian/go-queue/rabbitmq"
-        ],
+        "companions": [],
         "supported_go": {
           "minimum": "1.27.0",
           "tested": [
@@ -638,7 +615,6 @@
         "github.com/faustbrian/go-service"
       ],
       "reverse_owned_dependencies": [
-        "github.com/faustbrian/go-queue/queueservice",
         "github.com/faustbrian/go-service/integration/adoption"
       ],
       "external_runtime_dependencies": [
@@ -707,9 +683,7 @@
         },
         "optional_owned_dependencies": [],
         "adapters": [],
-        "companions": [
-          "github.com/faustbrian/go-queue/queueservice"
-        ],
+        "companions": [],
         "supported_go": {
           "minimum": "1.27.0",
           "tested": [
@@ -748,290 +722,6 @@
         "delivery": {
           "implementation": "in-progress",
           "hardening": "in-progress",
-          "release": "not-started"
-        }
-      },
-      "gates": {
-        "api_compatibility": true,
-        "benchmarks": true,
-        "conformance": false,
-        "coverage": true,
-        "documentation": true,
-        "fuzz": true,
-        "lint": true,
-        "mutation": true,
-        "race": true,
-        "security": true,
-        "tests": true
-      }
-    },
-    {
-      "directory": "rabbitmq",
-      "module_path": "github.com/faustbrian/go-queue/rabbitmq",
-      "go_version": "1.27.0",
-      "packages": [
-        {
-          "module_directory": "rabbitmq",
-          "directory": ".",
-          "name": "rabbitmq",
-          "import_path": "github.com/faustbrian/go-queue/rabbitmq",
-          "kind": "public",
-          "production": true,
-          "executable": true,
-          "coverage_required": true,
-          "build_required": true,
-          "build_tags": []
-        }
-      ],
-      "purpose": "Deprecated v1 compatibility facade for the target-oriented RabbitMQ adapter.",
-      "lifecycle": "stable",
-      "kind": "public library",
-      "releasable": true,
-      "family": "persistence-and-durability",
-      "family_label": "Persistence And Durability",
-      "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
-      "family_order": 4,
-      "version": "1.1.0",
-      "tag_prefix": "rabbitmq/v",
-      "owned_dependencies": [
-        "github.com/faustbrian/go-queue",
-        "github.com/faustbrian/go-queue/adapters/rabbitmq",
-        "github.com/faustbrian/go-rabbitmq-queues"
-      ],
-      "reverse_owned_dependencies": [],
-      "external_runtime_dependencies": [],
-      "required_services": [],
-      "build_tags": [],
-      "test_tags": [],
-      "interoperability_tools": [],
-      "specifications": [],
-      "conformance_corpora": [],
-      "provenance": [],
-      "goal_files": [],
-      "goal_status": "not-applicable",
-      "goal_evidence": [],
-      "cohesion": {
-        "family": "persistence-and-durability",
-        "secondary_capabilities": [
-          "configuration",
-          "eventing-and-messaging",
-          "resilience-and-admission",
-          "transport-and-networking"
-        ],
-        "responsibility": "Preserve the released RabbitMQ import path while delegating every public type and operation to adapters/rabbitmq.",
-        "non_goals": [
-          "Own runtime state, broker policy, topology, or new adapter behavior."
-        ],
-        "public_package_identifier": "rabbitmq",
-        "primary_entry_packages": [
-          "github.com/faustbrian/go-queue/rabbitmq"
-        ],
-        "package_selection": {
-          "github.com/faustbrian/go-queue/rabbitmq": "Use only when an existing go-queue job workflow must preserve its worker surface over RabbitMQ; use go-rabbitmq-queues directly for RabbitMQ-native messaging."
-        },
-        "lifecycle_status": "deprecated",
-        "maturity": "stable",
-        "construction_styles": [
-          "functional-options",
-          "must-helper",
-          "open"
-        ],
-        "lifecycle_styles": [
-          "run",
-          "shutdown"
-        ],
-        "ownership": {
-          "configuration": "caller",
-          "mutable_inputs": [
-            "borrow",
-            "copy"
-          ],
-          "runtime_resources": "package",
-          "background_work": "package"
-        },
-        "optional_owned_dependencies": [],
-        "adapters": [],
-        "companions": [],
-        "supported_go": {
-          "minimum": "1.27.0",
-          "tested": [
-            "1.27.0"
-          ]
-        },
-        "supported_platforms": [
-          "portable-go"
-        ],
-        "supported_backends": [
-          "rabbitmq"
-        ],
-        "supported_protocols": [
-          "amqp-0-9-1"
-        ],
-        "documentation": {
-          "readme": "rabbitmq/README.md",
-          "api": "rabbitmq/README.md",
-          "adoption": "rabbitmq/README.md",
-          "security": "rabbitmq/README.md",
-          "compatibility": "rabbitmq/README.md",
-          "performance": null,
-          "examples": "rabbitmq/README.md",
-          "faq": "rabbitmq/README.md",
-          "changelog": "rabbitmq/CHANGELOG.md",
-          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/rabbitmq",
-          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
-        },
-        "known_good_compatibility_sets": [],
-        "delivery": {
-          "implementation": "in-progress",
-          "hardening": "not-started",
-          "release": "not-started"
-        }
-      },
-      "gates": {
-        "api_compatibility": true,
-        "benchmarks": true,
-        "conformance": false,
-        "coverage": true,
-        "documentation": true,
-        "fuzz": true,
-        "lint": true,
-        "mutation": true,
-        "race": true,
-        "security": true,
-        "tests": true
-      }
-    },
-    {
-      "directory": "queueservice",
-      "module_path": "github.com/faustbrian/go-queue/queueservice",
-      "go_version": "1.27.0",
-      "packages": [
-        {
-          "module_directory": "queueservice",
-          "directory": ".",
-          "name": "queueservice",
-          "import_path": "github.com/faustbrian/go-queue/queueservice",
-          "kind": "public",
-          "production": true,
-          "executable": true,
-          "coverage_required": true,
-          "build_required": true,
-          "build_tags": []
-        }
-      ],
-      "purpose": "Deprecated v1 compatibility facade for the target-oriented queue service lifecycle adapter.",
-      "lifecycle": "stable",
-      "kind": "public library",
-      "releasable": true,
-      "family": "persistence-and-durability",
-      "family_label": "Persistence And Durability",
-      "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
-      "family_order": 4,
-      "version": "1.1.0",
-      "tag_prefix": "queueservice/v",
-      "owned_dependencies": [
-        "github.com/faustbrian/go-correlation",
-        "github.com/faustbrian/go-queue",
-        "github.com/faustbrian/go-queue/adapters/service",
-        "github.com/faustbrian/go-service"
-      ],
-      "reverse_owned_dependencies": [
-        "github.com/faustbrian/go-service/integration/adoption"
-      ],
-      "external_runtime_dependencies": [
-        "go.opentelemetry.io/otel"
-      ],
-      "required_services": [],
-      "build_tags": [],
-      "test_tags": [],
-      "interoperability_tools": [],
-      "specifications": [],
-      "conformance_corpora": [],
-      "provenance": [],
-      "goal_files": [],
-      "goal_status": "not-applicable",
-      "goal_evidence": [],
-      "cohesion": {
-        "family": "persistence-and-durability",
-        "secondary_capabilities": [
-          "configuration",
-          "eventing-and-messaging",
-          "observability",
-          "scheduling-and-orchestration"
-        ],
-        "responsibility": "Preserve the released queueservice import path while delegating every public type and operation to adapters/service.",
-        "non_goals": [
-          "Own runtime state, service lifecycle behavior, queue policy, or new adapter behavior."
-        ],
-        "public_package_identifier": "queueservice",
-        "primary_entry_packages": [
-          "github.com/faustbrian/go-queue/queueservice"
-        ],
-        "package_selection": {
-          "github.com/faustbrian/go-queue/queueservice": "Use only to preserve existing imports during migration; new adopters should use github.com/faustbrian/go-queue/adapters/service."
-        },
-        "lifecycle_status": "deprecated",
-        "maturity": "stable",
-        "construction_styles": [
-          "new-options"
-        ],
-        "lifecycle_styles": [
-          "drain",
-          "run",
-          "shutdown",
-          "start"
-        ],
-        "ownership": {
-          "configuration": "caller",
-          "mutable_inputs": [
-            "borrow",
-            "copy",
-            "transfer"
-          ],
-          "runtime_resources": "shared",
-          "background_work": "caller"
-        },
-        "optional_owned_dependencies": [],
-        "adapters": [],
-        "companions": [],
-        "supported_go": {
-          "minimum": "1.27.0",
-          "tested": [
-            "1.27.0"
-          ]
-        },
-        "supported_platforms": [
-          "portable-go"
-        ],
-        "supported_backends": [
-          "in-memory",
-          "nats-core",
-          "nsq",
-          "rabbitmq",
-          "redis-pubsub",
-          "redis-streams",
-          "valkey-streams"
-        ],
-        "supported_protocols": [
-          "w3c-trace-context"
-        ],
-        "documentation": {
-          "readme": "queueservice/README.md",
-          "api": "queueservice/README.md",
-          "adoption": "docs/migration.md",
-          "security": "queueservice/README.md",
-          "compatibility": "docs/migration.md",
-          "performance": null,
-          "examples": "queueservice/README.md",
-          "faq": "queueservice/README.md",
-          "changelog": "queueservice/CHANGELOG.md",
-          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/queueservice",
-          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
-        },
-        "known_good_compatibility_sets": [],
-        "delivery": {
-          "implementation": "in-progress",
-          "hardening": "not-started",
           "release": "not-started"
         }
       },

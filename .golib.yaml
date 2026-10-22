@@ -21,12 +21,6 @@ api:
     - module: .
       mode: apidiff
       path: api/baseline.txt
-    - module: rabbitmq
-      mode: apidiff
-      path: rabbitmq/api/baseline.txt
-    - module: queueservice
-      mode: apidiff
-      path: queueservice/api/baseline.txt
     - module: adapters/rabbitmq
       mode: apidiff
       path: adapters/rabbitmq/api/baseline.txt
@@ -118,45 +112,6 @@ operations:
       - type: make
         makefile: verification/package.mk
         target: benchmark
-        timeout: 20m
-  - module: rabbitmq
-    gate: test
-    steps:
-      - type: make
-        makefile: verification/package.mk
-        target: integration
-        timeout: 20m
-  - module: rabbitmq
-    gate: fuzz
-    steps:
-      - type: go-test
-        packages: [.]
-        fuzz: '^FuzzLegacyOptionValuesReachSuccessor$'
-        budget: 10000x
-        timeout: 20m
-  - module: rabbitmq
-    gate: benchmark
-    steps:
-      - type: go-test
-        packages: [./...]
-        benchmark: .
-        budget: 100ms
-        timeout: 20m
-  - module: queueservice
-    gate: fuzz
-    steps:
-      - type: go-test
-        packages: [.]
-        fuzz: '^FuzzLegacyStructuredErrorTranslation$'
-        budget: 10000x
-        timeout: 20m
-  - module: queueservice
-    gate: benchmark
-    steps:
-      - type: go-test
-        packages: [./...]
-        benchmark: .
-        budget: 100ms
         timeout: 20m
   - module: adapters/rabbitmq
     gate: test
