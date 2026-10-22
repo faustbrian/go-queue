@@ -18,6 +18,7 @@ require (
 	github.com/faustbrian/go-identifier/v2 v2.0.0 // indirect
 	github.com/jackc/pgx/v5 v5.11.0 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
+	github.com/moby/moby/client v0.6.2 // indirect
 	github.com/valkey-io/valkey-go v1.0.76 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
