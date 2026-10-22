@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	queue "github.com/faustbrian/go-queue"
+	queue "github.com/faustbrian/go-queue/v2"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/v2/core"
 	rabbitmqqueue "github.com/faustbrian/go-rabbitmq-queues"
 )
 

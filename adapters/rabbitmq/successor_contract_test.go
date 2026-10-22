@@ -3,7 +3,7 @@ package rabbitmq_test
 import (
 	"testing"
 
-	"github.com/faustbrian/go-queue/adapters/rabbitmq"
+	"github.com/faustbrian/go-queue/adapters/rabbitmq/v2"
 )
 
 func TestSuccessorExposesRabbitMQCompatibilityAPI(t *testing.T) {

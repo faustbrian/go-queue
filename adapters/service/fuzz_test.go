@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/v2/job"
 	"go.opentelemetry.io/otel/propagation"
 )
 

@@ -15,11 +15,11 @@ import (
 	"testing"
 	"time"
 
-	queue "github.com/faustbrian/go-queue"
-	redisstream "github.com/faustbrian/go-queue/adapters/redisstream"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/valkeystream"
-	"github.com/faustbrian/go-service"
+	queue "github.com/faustbrian/go-queue/v2"
+	redisstream "github.com/faustbrian/go-queue/v2/adapters/redisstream"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/valkeystream"
+	"github.com/faustbrian/go-service/v3"
 )
 
 var integrationIdentitySequence atomic.Uint64

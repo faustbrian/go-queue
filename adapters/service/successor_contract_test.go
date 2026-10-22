@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	queueservice "github.com/faustbrian/go-queue/adapters/service"
-	"github.com/faustbrian/go-queue/core"
+	queueservice "github.com/faustbrian/go-queue/adapters/service/v2"
+	"github.com/faustbrian/go-queue/v2/core"
 )
 
 func TestSuccessorExposesQueueServiceLifecycleAPI(t *testing.T) {

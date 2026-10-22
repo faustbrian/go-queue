@@ -7,7 +7,7 @@
 
 ## API reference
 
-- [Go package documentation](https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service)
+- [Go package documentation](https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service/v2)
 
 ## Security and compatibility
 

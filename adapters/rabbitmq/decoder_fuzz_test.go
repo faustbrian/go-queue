@@ -3,7 +3,7 @@ package rabbitmq
 import (
 	"testing"
 
-	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/v2/job"
 	rabbitmqqueue "github.com/faustbrian/go-rabbitmq-queues"
 )
 

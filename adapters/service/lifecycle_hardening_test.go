@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/job"
 )
 
 func TestProducerDrainAndShutdownShareOneTerminationBudget(t *testing.T) {

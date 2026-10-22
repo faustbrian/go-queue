@@ -12,7 +12,7 @@ This is the stable, supported RabbitMQ adapter. It requires Go 1.27.0 or later.
 ## Install
 
 ```sh
-go get github.com/faustbrian/go-queue/adapters/rabbitmq@v1
+go get github.com/faustbrian/go-queue/adapters/rabbitmq/v2@v2
 ```
 
 ## Quick start
@@ -39,14 +39,13 @@ and caller-controlled routing identifiers are sensitive.
 
 Use this module when an existing `go-queue` job workflow must use RabbitMQ.
 Use `go-rabbitmq-queues` directly for RabbitMQ-native APIs. The former
-`github.com/faustbrian/go-queue/rabbitmq` path remains available as a deprecated
-compatibility facade.
+`github.com/faustbrian/go-queue/rabbitmq` facade was removed in root v2.
 
 See the [RabbitMQ guide](../../docs/backends/rabbitmq.md),
 [migration guide](../../docs/migration.md), [changelog](CHANGELOG.md),
 [security policy](../../SECURITY.md), [support policy](../../SUPPORT.md), and
 [MIT license](LICENSE). API documentation is published at
-[`pkg.go.dev`](https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/rabbitmq).
+[`pkg.go.dev`](https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/rabbitmq/v2).
 
 ## Navigation
 

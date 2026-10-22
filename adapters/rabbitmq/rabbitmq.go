@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	queue "github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/core"
+	queue "github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/core"
 )
 
 var _ core.Worker = (*Worker)(nil)

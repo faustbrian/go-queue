@@ -9,10 +9,10 @@ import (
 
 	"github.com/faustbrian/go-correlation"
 	queuecorrelation "github.com/faustbrian/go-correlation/queue"
-	queue "github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/job"
-	"github.com/faustbrian/go-service"
+	queue "github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/job"
+	"github.com/faustbrian/go-service/v3"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )

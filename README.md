@@ -40,10 +40,8 @@ go get github.com/faustbrian/go-queue/v2@v2.0.0
 
 Root backend packages, including `adapters/redisstream`, ship in the same
 module and are imported explicitly. Install the independently versioned
-`github.com/faustbrian/go-queue/adapters/rabbitmq` or
-`github.com/faustbrian/go-queue/adapters/service` module when needed. Both
-still build on root v1 until their root-v2 majors are published; keep their
-users on root v1 until then.
+`github.com/faustbrian/go-queue/adapters/rabbitmq/v2` or
+`github.com/faustbrian/go-queue/adapters/service/v2` module when needed.
 
 ## Choosing this package
 

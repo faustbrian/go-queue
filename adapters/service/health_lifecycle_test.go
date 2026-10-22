@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-service"
-	"github.com/faustbrian/go-service/healthhttp"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-service/v3"
+	"github.com/faustbrian/go-service/v3/healthhttp"
 )
 
 func TestHealthProbesRaceWorkerDrainAndCancellation(t *testing.T) {

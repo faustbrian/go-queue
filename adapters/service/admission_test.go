@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	queue "github.com/faustbrian/go-queue"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/job"
-	"github.com/faustbrian/go-service"
+	queue "github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/job"
+	"github.com/faustbrian/go-service/v3"
 )
 
 type concretePanickingWorker struct {

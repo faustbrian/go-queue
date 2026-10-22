@@ -265,12 +265,14 @@
         "github.com/faustbrian/go-event-sourcing/adapters/queue",
         "github.com/faustbrian/go-idempotency/compatibility/ecosystem",
         "github.com/faustbrian/go-lease",
-        "github.com/faustbrian/go-transactional-outbox/adapters/queue",
         "github.com/faustbrian/go-queue-control-plane",
+        "github.com/faustbrian/go-queue/adapters/rabbitmq/v2",
+        "github.com/faustbrian/go-queue/adapters/service/v2",
         "github.com/faustbrian/go-scheduler",
         "github.com/faustbrian/go-service/compatibility",
         "github.com/faustbrian/go-service/integration/adoption",
         "github.com/faustbrian/go-service/integration/reference-durability",
+        "github.com/faustbrian/go-transactional-outbox/adapters/queue",
         "github.com/faustbrian/go-webhook"
       ],
       "external_runtime_dependencies": [
@@ -366,6 +368,8 @@
         },
         "optional_owned_dependencies": [],
         "adapters": [
+          "github.com/faustbrian/go-queue/adapters/rabbitmq/v2",
+          "github.com/faustbrian/go-queue/adapters/service/v2",
           "github.com/faustbrian/go-queue/v2/adapters/redisstream",
           "github.com/faustbrian/go-queue/v2/managementhttp",
           "github.com/faustbrian/go-queue/v2/nats",
@@ -440,14 +444,14 @@
     },
     {
       "directory": "adapters/rabbitmq",
-      "module_path": "github.com/faustbrian/go-queue/adapters/rabbitmq",
+      "module_path": "github.com/faustbrian/go-queue/adapters/rabbitmq/v2",
       "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": "adapters/rabbitmq",
           "directory": ".",
           "name": "rabbitmq",
-          "import_path": "github.com/faustbrian/go-queue/adapters/rabbitmq",
+          "import_path": "github.com/faustbrian/go-queue/adapters/rabbitmq/v2",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -464,10 +468,10 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.1.0",
+      "version": "2.0.0",
       "tag_prefix": "adapters/rabbitmq/v",
       "owned_dependencies": [
-        "github.com/faustbrian/go-queue",
+        "github.com/faustbrian/go-queue/v2",
         "github.com/faustbrian/go-rabbitmq-queues"
       ],
       "reverse_owned_dependencies": [],
@@ -500,10 +504,10 @@
         ],
         "public_package_identifier": "rabbitmq",
         "primary_entry_packages": [
-          "github.com/faustbrian/go-queue/adapters/rabbitmq"
+          "github.com/faustbrian/go-queue/adapters/rabbitmq/v2"
         ],
         "package_selection": {
-          "github.com/faustbrian/go-queue/adapters/rabbitmq": "Use when an existing go-queue job workflow must preserve its worker surface over RabbitMQ; use go-rabbitmq-queues directly for native messaging."
+          "github.com/faustbrian/go-queue/adapters/rabbitmq/v2": "Use when an existing go-queue job workflow must preserve its worker surface over RabbitMQ; use go-rabbitmq-queues directly for native messaging."
         },
         "lifecycle_status": "active",
         "maturity": "stable",
@@ -553,7 +557,7 @@
           "examples": "adapters/rabbitmq/example_test.go",
           "faq": "adapters/rabbitmq/README.md",
           "changelog": "adapters/rabbitmq/CHANGELOG.md",
-          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/rabbitmq",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/rabbitmq/v2",
           "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
@@ -579,14 +583,14 @@
     },
     {
       "directory": "adapters/service",
-      "module_path": "github.com/faustbrian/go-queue/adapters/service",
+      "module_path": "github.com/faustbrian/go-queue/adapters/service/v2",
       "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": "adapters/service",
           "directory": ".",
           "name": "queueservice",
-          "import_path": "github.com/faustbrian/go-queue/adapters/service",
+          "import_path": "github.com/faustbrian/go-queue/adapters/service/v2",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -603,14 +607,14 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.1.0",
+      "version": "2.0.0",
       "tag_prefix": "adapters/service/v",
       "owned_dependencies": [
-        "github.com/faustbrian/go-cli",
+        "github.com/faustbrian/go-cli/v2",
         "github.com/faustbrian/go-correlation",
         "github.com/faustbrian/go-identifier",
-        "github.com/faustbrian/go-queue",
-        "github.com/faustbrian/go-service"
+        "github.com/faustbrian/go-queue/v2",
+        "github.com/faustbrian/go-service/v3"
       ],
       "reverse_owned_dependencies": [
         "github.com/faustbrian/go-service/integration/adoption"
@@ -653,10 +657,10 @@
         ],
         "public_package_identifier": "queueservice",
         "primary_entry_packages": [
-          "github.com/faustbrian/go-queue/adapters/service"
+          "github.com/faustbrian/go-queue/adapters/service/v2"
         ],
         "package_selection": {
-          "github.com/faustbrian/go-queue/adapters/service": "Use to attach queue producers and workers to go-service startup, readiness, supervision, drain, and shutdown."
+          "github.com/faustbrian/go-queue/adapters/service/v2": "Use to attach queue producers and workers to go-service startup, readiness, supervision, drain, and shutdown."
         },
         "lifecycle_status": "active",
         "maturity": "stable",
@@ -713,7 +717,7 @@
           "examples": "adapters/service/example_test.go",
           "faq": "adapters/service/docs/reference.md",
           "changelog": "adapters/service/CHANGELOG.md",
-          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service/v2",
           "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/faustbrian/go-queue/adapters/rabbitmq"
-	"github.com/faustbrian/go-queue/core"
+	"github.com/faustbrian/go-queue/adapters/rabbitmq/v2"
+	"github.com/faustbrian/go-queue/v2/core"
 	rabbitmqqueue "github.com/faustbrian/go-rabbitmq-queues"
 )
 

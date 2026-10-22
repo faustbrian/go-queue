@@ -14,7 +14,7 @@ or later.
 ## Install
 
 ```sh
-go get github.com/faustbrian/go-queue/adapters/service@v1
+go get github.com/faustbrian/go-queue/adapters/service/v2@v2
 ```
 
 ## Quick start
@@ -43,14 +43,13 @@ from unknown outcomes. Callback errors preserve causes without disclosing
 payloads, endpoints, trace baggage, or credentials.
 
 Use this module only to connect queue resources to `go-service`. The former
-`github.com/faustbrian/go-queue/queueservice` path remains available as a
-deprecated compatibility facade.
+`github.com/faustbrian/go-queue/queueservice` facade was removed in root v2.
 
 See the [technical guide](docs/reference.md), [documentation index](docs/README.md),
 [migration guide](../../docs/migration.md), [changelog](CHANGELOG.md),
 [security policy](../../SECURITY.md), [support policy](../../SUPPORT.md), and
 [MIT license](LICENSE). API documentation is published at
-[`pkg.go.dev`](https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service).
+[`pkg.go.dev`](https://pkg.go.dev/github.com/faustbrian/go-queue/adapters/service/v2).
 
 ## Navigation
 

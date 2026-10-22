@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/faustbrian/go-correlation"
-	queue "github.com/faustbrian/go-queue"
-	queueservice "github.com/faustbrian/go-queue/adapters/service"
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/job"
+	queueservice "github.com/faustbrian/go-queue/adapters/service/v2"
+	queue "github.com/faustbrian/go-queue/v2"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/job"
 	"go.opentelemetry.io/otel/propagation"
 )
 

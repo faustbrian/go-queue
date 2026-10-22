@@ -1,6 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## [2.0.0] - 2026-10-22
+
+### Changed
+
+- Move to `github.com/faustbrian/go-queue/adapters/rabbitmq/v2` and build on root
+  `github.com/faustbrian/go-queue/v2`.
+  Adapter behaviour is unchanged.
+
+## [1.1.0] - 2026-10-22
 
 ## [1.0.2] - 2026-10-08
 

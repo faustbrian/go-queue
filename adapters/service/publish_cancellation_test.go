@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/faustbrian/go-queue/core"
-	"github.com/faustbrian/go-queue/job"
+	"github.com/faustbrian/go-queue/v2/core"
+	"github.com/faustbrian/go-queue/v2/job"
 )
 
 // A publish the backend already accepted must not be reported as failed
