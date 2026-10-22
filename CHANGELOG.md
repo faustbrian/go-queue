@@ -16,6 +16,10 @@ versioning and Keep a Changelog structure.
 - Remove the deprecated root `redisstream` facade and the `queueservice` and
   `rabbitmq` compatibility modules. Import `adapters/redisstream`,
   `adapters/service` and `adapters/rabbitmq` instead.
+- The independently versioned `adapters/rabbitmq` and `adapters/service`
+  modules still build on root v1; keep their users on root v1 until their v2
+  majors are published. The latest v1 release receives security fixes until
+  then.
 
 ## 1.1.5 - 2026-10-22
 

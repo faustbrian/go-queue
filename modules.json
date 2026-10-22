@@ -366,9 +366,7 @@
         },
         "optional_owned_dependencies": [],
         "adapters": [
-          "github.com/faustbrian/go-queue/adapters/rabbitmq",
           "github.com/faustbrian/go-queue/v2/adapters/redisstream",
-          "github.com/faustbrian/go-queue/adapters/service",
           "github.com/faustbrian/go-queue/v2/managementhttp",
           "github.com/faustbrian/go-queue/v2/nats",
           "github.com/faustbrian/go-queue/v2/nsq",
