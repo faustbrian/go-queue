@@ -62,9 +62,10 @@ The successor package identifier is `redisstream`.
     `WithPublishTimeout` (five seconds by default).
 12. RabbitMQ now requires explicit `NativeConfig`, stable message identity,
     verified TLS, infrastructure-owned topology, manual settlement, and a
-    distinct configured terminal route. Upgrade the parent module first, then
-    install the independently tagged `adapters/rabbitmq` module. The former
-    `rabbitmq` module remains only as a deprecated compatibility facade.
+    distinct configured terminal route. Install the independently tagged
+    `adapters/rabbitmq` module; the former `rabbitmq` facade module is removed
+    in v2. Until `adapters/rabbitmq` publishes its root-v2 major, keep RabbitMQ
+    consumers on root v1.
 13. NSQ now publishes bounded terminal envelopes before `FIN`; configure the
     terminal topic and update operations that previously expected malformed
     work to disappear.

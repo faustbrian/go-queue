@@ -2,6 +2,10 @@
 
 [Documentation index](README.md)
 
+This is a historical audit of the v1 source at the commit named below. Its
+`rabbitmq`, `queueservice` and root `redisstream` rows describe paths that v2
+removes.
+
 ## Initial scope and bounded plan
 
 Tier A source comments and directly related current contract prose from

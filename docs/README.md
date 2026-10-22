@@ -47,7 +47,7 @@ Use this index to evaluate backend guarantees before deploying workers.
 - [Redis Streams package (root module)](../adapters/redisstream/README.md)
 - [RabbitMQ adapter](../adapters/rabbitmq/README.md)
 - [Service lifecycle adapter (independent module)](../adapters/service/docs/README.md)
-- [Deprecated compatibility paths](migration.md)
+- [Migration and removed compatibility paths](migration.md)
 
 ## Maintainers
 

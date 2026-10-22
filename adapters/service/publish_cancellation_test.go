@@ -141,3 +141,39 @@ func TestPublishObservesCancellationOnce(t *testing.T) {
 		t.Fatalf("PublishWithAcceptance() calls = (%d callback, %d context), want (2, 1)", publishCalls, ctx.calls)
 	}
 }
+
+// A caller-cancelled publish must return the caller's exact cause, not a
+// translation, and a stopped producer must report ErrUnavailable even when
+// the context is also cancelled.
+func TestCanceledPublishPreservesCallerCauseIdentity(t *testing.T) {
+	producer, err := NewProducer(ProducerOptions[int]{
+		Name:        "producer",
+		Resource:    1,
+		Correlation: mustFactory(t),
+		Publish:     func(context.Context, int, core.QueuedMessage, ...job.AllowOption) error { return nil },
+	})
+	if err != nil {
+		t.Fatalf("NewProducer() error = %v", err)
+	}
+	if err = producer.Component().Start(t.Context()); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+	original := &CallbackError{
+		Operation: CallbackPublish,
+		Err:       errors.New("caller-owned cancellation cause"),
+	}
+	ctx, cancel := context.WithCancelCause(t.Context())
+	cancel(original)
+	if _, err = producer.Publish(ctx, queuedPayload("payload")); err != original { //nolint:errorlint // Exact caller-owned identity is required.
+		t.Fatalf("Publish() error = %p (%T), want exact caller cause %p", err, err, original)
+	}
+	if _, acceptance, publishErr := producer.PublishWithAcceptance(ctx, queuedPayload("payload")); acceptance != PublishNotAccepted || publishErr != original { //nolint:errorlint // Exact caller-owned identity is required.
+		t.Fatalf("PublishWithAcceptance() = (%v, %p %T), want exact caller cause %p", acceptance, publishErr, publishErr, original)
+	}
+	if err = producer.Component().Stop(t.Context()); err != nil {
+		t.Fatalf("Stop() error = %v", err)
+	}
+	if _, err = producer.Publish(ctx, queuedPayload("payload")); !errors.Is(err, ErrUnavailable) {
+		t.Fatalf("stopped Publish() error = %v, want ErrUnavailable before cancellation cause", err)
+	}
+}

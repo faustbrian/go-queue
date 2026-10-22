@@ -38,5 +38,5 @@ workers. New applications should use `NewWorkerE` and handle the error.
 
 ## Does the module ship Prometheus metrics?
 
-Not in v1. Implement `Metric` and/or translate `Observer` events in the
+No. Implement `Metric` and/or translate `Observer` events in the
 application so the queue core remains vendor-neutral.

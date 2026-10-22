@@ -3,7 +3,7 @@
 [![CI](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-queue/actions/workflows/ci.yml)
 [![Documentation](https://img.shields.io/badge/docs-structural_checks_in_CI-blue)](docs/)
-[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-queue.svg)](https://pkg.go.dev/github.com/faustbrian/go-queue)
+[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-queue/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-queue/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-queue?sort=semver)](https://github.com/faustbrian/go-queue/releases)
 [![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -41,7 +41,9 @@ go get github.com/faustbrian/go-queue/v2@v2.0.0
 Root backend packages, including `adapters/redisstream`, ship in the same
 module and are imported explicitly. Install the independently versioned
 `github.com/faustbrian/go-queue/adapters/rabbitmq` or
-`github.com/faustbrian/go-queue/adapters/service` module when needed.
+`github.com/faustbrian/go-queue/adapters/service` module when needed. Both
+still build on root v1 until their root-v2 majors are published; keep their
+users on root v1 until then.
 
 ## Choosing this package
 

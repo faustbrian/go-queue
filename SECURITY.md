@@ -2,7 +2,10 @@
 
 ## Supported Versions
 
-Security fixes are applied to the latest stable v2 release and `main`; v1 is no longer maintained.
+Security fixes are applied to the latest stable v2 release and `main`. The
+latest v1 release also receives security fixes until the `adapters/rabbitmq`
+and `adapters/service` modules publish majors built on root v2, because their
+users must stay on root v1 until then.
 Additional supported release lines and end-of-support dates will be documented
 here when offered.
 

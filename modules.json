@@ -249,7 +249,7 @@
           "build_tags": []
         }
       ],
-      "purpose": "`queue` owns the backend-neutral worker model and root in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ backends. The target-oriented Redis Streams package is released atomically with its compatibility facade; RabbitMQ and service lifecycle adapters are independently releasable nested modules.",
+      "purpose": "`queue` owns the backend-neutral worker model and root in-memory, Redis Pub/Sub, Redis Streams, Valkey Streams, NATS, and NSQ backends. RabbitMQ and service lifecycle adapters are independently releasable nested modules.",
       "lifecycle": "stable",
       "kind": "public library",
       "releasable": true,

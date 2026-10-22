@@ -71,7 +71,7 @@ Unreleased entries and prior release notes are retained.
 - [4a2d19f628](https://github.com/faustbrian/go-queue/commit/4a2d19f62886cf17d81e2e4d9ff537ed88ef6be7),
   [46f159c15c](https://github.com/faustbrian/go-queue/commit/46f159c15cd1a86b53c925544d6c99cecf323e87).
 
-## [Unreleased]
+## Earlier unversioned notes (shipped by 1.1.4)
 
 ### Changed
 
@@ -574,7 +574,6 @@ Unreleased entries and prior release notes are retained.
   results do not depend on scheduler selection between simultaneously ready
   channels.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/v1.1.3...HEAD
 [1.1.2]: https://github.com/faustbrian/go-queue/compare/v1.1.1...v1.1.2
 [1.1.0]: https://github.com/faustbrian/go-queue/releases/tag/v1.1.0
 [1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/v1.0.1
