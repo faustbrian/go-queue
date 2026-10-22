@@ -3,6 +3,13 @@
 All notable changes are documented here. The project follows semantic
 versioning and Keep a Changelog structure.
 
+## Unreleased
+
+### Changed
+
+- Release `adapters/rabbitmq/v2.0.0` and `adapters/service/v2.0.0` on root v2.
+  The latest v1 release now receives security fixes through 2026-12-31.
+
 ## 2.0.0 - 2026-10-22
 
 ### Changed

@@ -10,6 +10,8 @@
 
 ## [1.1.0] - 2026-10-22
 
+- Republished from the root 1.1.5 source snapshot; no adapter change.
+
 ## [1.0.2] - 2026-10-08
 
 ### Changed
@@ -43,7 +45,8 @@
   `github.com/faustbrian/go-queue/adapters/rabbitmq`; public types and behavior
   remain compatible.
 
-[Unreleased]: https://github.com/faustbrian/go-queue/compare/adapters%2Frabbitmq%2Fv1.0.2...HEAD
+[2.0.0]: https://github.com/faustbrian/go-queue/releases/tag/adapters%2Frabbitmq%2Fv2.0.0
+[1.1.0]: https://github.com/faustbrian/go-queue/releases/tag/adapters%2Frabbitmq%2Fv1.1.0
 [1.0.2]: https://github.com/faustbrian/go-queue/releases/tag/adapters%2Frabbitmq%2Fv1.0.2
 [1.0.0]: https://github.com/faustbrian/go-queue/releases/tag/adapters%2Frabbitmq%2Fv1.0.0
 [1.0.1]: https://github.com/faustbrian/go-queue/releases/tag/adapters%2Frabbitmq%2Fv1.0.1

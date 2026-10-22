@@ -6,15 +6,15 @@ This guide contains the complete behavioral and operational reference. Start
 with the [package overview](../README.md).
 
 `queueservice` is the independently versioned lifecycle integration between
-[`github.com/faustbrian/go-queue`](../../..) and
-`github.com/faustbrian/go-service`. It connects caller-owned producers
+[`github.com/faustbrian/go-queue/v2`](../../..) and
+`github.com/faustbrian/go-service/v3`. It connects caller-owned producers
 and workers to service startup, readiness, supervision, drain, and shutdown
 without choosing a backend or moving retry, scheduling, acknowledgement,
 redelivery, or dead-letter policy out of `queue`.
 
-The module is stable at `adapters/service/v1.0.0`. Consumers may change the
-import path from the released `queueservice` compatibility module without
-changing its public behavior and should pin an exact released version.
+The module is stable at `adapters/service/v2.0.0`; import
+`github.com/faustbrian/go-queue/adapters/service/v2` and pin an exact released
+version.
 
 ## Quick start
 

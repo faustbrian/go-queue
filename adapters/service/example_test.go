@@ -77,7 +77,7 @@ func ExampleNewWorker() {
 	if err = producerComponent.Start(ctx); err != nil {
 		return
 	}
-	parent, _ := factory.Start()
+	parent, _ := factory.Create()
 	if _, err = producer.Publish(
 		correlation.WithValues(ctx, parent),
 		payload("delivery"),

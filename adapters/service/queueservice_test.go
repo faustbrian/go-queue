@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/faustbrian/go-correlation"
-	queuecorrelation "github.com/faustbrian/go-correlation/queue"
+	queuecorrelation "github.com/faustbrian/go-correlation/adapters/queue"
 	queue "github.com/faustbrian/go-queue/v2"
 	"github.com/faustbrian/go-queue/v2/core"
 	"github.com/faustbrian/go-queue/v2/job"
