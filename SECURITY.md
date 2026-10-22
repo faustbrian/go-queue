@@ -4,7 +4,9 @@
 
 Security fixes are applied to the latest stable v2 release and `main`. The
 latest v1 release also receives security fixes through 2026-12-31 so users of
-the v1-based adapter modules can move to their v2 majors.
+the v1-based adapter modules can move to their v2 majors; the latest
+`adapters/rabbitmq` and `adapters/service` v1.1 releases are covered for the
+same period.
 Additional supported release lines and end-of-support dates will be documented
 here when offered.
 
