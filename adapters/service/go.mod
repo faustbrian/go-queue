@@ -7,8 +7,8 @@ require (
 	github.com/faustbrian/go-queue/v2 v2.0.0
 	github.com/faustbrian/go-service/v3 v3.0.0
 	github.com/redis/go-redis/v9 v9.23.0
-	go.opentelemetry.io/otel v1.46.0
-	go.opentelemetry.io/otel/trace v1.46.0
+	go.opentelemetry.io/otel v1.47.0
+	go.opentelemetry.io/otel/trace v1.47.0
 )
 
 require (
